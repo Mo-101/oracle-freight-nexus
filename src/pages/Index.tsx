@@ -92,6 +92,22 @@ const shipmentData = [
   }
 ];
 
+interface DestinationStats {
+  country: string;
+  shipments: number;
+  totalCost: number;
+  avgCost: number;
+  totalWeight: number;
+}
+
+interface ForwarderPerformance {
+  forwarder: string;
+  shipments: number;
+  avgCost: number;
+  avgEfficiency: number;
+  avgTransit: number;
+}
+
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
@@ -123,7 +139,8 @@ const Index = () => {
   }, []);
 
   const destinationStats = useMemo(() => {
-    const stats = {};
+    const stats: { [key: string]: { count: number; totalCost: number; totalWeight: number } } = {};
+    
     shipmentData.forEach(item => {
       if (!stats[item.destination]) {
         stats[item.destination] = { count: 0, totalCost: 0, totalWeight: 0 };
@@ -133,7 +150,7 @@ const Index = () => {
       stats[item.destination].totalWeight += item.weight;
     });
     
-    return Object.entries(stats).map(([country, data]) => ({
+    return Object.entries(stats).map(([country, data]): DestinationStats => ({
       country,
       shipments: data.count,
       totalCost: data.totalCost,
@@ -143,7 +160,8 @@ const Index = () => {
   }, []);
 
   const forwarderPerformance = useMemo(() => {
-    const performance = {};
+    const performance: { [key: string]: { shipments: number; totalCost: number; totalEfficiency: number; avgTransit: number } } = {};
+    
     shipmentData.forEach(item => {
       if (!performance[item.forwarder]) {
         performance[item.forwarder] = { 
@@ -159,7 +177,7 @@ const Index = () => {
       performance[item.forwarder].avgTransit += item.transit_days;
     });
 
-    return Object.entries(performance).map(([forwarder, data]) => ({
+    return Object.entries(performance).map(([forwarder, data]): ForwarderPerformance => ({
       forwarder,
       shipments: data.shipments,
       avgCost: Math.round(data.totalCost / data.shipments),
@@ -303,6 +321,66 @@ const Index = () => {
           </HolographicCard>
         </div>
 
+        {/* AI Insight Panel */}
+        <HolographicCard className="mb-8">
+          <Card className="oracle-card">
+            <CardContent className="p-6">
+              <div className="bg-gradient-to-r from-deepcal-dark to-deepcal-purple p-6 rounded-lg">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+                  <div className="mb-4 md:mb-0">
+                    <div className="flex items-center mb-2">
+                      <div className="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center mr-3">
+                        <i className="fas fa-brain text-xl text-white"></i>
+                      </div>
+                      <h2 className="text-xl font-bold text-white">DeepCAL++ AI Oracle</h2>
+                    </div>
+                    <p className="text-purple-200">Real-time logistics intelligence for quantum decision-making</p>
+                  </div>
+                  <Button className="bg-white text-deepcal-purple hover:bg-gray-100">
+                    <i className="fas fa-robot mr-2"></i>
+                    Generate Quantum Report
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                  <div className="bg-white bg-opacity-10 p-4 rounded-lg border border-white border-opacity-20">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-medium text-white">Neural Accuracy</h3>
+                      <i className="fas fa-chart-line text-neural-300"></i>
+                    </div>
+                    <p className="text-2xl font-bold text-white">94.6%</p>
+                    <div className="mt-2 text-sm text-purple-200">
+                      <span className="text-neural-300"><i className="fas fa-arrow-up"></i> 2.3%</span> quantum boost
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white bg-opacity-10 p-4 rounded-lg border border-white border-opacity-20">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-medium text-white">Disruption Oracle</h3>
+                      <i className="fas fa-exclamation-triangle text-yellow-300"></i>
+                    </div>
+                    <p className="text-2xl font-bold text-white">Medium</p>
+                    <div className="mt-2 text-sm text-purple-200">
+                      12 routes under quantum analysis
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white bg-opacity-10 p-4 rounded-lg border border-white border-opacity-20">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-medium text-white">Cost Optimization</h3>
+                      <i className="fas fa-infinity text-quantum-300"></i>
+                    </div>
+                    <p className="text-2xl font-bold text-white">$24,500</p>
+                    <div className="mt-2 text-sm text-purple-200">
+                      Projected quantum savings
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </HolographicCard>
+
         {/* Search and Filter Controls */}
         <HolographicCard className="mb-6">
           <Card className="oracle-card">
@@ -310,32 +388,35 @@ const Index = () => {
               <div className="flex flex-col md:flex-row gap-4 items-center">
                 <div className="flex-1">
                   <Input
-                    placeholder="Search shipments by ID, destination, or cargo..."
+                    placeholder="🔍 Search quantum shipments by ID, destination, or cargo..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="bg-dark-800/50 border-quantum-500/30"
+                    className="bg-dark-800/50 border-quantum-500/30 text-white placeholder:text-gray-400"
                   />
                 </div>
                 <div className="flex gap-2">
                   <Button
                     variant={selectedFilter === 'all' ? 'default' : 'outline'}
                     onClick={() => setSelectedFilter('all')}
-                    className="bg-quantum-600 hover:bg-quantum-700"
+                    className="bg-quantum-600 hover:bg-quantum-700 border-quantum-500/30"
                   >
+                    <i className="fas fa-layer-group mr-1"></i>
                     All Categories
                   </Button>
                   <Button
                     variant={selectedFilter === 'Emergency Health Kits' ? 'default' : 'outline'}
                     onClick={() => setSelectedFilter('Emergency Health Kits')}
-                    className="bg-neural-600 hover:bg-neural-700"
+                    className="bg-neural-600 hover:bg-neural-700 border-neural-500/30"
                   >
+                    <i className="fas fa-briefcase-medical mr-1"></i>
                     Health Kits
                   </Button>
                   <Button
                     variant={selectedFilter === 'Field Support Material' ? 'default' : 'outline'}
                     onClick={() => setSelectedFilter('Field Support Material')}
-                    className="bg-purple-600 hover:bg-purple-700"
+                    className="bg-purple-600 hover:bg-purple-700 border-purple-500/30"
                   >
+                    <i className="fas fa-tools mr-1"></i>
                     Field Support
                   </Button>
                 </div>
@@ -350,7 +431,7 @@ const Index = () => {
             <CardHeader>
               <CardTitle className="text-quantum-300 flex items-center">
                 <i className="fas fa-table mr-2"></i>
-                Shipment Details ({filteredData.length} records)
+                Quantum Shipment Matrix ({filteredData.length} records)
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -370,16 +451,16 @@ const Index = () => {
                   </TableHeader>
                   <TableBody>
                     {filteredData.map((shipment) => (
-                      <TableRow key={shipment.id} className="hover:bg-dark-800/30">
+                      <TableRow key={shipment.id} className="hover:bg-dark-800/30 border-dark-700/30">
                         <TableCell className="font-mono text-quantum-400">{shipment.id}</TableCell>
                         <TableCell>
                           <div className="flex items-center">
-                            <span className="text-sm">{shipment.origin}</span>
+                            <span className="text-sm text-gray-300">{shipment.origin}</span>
                             <i className="fas fa-arrow-right mx-2 text-quantum-500"></i>
-                            <span className="text-sm">{shipment.destination}</span>
+                            <span className="text-sm text-gray-300">{shipment.destination}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="max-w-xs truncate" title={shipment.cargo}>
+                        <TableCell className="max-w-xs truncate text-gray-300" title={shipment.cargo}>
                           {shipment.cargo}
                         </TableCell>
                         <TableCell className="text-neural-400">{shipment.weight.toLocaleString()}</TableCell>
@@ -405,6 +486,72 @@ const Index = () => {
             </CardContent>
           </Card>
         </HolographicCard>
+
+        {/* Performance Overview */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <HolographicCard>
+            <Card className="oracle-card h-full">
+              <CardHeader>
+                <CardTitle className="text-quantum-300 flex items-center">
+                  <i className="fas fa-award mr-2"></i>
+                  Carrier Quantum Performance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {forwarderPerformance.map((carrier, index) => (
+                    <div key={carrier.forwarder}>
+                      <div className="flex justify-between mb-1">
+                        <span className="font-medium text-gray-300">{carrier.forwarder}</span>
+                        <span className="text-sm text-quantum-300">{carrier.avgEfficiency}%</span>
+                      </div>
+                      <div className="w-full bg-dark-700 rounded-full h-2.5">
+                        <div 
+                          className="bg-gradient-to-r from-quantum-500 to-neural-500 h-2.5 rounded-full transition-all duration-1000" 
+                          style={{ width: `${carrier.avgEfficiency}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </HolographicCard>
+          
+          <HolographicCard>
+            <Card className="oracle-card h-full">
+              <CardHeader>
+                <CardTitle className="text-quantum-300 flex items-center">
+                  <i className="fas fa-globe mr-2"></i>
+                  Regional Quantum Response
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={destinationStats}>
+                    <CartesianGrid strokeDasharray="3,3" stroke="rgba(99, 102, 241, 0.1)" />
+                    <XAxis dataKey="country" stroke="#a5b4fc" />
+                    <YAxis stroke="#a5b4fc" />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#1e293b', 
+                        border: '1px solid rgba(99, 102, 241, 0.3)',
+                        borderRadius: '8px'
+                      }} 
+                    />
+                    <Bar dataKey="avgCost" fill="url(#quantumGradient)" />
+                    <defs>
+                      <linearGradient id="quantumGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                      </linearGradient>
+                    </defs>
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </HolographicCard>
+        </div>
       </div>
     </div>
   );
