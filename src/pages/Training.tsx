@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -17,6 +16,7 @@ import { TrainingLogsPanel } from '../components/training/TrainingLogsPanel';
 import { TrainingActivityMonitor } from '../components/training/TrainingActivityMonitor';
 import { LiveMetricsPanel } from '../components/training/LiveMetricsPanel';
 import { SystemStatusSidebar } from '../components/training/SystemStatusSidebar';
+import { OracleOutputPanel } from '../components/oracle/OracleOutputPanel';
 
 // Types
 interface WeightVector {
@@ -64,6 +64,7 @@ interface SystemStatus {
 const Training = () => {
   const [activeTab, setActiveTab] = useState("engine");
   const [isTraining, setIsTraining] = useState(true);
+  const [showOracle, setShowOracle] = useState(false);
   const [weights, setWeights] = useState<WeightVector>({ 
     cost: 0.25, 
     time: 0.25, 
@@ -132,6 +133,10 @@ const Training = () => {
     trainingPipeline: "connected",
   };
 
+  const invokeOracle = () => {
+    setShowOracle(true);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <Header />
@@ -156,6 +161,12 @@ const Training = () => {
                 </div>
               </div>
               <div className="flex items-center space-x-4">
+                <button
+                  onClick={invokeOracle}
+                  className="px-6 py-3 bg-gradient-to-r from-deepcal-purple to-deepcal-light hover:from-deepcal-dark hover:to-deepcal-purple text-white rounded-lg font-bold transition-all duration-300 transform hover:scale-105 active:scale-95 glowing-border"
+                >
+                  🔮 Invoke Oracle Engine
+                </button>
                 <div className="oracle-card px-4 py-2 flex items-center">
                   <div className="w-3 h-3 rounded-full bg-green-400 mr-2 animate-pulse"></div>
                   <span className="text-sm text-slate-200">Training Pipeline Active</span>
@@ -168,13 +179,23 @@ const Training = () => {
             </div>
           </div>
 
-          {/* Quantum Node UI Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10 place-items-center">
+          {/* Quantum Node UI Layout - Fixed Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10 place-items-stretch">
             <QuantumDataInputCard />
             <QuantumPreprocessorCard />
             <QuantumAnalyticsCard />
             <QuantumInterfaceCard />
           </div>
+
+          {/* Oracle Output Panel */}
+          <OracleOutputPanel
+            isVisible={showOracle}
+            weights={weights}
+            emergency="cholera outbreak in Kanyama District"
+            cargoType="Emergency Medical Supplies"
+            origin="Johannesburg"
+            destination="Lusaka"
+          />
 
           <div className="grid grid-cols-1 lg:grid-cols-6 gap-8">
             {/* Sidebar */}
