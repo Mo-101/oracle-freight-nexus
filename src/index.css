@@ -167,4 +167,87 @@
     stroke: #a855f7;
     stroke-width: 2;
   }
+
+  /* Quantum-specific styles */
+  .quantum-gradient {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #312e81 100%);
+  }
+
+  .particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background-color: rgba(99, 102, 241, 0.7);
+    border-radius: 50%;
+    animation: particle-move 2s linear forwards;
+  }
+
+  .holographic-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .holographic-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      to bottom right,
+      rgba(99, 102, 241, 0) 0%,
+      rgba(99, 102, 241, 0) 35%,
+      rgba(99, 102, 241, 0.1) 45%,
+      rgba(99, 102, 241, 0) 55%,
+      rgba(99, 102, 241, 0) 100%
+    );
+    transform: rotate(30deg);
+    animation: shine 3s infinite;
+  }
+
+  .quantum-ring {
+    position: relative;
+  }
+
+  .quantum-ring::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border: 2px solid rgba(99, 102, 241, 0.5);
+    border-radius: 50%;
+    animation: pulse 3s infinite;
+  }
+
+  .data-stream {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .data-stream::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.7), transparent);
+    animation: data-flow 2s linear infinite;
+  }
+
+  .quantum-dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: rgba(99, 102, 241, 0.8);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.8);
+    animation: quantum-float 4s ease-in-out infinite;
+  }
 }
