@@ -1,5 +1,6 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import Header from '@/components/Header';
+import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 interface Message {
@@ -115,7 +116,7 @@ const Chat = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-deepcal-dark via-slate-900 to-deepcal-purple">
+    <div className="min-h-screen flex flex-col">
       <Header />
       
       <main className="flex-1 py-8">

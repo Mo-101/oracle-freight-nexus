@@ -1,126 +1,170 @@
 
 import React, { useState, useEffect } from 'react';
-import Header from '@/components/Header';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
-import { Switch } from "@/components/ui/switch"
-import { Textarea } from "@/components/ui/textarea"
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { cn } from "@/lib/utils";
-import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
+import Header from '../components/Header';
+import InputPanel from '../components/InputPanel';
+import OutputPanel from '../components/OutputPanel';
+import Footer from '../components/Footer';
+
+interface FormData {
+  origin: string;
+  destination: string;
+  weight: number;
+  volume: number;
+  cargoType: string;
+  selectedForwarders: string[];
+}
+
+interface ForwarderRanking {
+  name: string;
+  transitDays: number;
+  cost: number;
+  risk: number;
+  score: number;
+  rank: number;
+}
+
+// Historical shipment data simulation
+const historicalData = [
+  { origin: "Nairobi, Kenya", destination: "Lusaka, Zambia", weight_kg: 7850, volume_cbm: 24.5, forwarder: "Kuehne + Nagel", transit_days: 5.2, cost_usd: 36189.50, on_time: true },
+  { origin: "Nairobi, Kenya", destination: "Lusaka, Zambia", weight_kg: 6500, volume_cbm: 20.8, forwarder: "DHL Global Forwarding", transit_days: 6.0, cost_usd: 33865.00, on_time: true },
+  { origin: "Nairobi, Kenya", destination: "Lusaka, Zambia", weight_kg: 5200, volume_cbm: 18.2, forwarder: "Siginon Logistics", transit_days: 6.5, cost_usd: 23140.00, on_time: false },
+];
 
 const Index = () => {
-  const [count, setCount] = useState(0);
-  const [date, setDate] = useState<Date>();
+  const [showOutput, setShowOutput] = useState(false);
+  const [rankings, setRankings] = useState<ForwarderRanking[]>([]);
+  const [formData, setFormData] = useState<FormData>({
+    origin: 'Nairobi, Kenya',
+    destination: 'Lusaka, Zambia',
+    weight: 7850,
+    volume: 24.5,
+    cargoType: 'Emergency Health Kits',
+    selectedForwarders: ['Kuehne + Nagel', 'DHL Global Forwarding', 'Siginon Logistics']
+  });
+
+  // Calculate KPIs for forwarders
+  const calculateForwarderKPIs = (data: any[], forwarders: string[]) => {
+    const results: any = {};
+    forwarders.forEach(f => {
+      const forwarderData = data.filter(d => d.forwarder === f);
+      if (forwarderData.length > 0) {
+        const totalShipments = forwarderData.length;
+        const totalWeight = forwarderData.reduce((sum, d) => sum + d.weight_kg, 0);
+        const avgTransitDays = forwarderData.reduce((sum, d) => sum + d.transit_days, 0) / totalShipments;
+        const avgCost = forwarderData.reduce((sum, d) => sum + d.cost_usd, 0) / totalShipments;
+        const onTimeRate = forwarderData.filter(d => d.on_time).length / totalShipments;
+        const costPerKg = avgCost / (totalWeight / totalShipments);
+        
+        results[f] = { totalShipments, avgTransitDays, avgCost, onTimeRate, costPerKg };
+      } else {
+        // Default values for forwarders without historical data
+        results[f] = {
+          totalShipments: 1,
+          avgTransitDays: 7 + Math.random() * 3,
+          avgCost: 30000 + Math.random() * 15000,
+          onTimeRate: 0.7 + Math.random() * 0.3,
+          costPerKg: 4 + Math.random() * 2
+        };
+      }
+    });
+    return results;
+  };
+
+  // Normalize values between 0-1
+  const normalize = (value: number, min: number, max: number) => {
+    return Math.max(0, Math.min(1, (value - min) / (max - min)));
+  };
+
+  // Rank forwarders using TOPSIS-like scoring
+  const rankForwarders = (kpis: any) => {
+    return Object.entries(kpis).map(([name, data]: [string, any]) => ({
+      name,
+      transitDays: data.avgTransitDays,
+      cost: data.costPerKg,
+      risk: Math.round((1 - data.onTimeRate) * 100),
+      score: (
+        0.68 * (1 - normalize(data.avgTransitDays, 4, 8)) +
+        0.45 * (1 - normalize(data.costPerKg, 4, 7)) +
+        0.22 * normalize(data.onTimeRate, 0.7, 1)
+      )
+    }))
+    .sort((a, b) => b.score - a.score)
+    .map((forwarder, index) => ({
+      ...forwarder,
+      rank: index + 1,
+      transitDays: Number(forwarder.transitDays.toFixed(1)),
+      cost: Number(forwarder.cost.toFixed(2)),
+      score: Number(forwarder.score.toFixed(2))
+    }));
+  };
+
+  const handleOracleAwaken = () => {
+    console.log('Oracle awakening with data:', formData);
+    
+    // Filter historical data for this route
+    const routeData = historicalData.filter(d => 
+      d.origin === formData.origin && d.destination === formData.destination
+    );
+    
+    // Calculate KPIs
+    const kpis = calculateForwarderKPIs(routeData, formData.selectedForwarders);
+    const ranked = rankForwarders(kpis);
+    
+    console.log('Calculated rankings:', ranked);
+    
+    setRankings(ranked);
+    setShowOutput(true);
+    
+    // Smooth scroll to output after a brief delay
+    setTimeout(() => {
+      const outputElement = document.getElementById('outputPanel');
+      if (outputElement) {
+        outputElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 300);
+  };
 
   useEffect(() => {
-    document.title = `DeepCAL++ vΩ (count: ${count})`;
-  }, [count]);
+    // Initialize animations
+    const timer = setTimeout(() => {
+      const elements = document.querySelectorAll('.oracle-card, header');
+      elements.forEach(el => {
+        el.classList.add('animate-fade-in');
+      });
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-deepcal-dark via-slate-900 to-deepcal-purple">
+    <div className="min-h-screen flex flex-col">
       <Header />
-      <div className="container mx-auto p-4">
-        <Card className="oracle-card backdrop-blur-sm bg-black/40 border-deepcal-purple/30">
-          <CardHeader>
-            <CardTitle className="text-deepcal-light">DeepCAL++ Analytics</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-slate-300">
-              Welcome to the DeepCAL++ analytics dashboard. Here, you can monitor real-time data,
-              track key performance indicators, and gain insights into the mystical world of freight forwarding.
-            </p>
-            <div className="mt-4">
-              <Button onClick={() => setCount(count + 1)} className="bg-deepcal-purple hover:bg-deepcal-dark text-white">
-                Increment Count: {count}
-              </Button>
+      
+      <main className="flex-1 py-8">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <InputPanel 
+              onOracleAwaken={handleOracleAwaken}
+              formData={formData}
+              onFormChange={setFormData}
+            />
+            
+            <OutputPanel 
+              isVisible={showOutput}
+              rankings={rankings}
+              formData={formData}
+            />
+          </div>
+          
+          {showOutput && (
+            <div className="mt-6 text-center text-sm text-slate-400">
+              DeepCAL++ vΩ • Symbolic Logistical Intelligence Engine • First Transmission: {new Date().toISOString().split('T')[0]}
             </div>
-            <div className="mt-4 grid gap-4">
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
-                <Input type="text" id="name" defaultValue="shadcn" className="col-span-2" />
-              </div>
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="username" className="text-right">
-                  Username
-                </Label>
-                <Input type="text" id="username" defaultValue="@shadcn" className="col-span-2" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <Select>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select a fruit" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="apple">Apple</SelectItem>
-                  <SelectItem value="banana">Banana</SelectItem>
-                  <SelectItem value="blueberry">Blueberry</SelectItem>
-                  <SelectItem value="grapes">Grapes</SelectItem>
-                  <SelectItem value="pineapple">Pineapple</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="mt-4">
-              <Slider defaultValue={[50]} max={100} step={1} />
-            </div>
-            <div className="mt-4 flex items-center space-x-2">
-              <Switch id="airplane-mode" />
-              <Label htmlFor="airplane-mode">Airplane mode</Label>
-            </div>
-            <div className="mt-4">
-              <Textarea placeholder="Type your message here." />
-            </div>
-            <div className="mt-4">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-[280px] justify-start text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("1900-01-01")
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+        </div>
+      </main>
+      
+      <Footer />
     </div>
   );
 };
