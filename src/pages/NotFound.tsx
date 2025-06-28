@@ -12,14 +12,34 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
-      </div>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      
+      <main className="flex-1 py-8">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <InputPanel 
+              onOracleAwaken={handleOracleAwaken}
+              formData={formData}
+              onFormChange={setFormData}
+            />
+            
+            <OutputPanel 
+              isVisible={showOutput}
+              rankings={rankings}
+              formData={formData}
+            />
+          </div>
+          
+          {showOutput && (
+            <div className="mt-6 text-center text-sm text-slate-400">
+              DeepCAL++ vΩ • Symbolic Logistical Intelligence Engine • First Transmission: {new Date().toISOString().split('T')[0]}
+            </div>
+          )}
+        </div>
+      </main>
+      
+      <Footer />
     </div>
   );
 };

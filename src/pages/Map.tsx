@@ -327,20 +327,33 @@ const Map = () => {
 
       {/* Selected Location Details - Floating */}
       {selectedLocation && (
-        <div className="absolute bottom-4 left-4 w-80 z-10">
-          <Card className="oracle-card backdrop-blur-sm bg-black/60 border-deepcal-purple/30">
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-deepcal-light">Location Details</CardTitle>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  className="text-slate-400 hover:text-white"
-                  onClick={() => setSelectedLocation(null)}
-                >
-                  <i className="fas fa-times"></i>
-                </Button>
+        return (
+          <div className="min-h-screen flex flex-col">
+            <Header />
+            
+            <main className="flex-1 py-8">
+              <div className="container mx-auto px-4">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  <InputPanel 
+                    onOracleAwaken={handleOracleAwaken}
+                    formData={formData}
+                    onFormChange={setFormData}
+                  />
+                  
+                  <OutputPanel 
+                    isVisible={showOutput}
+                    rankings={rankings}
+                    formData={formData}
+                  />
+                </div>
+                
+                {showOutput && (
+                  <div className="mt-6 text-center text-sm text-slate-400">
+                    DeepCAL++ vΩ • Symbolic Logistical Intelligence Engine • First Transmission: {new Date().toISOString().split('T')[0]}
+                  </div>
+                )}
               </div>
+            </main>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
