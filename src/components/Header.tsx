@@ -37,18 +37,6 @@ const Header = () => {
               >
                 <i className="fas fa-atom mr-2"></i> Quantum View
               </Link>
-              <Link 
-                to="/ai-training" 
-                className="px-4 py-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition text-white"
-              >
-                <i className="fas fa-brain mr-2"></i> AI Training
-              </Link>
-              <Link 
-                to="/freight-analyzer" 
-                className="px-4 py-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition text-white"
-              >
-                <i className="fas fa-calculator mr-2"></i> Freight Analyzer
-              </Link>
             </div>
             <div className="flex items-center">
               <div className="h-3 w-3 rounded-full bg-green-400 animate-pulse"></div>
