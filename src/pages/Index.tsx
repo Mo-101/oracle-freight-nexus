@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,9 +23,11 @@ import {
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils";
 import { format } from "date-fns"
+import { CalendarIcon } from "lucide-react"
 
 const Index = () => {
   const [count, setCount] = useState(0);
+  const [date, setDate] = useState<Date>();
 
   useEffect(() => {
     document.title = `DeepCAL++ vΩ (count: ${count})`;
@@ -93,11 +96,11 @@ const Index = () => {
                     variant={"outline"}
                     className={cn(
                       "w-[280px] justify-start text-left font-normal",
-                      !count && "text-muted-foreground"
+                      !date && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {count ? format(count, "PPP") : (
+                    {date ? format(date, "PPP") : (
                       <span>Pick a date</span>
                     )}
                   </Button>
@@ -105,8 +108,8 @@ const Index = () => {
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={count}
-                    onSelect={setCount}
+                    selected={date}
+                    onSelect={setDate}
                     disabled={(date) =>
                       date > new Date() || date < new Date("1900-01-01")
                     }
@@ -123,5 +126,3 @@ const Index = () => {
 };
 
 export default Index;
-
-import { CalendarIcon } from "@radix-ui/react-icons"
