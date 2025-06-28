@@ -63,21 +63,11 @@ const Quantum = () => {
             </div>
           </div>
 
-          {/* Main Visualization */}
-          <div className="relative h-[700px] mb-16 oracle-card p-8">
-            {/* Quantum grid background */}
-            <div 
-              className="absolute inset-0 opacity-10" 
-              style={{
-                backgroundImage: `linear-gradient(rgba(126, 34, 206, 0.3) 1px, transparent 1px),
-                                 linear-gradient(90deg, rgba(126, 34, 206, 0.3) 1px, transparent 1px)`,
-                backgroundSize: '40px 40px'
-              }}
-            ></div>
-            
+          {/* Quantum Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 mb-16">
             {/* Data Input Quantum Node */}
-            <HolographicCard className="absolute top-8 left-8 w-72" animationClass="animate-float">
-              <div className="oracle-card p-5">
+            <HolographicCard className="w-full h-80" animationClass="animate-float">
+              <div className="oracle-card p-6 h-full flex flex-col justify-between">
                 <div className="flex items-center mb-4">
                   <div className="w-12 h-12 rounded-full bg-deepcal-purple flex items-center justify-center mr-3 glowing-border">
                     <i className="fas fa-dna text-white text-xl"></i>
@@ -87,7 +77,7 @@ const Quantum = () => {
                     <div className="text-xs text-slate-400">Emergency Health Kits Dataset</div>
                   </div>
                 </div>
-                <div className="text-xs text-slate-300 space-y-2">
+                <div className="text-xs text-slate-300 space-y-2 flex-1">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Quantum Entanglement</span>
                     <span className="text-green-400">✓ Superpositioned</span>
@@ -105,8 +95,8 @@ const Quantum = () => {
             </HolographicCard>
 
             {/* Quantum Preprocessor */}
-            <HolographicCard className="absolute top-32 left-1/3 w-72" animationClass="animate-float-2">
-              <div className="oracle-card p-5">
+            <HolographicCard className="w-full h-80" animationClass="animate-float-2">
+              <div className="oracle-card p-6 h-full flex flex-col justify-between">
                 <div className="flex items-center mb-4">
                   <div className="w-12 h-12 rounded-full bg-deepcal-light flex items-center justify-center mr-3 glowing-border">
                     <i className="fas fa-microchip text-white text-xl"></i>
@@ -116,7 +106,7 @@ const Quantum = () => {
                     <div className="text-xs text-slate-400">Parallel Dimension Reduction</div>
                   </div>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-3 flex-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <div className="w-2 h-2 rounded-full bg-green-400 mr-2 animate-pulse"></div>
@@ -136,8 +126,8 @@ const Quantum = () => {
             </HolographicCard>
 
             {/* Quantum Analytics Core */}
-            <HolographicCard className="absolute top-1/4 right-1/4 w-80" animationClass="animate-float-3">
-              <div className="oracle-card p-5">
+            <HolographicCard className="w-full h-80" animationClass="animate-float-3">
+              <div className="oracle-card p-6 h-full flex flex-col justify-between">
                 <div className="flex items-center mb-4">
                   <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center mr-3 glowing-border">
                     <i className="fas fa-brain text-white text-xl"></i>
@@ -147,29 +137,31 @@ const Quantum = () => {
                     <div className="text-xs text-slate-400">Neural Quantum Network</div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="bg-slate-800/50 p-2 rounded border border-slate-600/50">
+                <div className="grid grid-cols-2 gap-3 text-xs flex-1">
+                  <div className="bg-slate-800/50 p-3 rounded border border-slate-600/50">
                     <div className="text-deepcal-light mb-1">Avg Transit</div>
                     <div className="font-mono text-slate-200">2.4d <span className="text-green-400">(-18%)</span></div>
                   </div>
-                  <div className="bg-slate-800/50 p-2 rounded border border-slate-600/50">
+                  <div className="bg-slate-800/50 p-3 rounded border border-slate-600/50">
                     <div className="text-deepcal-light mb-1">Cost Efficiency</div>
                     <div className="font-mono text-slate-200">$0.98/kg <span className="text-green-400">(+9.5%)</span></div>
                   </div>
-                  <div className="bg-slate-800/50 p-2 rounded border border-slate-600/50">
+                  <div className="bg-slate-800/50 p-3 rounded border border-slate-600/50">
                     <div className="text-deepcal-light mb-1">Reliability</div>
                     <div className="font-mono text-slate-200">96.2% <span className="text-green-400">(+4.2pp)</span></div>
                   </div>
-                  <div className="bg-slate-800/50 p-2 rounded border border-slate-600/50">
+                  <div className="bg-slate-800/50 p-3 rounded border border-slate-600/50">
                     <div className="text-deepcal-light mb-1">Risk Factor</div>
                     <div className="font-mono text-slate-200">3.8% <span className="text-green-400">(-4.2pp)</span></div>
                   </div>
                 </div>
               </div>
             </HolographicCard>
+          </div>
 
-            {/* Quantum Decision Orb */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full oracle-card flex items-center justify-center animate-pulse">
+          {/* Quantum Decision Orb - Centered */}
+          <div className="flex justify-center mb-16">
+            <div className="w-96 h-96 rounded-full oracle-card flex items-center justify-center animate-pulse">
               <div className="text-center relative">
                 {/* Quantum particles orbiting */}
                 <div className="absolute w-2 h-2 rounded-full bg-deepcal-light animate-bounce" style={{top: '-40px', left: '50px'}}></div>
@@ -216,115 +208,6 @@ const Quantum = () => {
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Quantum Interface Console */}
-            <HolographicCard className="absolute bottom-8 right-8 w-96" animationClass="animate-float-4">
-              <div className="oracle-card p-5">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center mr-3 glowing-border">
-                    <i className="fas fa-terminal text-white text-xl"></i>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-green-300 text-lg">Quantum Interface</h3>
-                    <div className="text-xs text-slate-400">Real-time Optimization</div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs text-deepcal-light mb-1">Origin Coordinates</label>
-                    <input 
-                      type="text" 
-                      name="origin"
-                      value={formData.origin}
-                      onChange={handleInputChange}
-                      className="w-full bg-slate-800/50 border border-slate-600 rounded px-3 py-2 text-sm font-mono text-slate-200 focus:border-deepcal-light focus:outline-none" 
-                      placeholder="Qx: 0.42, Qy: 0.78"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-deepcal-light mb-1">Destination Field</label>
-                    <input 
-                      type="text" 
-                      name="destination"
-                      value={formData.destination}
-                      onChange={handleInputChange}
-                      className="w-full bg-slate-800/50 border border-slate-600 rounded px-3 py-2 text-sm font-mono text-slate-200 focus:border-deepcal-light focus:outline-none" 
-                      placeholder="Enter quantum coordinates"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs text-deepcal-light mb-1">Mass (kg)</label>
-                      <input 
-                        type="number" 
-                        name="weight"
-                        value={formData.weight}
-                        onChange={handleInputChange}
-                        className="w-full bg-slate-800/50 border border-slate-600 rounded px-3 py-2 text-sm font-mono text-slate-200 focus:border-deepcal-light focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-deepcal-light mb-1">Volume (qbm)</label>
-                      <input 
-                        type="number" 
-                        name="volume"
-                        value={formData.volume}
-                        onChange={handleInputChange}
-                        className="w-full bg-slate-800/50 border border-slate-600 rounded px-3 py-2 text-sm font-mono text-slate-200 focus:border-deepcal-light focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs text-deepcal-light mb-1">Quantum Priority</label>
-                    <select 
-                      name="priority"
-                      value={formData.priority}
-                      onChange={handleInputChange}
-                      className="w-full bg-slate-800/50 border border-slate-600 rounded px-3 py-2 text-sm font-mono text-slate-200 focus:border-deepcal-light focus:outline-none"
-                    >
-                      <option>Medical Supplies (Q-Priority 9)</option>
-                      <option>Food Aid (Q-Priority 7)</option>
-                      <option>Shelter Materials (Q-Priority 5)</option>
-                      <option>Other (Q-Priority 3)</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center">
-                    <input 
-                      type="checkbox" 
-                      id="quantum-emergency" 
-                      name="emergency"
-                      checked={formData.emergency}
-                      onChange={handleInputChange}
-                      className="mr-2 appearance-none w-4 h-4 border border-slate-500 rounded-sm bg-slate-700 checked:bg-deepcal-purple checked:border-deepcal-purple"
-                    />
-                    <label htmlFor="quantum-emergency" className="text-xs text-red-400 font-mono">Quantum Emergency Override</label>
-                  </div>
-                  <button 
-                    onClick={handleOptimize}
-                    className="w-full bg-gradient-to-r from-deepcal-purple to-deepcal-light hover:from-deepcal-dark hover:to-deepcal-purple text-white py-3 px-4 rounded text-sm font-bold transition-all duration-300 transform hover:scale-[1.01] active:scale-95 flex items-center justify-center glowing-border"
-                  >
-                    <i className="fas fa-bolt mr-2"></i>
-                    Execute Quantum Optimization
-                  </button>
-                </div>
-                <div className="mt-4 pt-3 border-t border-slate-600/50">
-                  <div className="text-xs text-center text-slate-400">
-                    <i className="fas fa-circle-notch fa-spin text-deepcal-light mr-1"></i>
-                    Awaiting quantum computation results...
-                  </div>
-                </div>
-              </div>
-            </HolographicCard>
-            
-            {/* Neural connections between nodes */}
-            <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-              <svg className="absolute" width="100%" height="100%" style={{zIndex: 0}}>
-                <line x1="280" y1="120" x2="380" y2="180" stroke="rgba(126, 34, 206, 0.5)" strokeWidth="2" strokeDasharray="5,3" />
-                <line x1="480" y1="200" x2="580" y2="150" stroke="rgba(168, 85, 247, 0.5)" strokeWidth="2" strokeDasharray="5,3" />
-                <line x1="650" y1="200" x2="700" y2="300" stroke="rgba(126, 34, 206, 0.5)" strokeWidth="2" strokeDasharray="5,3" />
-                <line x1="700" y1="400" x2="800" y2="500" stroke="rgba(168, 85, 247, 0.5)" strokeWidth="2" strokeDasharray="5,3" />
-              </svg>
             </div>
           </div>
           
