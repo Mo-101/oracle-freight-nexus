@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import {
   Cpu, Zap, Activity, TrendingUp, Clock, Signal, MemoryStick, BarChart3,
@@ -727,7 +726,7 @@ const Training = () => {
       <QuantumParticles />
       
       <main className="flex-1 py-8 relative z-10">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 max-w-7xl">
           {/* Header */}
           <div className="mb-12">
             <div className="flex items-center justify-between flex-wrap gap-4">
@@ -758,7 +757,7 @@ const Training = () => {
           </div>
 
           {/* Quantum Node UI Layout */}
-          <div className="flex flex-wrap gap-6 mb-10 justify-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10 place-items-center">
             <QuantumDataInputCard />
             <QuantumPreprocessorCard />
             <QuantumAnalyticsCard />
