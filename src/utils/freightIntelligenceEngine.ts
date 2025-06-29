@@ -1,4 +1,3 @@
-
 import { canonicalShipmentData, getForwarderPerformance } from '@/data/canonicalData';
 import { 
   RouteOption, 
@@ -265,7 +264,8 @@ export class FreightIntelligenceEngine {
       const cost = this.safeParseFloat(s.freight_carrier_cost);
       const weight = this.safeParseFloat(s.weight_kg);
       
-      if (cost > 0 && weight > 0) {
+      // Type guard to ensure we have numbers before arithmetic
+      if (typeof cost === 'number' && typeof weight === 'number' && cost > 0 && weight > 0) {
         return sum + (cost / weight);
       }
       return sum;
@@ -333,7 +333,8 @@ export class FreightIntelligenceEngine {
         this.safeParseFloat(s.bwosi)
       ];
       
-      return quotes.some(quote => quote > 0);
+      // Type guard to ensure we have numbers before comparison
+      return quotes.some(quote => typeof quote === 'number' && quote > 0);
     }).length;
     
     return Math.round((forwarderQuotes / totalQuoteRequests) * 100);
