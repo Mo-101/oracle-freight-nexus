@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import InputPanel from '../components/InputPanel';
 import OutputPanel from '../components/OutputPanel';
 import Footer from '../components/Footer';
 import { PredictiveTimeline } from '../components/analytics/PredictiveTimeline';
+import { canonicalShipmentData, getForwarderPerformance, getUniqueForwarders } from '../data/canonicalData';
 
 interface FormData {
   origin: string;
@@ -23,69 +25,54 @@ interface ForwarderRanking {
   rank: number;
 }
 
-// Historical shipment data simulation
-const historicalData = [
-  { origin: "Nairobi, Kenya", destination: "Lusaka, Zambia", weight_kg: 7850, volume_cbm: 24.5, forwarder: "Kuehne + Nagel", transit_days: 5.2, cost_usd: 36189.50, on_time: true },
-  { origin: "Nairobi, Kenya", destination: "Lusaka, Zambia", weight_kg: 6500, volume_cbm: 20.8, forwarder: "DHL Global Forwarding", transit_days: 6.0, cost_usd: 33865.00, on_time: true },
-  { origin: "Nairobi, Kenya", destination: "Lusaka, Zambia", weight_kg: 5200, volume_cbm: 18.2, forwarder: "Siginon Logistics", transit_days: 6.5, cost_usd: 23140.00, on_time: false },
-];
-
 const Index = () => {
   const [showOutput, setShowOutput] = useState(false);
   const [rankings, setRankings] = useState<ForwarderRanking[]>([]);
   const [formData, setFormData] = useState<FormData>({
-    origin: 'Nairobi, Kenya',
-    destination: 'Lusaka, Zambia',
+    origin: 'Kenya',
+    destination: 'Zambia',
     weight: 7850,
     volume: 24.5,
     cargoType: 'Emergency Health Kits',
-    selectedForwarders: ['Kuehne + Nagel', 'DHL Global Forwarding', 'Siginon Logistics']
+    selectedForwarders: ['Kuehne Nagel', 'DHL Express', 'Siginon Logistics', 'Freight In Time']
   });
-
-  // Calculate KPIs for forwarders
-  const calculateForwarderKPIs = (data: any[], forwarders: string[]) => {
-    const results: any = {};
-    forwarders.forEach(f => {
-      const forwarderData = data.filter(d => d.forwarder === f);
-      if (forwarderData.length > 0) {
-        const totalShipments = forwarderData.length;
-        const totalWeight = forwarderData.reduce((sum, d) => sum + d.weight_kg, 0);
-        const avgTransitDays = forwarderData.reduce((sum, d) => sum + d.transit_days, 0) / totalShipments;
-        const avgCost = forwarderData.reduce((sum, d) => sum + d.cost_usd, 0) / totalShipments;
-        const onTimeRate = forwarderData.filter(d => d.on_time).length / totalShipments;
-        const costPerKg = avgCost / (totalWeight / totalShipments);
-        
-        results[f] = { totalShipments, avgTransitDays, avgCost, onTimeRate, costPerKg };
-      } else {
-        // Default values for forwarders without historical data
-        results[f] = {
-          totalShipments: 1,
-          avgTransitDays: 7 + Math.random() * 3,
-          avgCost: 30000 + Math.random() * 15000,
-          onTimeRate: 0.7 + Math.random() * 0.3,
-          costPerKg: 4 + Math.random() * 2
-        };
-      }
-    });
-    return results;
-  };
 
   // Normalize values between 0-1
   const normalize = (value: number, min: number, max: number) => {
     return Math.max(0, Math.min(1, (value - min) / (max - min)));
   };
 
-  // Rank forwarders using TOPSIS-like scoring
-  const rankForwarders = (kpis: any) => {
-    return Object.entries(kpis).map(([name, data]: [string, any]) => ({
-      name,
-      transitDays: data.avgTransitDays,
-      cost: data.costPerKg,
-      risk: Math.round((1 - data.onTimeRate) * 100),
+  // Rank forwarders using TOPSIS-like scoring with real canonical data
+  const rankForwarders = (forwarders: string[]) => {
+    const performances = forwarders.map(forwarder => {
+      const performance = getForwarderPerformance(forwarder);
+      return {
+        name: forwarder,
+        ...performance
+      };
+    });
+
+    // Calculate min/max for normalization
+    const costs = performances.map(p => p.avgCostPerKg).filter(c => c > 0);
+    const transits = performances.map(p => p.avgTransitDays).filter(t => t > 0);
+    const reliabilities = performances.map(p => p.reliabilityScore);
+
+    const minCost = Math.min(...costs);
+    const maxCost = Math.max(...costs);
+    const minTransit = Math.min(...transits);
+    const maxTransit = Math.max(...transits);
+    const minReliability = Math.min(...reliabilities);
+    const maxReliability = Math.max(...reliabilities);
+
+    return performances.map(perf => ({
+      name: perf.name,
+      transitDays: perf.avgTransitDays || 7,
+      cost: perf.avgCostPerKg || 4.5,
+      risk: Math.round((1 - perf.onTimeRate) * 100) || 15,
       score: (
-        0.68 * (1 - normalize(data.avgTransitDays, 4, 8)) +
-        0.45 * (1 - normalize(data.costPerKg, 4, 7)) +
-        0.22 * normalize(data.onTimeRate, 0.7, 1)
+        0.68 * (1 - normalize(perf.avgTransitDays || 7, minTransit, maxTransit)) +
+        0.45 * (1 - normalize(perf.avgCostPerKg || 4.5, minCost, maxCost)) +
+        0.22 * normalize(perf.reliabilityScore || 80, minReliability, maxReliability)
       )
     }))
     .sort((a, b) => b.score - a.score)
@@ -99,18 +86,11 @@ const Index = () => {
   };
 
   const handleOracleAwaken = () => {
-    console.log('Oracle awakening with data:', formData);
+    console.log('Oracle awakening with canonical data:', formData);
     
-    // Filter historical data for this route
-    const routeData = historicalData.filter(d => 
-      d.origin === formData.origin && d.destination === formData.destination
-    );
-    
-    // Calculate KPIs
-    const kpis = calculateForwarderKPIs(routeData, formData.selectedForwarders);
-    const ranked = rankForwarders(kpis);
-    
-    console.log('Calculated rankings:', ranked);
+    // Use real canonical data for rankings
+    const ranked = rankForwarders(formData.selectedForwarders);
+    console.log('Calculated rankings from canonical data:', ranked);
     
     setRankings(ranked);
     setShowOutput(true);
@@ -165,7 +145,7 @@ const Index = () => {
           
           {showOutput && (
             <div className="mt-6 text-center text-sm text-slate-400">
-              DeepCAL++ vΩ • Symbolic Logistical Intelligence Engine • First Transmission: {new Date().toISOString().split('T')[0]}
+              DeepCAL++ vΩ • Symbolic Logistical Intelligence Engine • Powered by Canonical Data • First Transmission: {new Date().toISOString().split('T')[0]}
             </div>
           )}
         </div>

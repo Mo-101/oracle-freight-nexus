@@ -91,7 +91,8 @@ class DeepCALModelAPI {
     return results;
   }
 
-  private encodeCarrier(carrierName: string): number {
+  // Made public so it can be used by modelFeatureConverter
+  encodeCarrier(carrierName: string): number {
     // Simple encoding - in production, use your trained encoders
     const carrierMap: { [key: string]: number } = {
       'Kuehne + Nagel': 1,
@@ -114,7 +115,36 @@ class DeepCALModelAPI {
       'South Africa': 3,
       'Nigeria': 4,
       'UAE': 5,
-      'China': 6
+      'China': 6,
+      'Zimbabwe': 7,
+      'Madagascar': 8,
+      'Comoros': 9,
+      'South Sudan': 10,
+      'Mayotte': 11,
+      'Mauritius': 12,
+      'Ethiopia': 13,
+      'Congo Brazzaville': 14,
+      'Malawi': 15,
+      'Burundi': 16,
+      'Senegal': 17,
+      'Congo Kinshasa': 18,
+      'DR Congo': 19,
+      'Guinea': 20,
+      'Benin': 21,
+      'Chad': 22,
+      'Guinea Bissau': 23,
+      'Togo': 24,
+      'Cote d\'lvoire': 25,
+      'Central Africa Republic': 26,
+      'Sudan': 27,
+      'Rwanda': 28,
+      'Uganda': 29,
+      'Eritrea': 30,
+      'Ghana': 31,
+      'Sierra Leone': 32,
+      'Sao Tome': 33,
+      'Eswatini': 34,
+      'Tanzania': 35
     };
     return countryMap[countryName] || 0;
   }
@@ -126,7 +156,15 @@ class DeepCALModelAPI {
       'Pharmaceuticals': 2,
       'Laboratory Equipment': 3,
       'Cold Chain Supplies': 4,
-      'Medical Supplies': 5
+      'Medical Supplies': 5,
+      'Lab & Diagnostics': 6,
+      'Field Support Material': 7,
+      'Wellbeing': 8,
+      'PPE': 9,
+      'Cold Chain Equipment': 10,
+      'Biomedical Equipments': 11,
+      'WASH/IPC': 12,
+      'Visibility': 13
     };
     return cargoMap[cargoType] || 0;
   }
