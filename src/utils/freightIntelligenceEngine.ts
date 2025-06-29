@@ -254,24 +254,17 @@ export class FreightIntelligenceEngine {
     if (shipments.length === 0) return 0;
     
     const costsWithData = shipments.filter(s => {
-      const costValue = s.freight_carrier_cost;
-      const weightValue = s.weight_kg;
-      
-      // Convert to numbers and validate - with explicit type checking
-      const cost = this.safeParseFloat(costValue);
-      const weight = this.safeParseFloat(weightValue);
-      
+      const cost = this.safeParseFloat(s.freight_carrier_cost);
+      const weight = this.safeParseFloat(s.weight_kg);
       return cost > 0 && weight > 0;
     });
 
     if (costsWithData.length === 0) return 0;
     
     const totalCost = costsWithData.reduce((sum, s) => {
-      // Safely convert to numbers with proper type checking
       const cost = this.safeParseFloat(s.freight_carrier_cost);
       const weight = this.safeParseFloat(s.weight_kg);
       
-      // Only proceed with arithmetic if both are valid numbers
       if (cost > 0 && weight > 0) {
         return sum + (cost / weight);
       }
@@ -329,7 +322,6 @@ export class FreightIntelligenceEngine {
   private calculateQuoteCoverage(forwarderName: string): number {
     const totalQuoteRequests = canonicalShipmentData.length;
     const forwarderQuotes = canonicalShipmentData.filter(s => {
-      // Convert forwarder quotes to numbers and check if they exist - with explicit type checking
       const quotes = [
         this.safeParseFloat(s.kuehne_nagel),
         this.safeParseFloat(s.scan_global_logistics),
