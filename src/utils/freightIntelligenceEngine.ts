@@ -9,6 +9,18 @@ import {
 
 export class FreightIntelligenceEngine {
   
+  // Helper function to safely parse unknown values to numbers
+  private safeParseFloat(value: unknown): number | null {
+    if (typeof value === 'number' && !isNaN(value)) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const parsed = parseFloat(value);
+      return isNaN(parsed) ? null : parsed;
+    }
+    return null;
+  }
+
   analyzeCorridorIntelligence(origin: string, destination: string): CorridorIntelligence {
     const corridorShipments = canonicalShipmentData.filter(
       s => s.origin_country === origin && s.destination_country === destination
@@ -253,28 +265,19 @@ export class FreightIntelligenceEngine {
     if (shipments.length === 0) return 0;
     
     const costsWithData = shipments.filter(s => {
-      const costValue = s.freight_carrier_cost;
-      const weightValue = s.weight_kg;
+      const costValue = this.safeParseFloat(s.freight_carrier_cost);
+      const weightValue = this.safeParseFloat(s.weight_kg);
       
-      // Convert to numbers and validate
-      const cost = Number(costValue);
-      const weight = Number(weightValue);
-      
-      return !isNaN(cost) && !isNaN(weight) && cost > 0 && weight > 0;
+      return costValue !== null && weightValue !== null && costValue > 0 && weightValue > 0;
     });
 
     if (costsWithData.length === 0) return 0;
     
     const totalCost = costsWithData.reduce((sum, s) => {
-      // Safely convert to numbers with proper type checking
-      const costValue = s.freight_carrier_cost;
-      const weightValue = s.weight_kg;
+      const cost = this.safeParseFloat(s.freight_carrier_cost);
+      const weight = this.safeParseFloat(s.weight_kg);
       
-      const cost = Number(costValue);
-      const weight = Number(weightValue);
-      
-      // Only proceed with arithmetic if both are valid numbers
-      if (!isNaN(cost) && !isNaN(weight) && weight > 0) {
+      if (cost !== null && weight !== null && weight > 0) {
         return sum + (cost / weight);
       }
       return sum;
@@ -331,16 +334,15 @@ export class FreightIntelligenceEngine {
   private calculateQuoteCoverage(forwarderName: string): number {
     const totalQuoteRequests = canonicalShipmentData.length;
     const forwarderQuotes = canonicalShipmentData.filter(s => {
-      // Convert forwarder quotes to numbers and check if they exist
       const quotes = [
-        Number(s.kuehne_nagel) || 0,
-        Number(s.scan_global_logistics) || 0,
-        Number(s.dhl_express) || 0,
-        Number(s.dhl_global) || 0,
-        Number(s.siginon) || 0,
-        Number(s.agl) || 0,
-        Number(s.freight_in_time) || 0,
-        Number(s.bwosi) || 0
+        this.safeParseFloat(s.kuehne_nagel) || 0,
+        this.safeParseFloat(s.scan_global_logistics) || 0,
+        this.safeParseFloat(s.dhl_express) || 0,
+        this.safeParseFloat(s.dhl_global) || 0,
+        this.safeParseFloat(s.siginon) || 0,
+        this.safeParseFloat(s.agl) || 0,
+        this.safeParseFloat(s.freight_in_time) || 0,
+        this.safeParseFloat(s.bwosi) || 0
       ];
       
       return quotes.some(quote => quote > 0);
