@@ -1,41 +1,39 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Rajdhani:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
-
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 222 47% 10%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 222 47% 7%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 210 100% 45%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 216 34% 17%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
 
     --radius: 0.5rem;
 
@@ -47,6 +45,11 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* DeepCAL color variables */
+    --deepcal-purple: #7e22ce;
+    --deepcal-light: #a855f7;
+    --deepcal-oracle: #c084fc;
   }
 
   .dark {
@@ -89,6 +92,7 @@
     /* DeepCAL color variables */
     --deepcal-purple: #7e22ce;
     --deepcal-light: #c084fc;
+    --deepcal-oracle: #a855f7;
   }
 }
 
@@ -98,10 +102,55 @@
   }
 
   body {
-    font-family: 'Space Grotesk', sans-serif;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    font-family: 'Inter', sans-serif;
+    background: #0A0E17;
     color: #e2e8f0;
     min-height: 100vh;
+    @apply antialiased overflow-x-hidden;
+    background-image: radial-gradient(circle at 50% 0%, rgba(126, 34, 206, 0.15) 0%, rgba(10, 14, 23, 0.5) 60%);
+    background-attachment: fixed;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Rajdhani', sans-serif;
+    @apply tracking-wide;
+  }
+  
+  code, pre {
+    font-family: 'JetBrains Mono', monospace;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-deepcal-dark;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(126, 34, 206, 0.5);
+    @apply rounded-full transition-colors;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a855f7;
+  }
+  
+  /* Scanline effect for cyberpunk feel */
+  .scanline {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(126, 34, 206, 0.1);
+    opacity: 0.75;
+    z-index: 100;
+    pointer-events: none;
+    animation: scan-line 6s linear infinite;
   }
 }
 
@@ -120,6 +169,60 @@
     border: 1px solid rgba(126, 34, 206, 0.4);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     border-radius: 1rem;
+  }
+
+  /* Tech card hover effects */
+  .tech-card {
+    @apply relative overflow-hidden rounded-lg border border-white/10 p-6 transition-all duration-300;
+    background: rgba(10, 14, 23, 0.5);
+    backdrop-filter: blur(12px);
+  }
+  
+  .tech-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(126, 34, 206, 0.2), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+  
+  .tech-card:hover::before {
+    transform: translateX(100%);
+  }
+  
+  .tech-card .glow-line {
+    @apply absolute h-px bg-gradient-to-r from-transparent via-deepcal-oracle to-transparent w-0 transition-all duration-500;
+  }
+  
+  .tech-card:hover .glow-line {
+    @apply w-full;
+  }
+  
+  /* Futuristic button */
+  .button-cyber {
+    @apply relative overflow-hidden font-display uppercase tracking-wide text-sm font-medium py-3 px-6 bg-deepcal-dark border border-deepcal-oracle/30 rounded text-white transition-all duration-300;
+  }
+  
+  .button-cyber::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-deepcal-purple to-deepcal-oracle opacity-0 transition-opacity duration-300;
+  }
+  
+  .button-cyber:hover::before {
+    @apply opacity-20;
+  }
+  
+  .button-cyber::after {
+    content: '';
+    @apply absolute bottom-0 left-0 h-[2px] w-0 bg-deepcal-oracle transition-all duration-300;
+  }
+  
+  .button-cyber:hover::after {
+    @apply w-full;
   }
 
   .map-container {
@@ -181,7 +284,7 @@
     position: absolute;
     width: 2px;
     height: 2px;
-    background-color: rgba(99, 102, 241, 0.7);
+    background-color: rgba(126, 34, 206, 0.7);
     border-radius: 50%;
     animation: particle-move 2s linear forwards;
   }
@@ -189,8 +292,8 @@
   .holographic-card {
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(99, 102, 241, 0.3);
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(126, 34, 206, 0.3);
+    box-shadow: 0 0 20px rgba(126, 34, 206, 0.1);
     transition: all 0.3s ease;
   }
 
@@ -203,11 +306,11 @@
     height: 200%;
     background: linear-gradient(
       to bottom right,
-      rgba(99, 102, 241, 0) 0%,
-      rgba(99, 102, 241, 0) 35%,
-      rgba(99, 102, 241, 0.1) 45%,
-      rgba(99, 102, 241, 0) 55%,
-      rgba(99, 102, 241, 0) 100%
+      rgba(126, 34, 206, 0) 0%,
+      rgba(126, 34, 206, 0) 35%,
+      rgba(126, 34, 206, 0.1) 45%,
+      rgba(126, 34, 206, 0) 55%,
+      rgba(126, 34, 206, 0) 100%
     );
     transform: rotate(30deg);
     animation: shine 3s infinite;
@@ -224,7 +327,7 @@
     left: -5px;
     right: -5px;
     bottom: -5px;
-    border: 2px solid rgba(99, 102, 241, 0.5);
+    border: 2px solid rgba(126, 34, 206, 0.5);
     border-radius: 50%;
     animation: pulse 3s infinite;
   }
@@ -241,7 +344,7 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.7), transparent);
+    background: linear-gradient(90deg, transparent, rgba(126, 34, 206, 0.7), transparent);
     animation: data-flow 2s linear infinite;
   }
 
@@ -250,9 +353,16 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background-color: rgba(99, 102, 241, 0.8);
-    box-shadow: 0 0 10px rgba(99, 102, 241, 0.8);
+    background-color: rgba(126, 34, 206, 0.8);
+    box-shadow: 0 0 10px rgba(126, 34, 206, 0.8);
     animation: quantum-float 4s ease-in-out infinite;
+  }
+
+  /* Glassmorphism effect */
+  .glassmorphism {
+    background: rgba(10, 14, 23, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -265,12 +375,20 @@
     color: #c084fc;
   }
   
+  .deepcal-oracle {
+    color: #a855f7;
+  }
+  
   .bg-deepcal-purple {
     background-color: #7e22ce;
   }
   
   .bg-deepcal-light {
     background-color: #c084fc;
+  }
+  
+  .bg-deepcal-oracle {
+    background-color: #a855f7;
   }
   
   .animate-spin-slow {
@@ -291,6 +409,26 @@
   
   .animate-shine {
     animation: shine 2s linear infinite;
+  }
+
+  /* Animation delay utilities */
+  .animate-delay-100 {
+    animation-delay: 100ms;
+  }
+  .animate-delay-200 {
+    animation-delay: 200ms;
+  }
+  .animate-delay-300 {
+    animation-delay: 300ms;
+  }
+  .animate-delay-400 {
+    animation-delay: 400ms;
+  }
+  .animate-delay-500 {
+    animation-delay: 500ms;
+  }
+  .animate-delay-1000 {
+    animation-delay: 1000ms;
   }
 }
 
