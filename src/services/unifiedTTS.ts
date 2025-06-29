@@ -1,5 +1,5 @@
 
-import { advancedTTS } from './advancedTTS';
+import { newTTSService } from './newTTSService';
 
 interface TTSConfig {
   voice?: string;
@@ -9,31 +9,28 @@ interface TTSConfig {
 }
 
 class UnifiedTTS {
-  private preferKokoro: boolean = true;
-
   async generateSpeech(
     text: string,
     config: TTSConfig = {}
   ): Promise<string | null> {
-    console.log('🎵 Unified TTS: Starting speech generation...');
+    console.log('🎵 Unified TTS: Using new TTS service...');
     console.log('🎵 Text length:', text.length);
     console.log('🎵 Config:', config);
 
-    // Primary: Kokoro-TTS
     try {
-      console.log('🎵 Trying Kokoro-TTS...');
-      const audioUrl = await advancedTTS.generateSpeech(text, {
-        voice: config.voice || 'af',
-        emotion: config.emotion || 'neutral',
-        useRandomSeed: config.useRandomSeed || false,
+      const audioUrl = await newTTSService.generateSpeech(text, {
+        voice: config.voice || 'ballad',
+        emotion: config.emotion || 'natural and engaging',
+        useRandomSeed: config.useRandomSeed ?? true,
         specificSeed: config.specificSeed
       });
+
       if (audioUrl) {
-        console.log('🎵 Kokoro-TTS successful');
+        console.log('🎵 New TTS successful');
         return audioUrl;
       }
     } catch (error) {
-      console.warn('🎵 Kokoro-TTS failed, falling back to browser speech:', error);
+      console.warn('🎵 New TTS failed:', error);
     }
 
     // Final fallback to browser speech synthesis
@@ -45,7 +42,7 @@ class UnifiedTTS {
         utterance.pitch = 1.1;
         window.speechSynthesis.speak(utterance);
         console.log('🎵 Browser speech synthesis triggered as fallback');
-        return 'browser-speech'; // Special indicator for browser speech
+        return 'browser-speech';
       }
     } catch (fallbackError) {
       console.error('🎵 All TTS methods failed:', fallbackError);
@@ -55,16 +52,15 @@ class UnifiedTTS {
   }
 
   getVoiceForPersonality(personality: 'oracular' | 'humorous' | 'corporate'): string {
-    const voiceMap = {
-      oracular: 'af_sarah',   // Clear, mystical
-      humorous: 'af_nicole',  // Friendly, casual
-      corporate: 'af'         // Professional default
-    };
-    return voiceMap[personality];
+    return newTTSService.getVoiceForPersonality(personality);
   }
 
-  getAvailableVoices() {
-    return advancedTTS.getAvailableVoices();
+  getEmotionForPersonality(personality: 'oracular' | 'humorous' | 'corporate'): string {
+    return newTTSService.getEmotionForPersonality(personality);
+  }
+
+  getAvailableVoices(): string[] {
+    return newTTSService.getAvailableVoices();
   }
 }
 

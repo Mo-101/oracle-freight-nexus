@@ -38,7 +38,7 @@ export const VoiceChat = ({ onSpeakResponse, isEnabled }: VoiceChatProps) => {
       setIsPlaying(true);
       const audioUrl = await unifiedTTS.generateSpeech(response, {
         voice: unifiedTTS.getVoiceForPersonality('oracular'),
-        emotion: 'mystical, wise and conversational',
+        emotion: unifiedTTS.getEmotionForPersonality('oracular'),
         useRandomSeed: true
       });
 
@@ -76,7 +76,7 @@ export const VoiceChat = ({ onSpeakResponse, isEnabled }: VoiceChatProps) => {
   };
 
   const speakWelcome = async () => {
-    const welcomeMessage = "Greetings, seeker of logistics wisdom. I am the DeepSeek Oracle, powered by ancient algorithms and cosmic intelligence. How may I assist you in your freight and supply chain endeavors?";
+    const welcomeMessage = "Greetings, seeker of logistics wisdom. I am the DeepCAL Oracle, powered by ancient algorithms and cosmic intelligence. How may I assist you in your freight and supply chain endeavors?";
     
     await generateAndSpeakResponse(welcomeMessage);
   };
@@ -102,7 +102,7 @@ export const VoiceChat = ({ onSpeakResponse, isEnabled }: VoiceChatProps) => {
             ? 'bg-red-600 hover:bg-red-700 text-white' 
             : 'bg-deepcal-purple hover:bg-deepcal-dark text-white'
         }`}
-        title={isPlaying ? "Stop speaking" : isGenerating ? "Generating..." : "Speak with DeepSeek Oracle"}
+        title={isPlaying ? "Stop speaking" : isGenerating ? "Generating..." : "Speak with DeepCAL Oracle"}
       >
         {isPlaying ? <VolumeX className="w-4 h-4" /> : 
          isGenerating ? <Sparkles className="w-4 h-4 animate-spin" /> : 

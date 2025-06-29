@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { TOPSISResult } from '@/utils/neutrosophicEngine';
@@ -90,14 +91,15 @@ export const VoiceNarration = ({
       text = await generateAINarrative();
     }
 
-    const voiceId = unifiedTTS.getVoiceForPersonality(currentMode);
+    const voice = unifiedTTS.getVoiceForPersonality(currentMode);
+    const emotion = unifiedTTS.getEmotionForPersonality(currentMode);
     
     setIsPlaying(true);
     
     try {
       const audioUrl = await unifiedTTS.generateSpeech(text, {
-        voice: voiceId,
-        emotion: 'engaging narrative voice',
+        voice,
+        emotion,
         useRandomSeed: true
       });
 
@@ -141,7 +143,7 @@ export const VoiceNarration = ({
     <div className="oracle-card p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-bold text-deepcal-light flex items-center">
-          🎙️ DeepSeek Oracle Narration
+          🎙️ DeepCAL Oracle Narration
           <Sparkles className="ml-2 w-5 h-5 text-deepcal-light" />
         </h3>
         <div className="flex items-center space-x-2">
@@ -193,7 +195,7 @@ export const VoiceNarration = ({
       {(isPlaying || isGenerating) && (
         <div className="mt-4 flex items-center text-xs text-deepcal-light">
           <div className="w-2 h-2 bg-deepcal-light rounded-full mr-2 animate-pulse"></div>
-          {isGenerating ? 'DeepSeek generating narrative...' : 'Oracle transmission in progress... (Premium AI Voice)'}
+          {isGenerating ? 'DeepSeek generating narrative...' : 'Oracle transmission in progress... (New AI Voice System)'}
         </div>
       )}
     </div>
