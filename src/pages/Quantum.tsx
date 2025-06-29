@@ -8,9 +8,15 @@ import { getForwarderPerformance } from '../data/canonicalData';
 
 const Quantum = () => {
   // Get sample forwarder data for the quantum matrix
-  const sampleForwarders = [
+  const forwarderNames = [
     'Kuehne Nagel', 'DHL Express', 'DHL Global', 'Siginon Logistics'
-  ].map(name => getForwarderPerformance(name));
+  ];
+  
+  const sampleForwarders = forwarderNames.map(name => ({
+    ...getForwarderPerformance(name),
+    name,
+    quoteWinRate: Math.random() * 0.5 + 0.3 // Mock quote win rate between 30-80%
+  }));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-deepcal-dark via-slate-900 to-deepcal-dark">

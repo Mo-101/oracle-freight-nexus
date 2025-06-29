@@ -258,32 +258,21 @@ export class FreightIntelligenceEngine {
       const weightValue = s.weight_kg;
       
       // Convert to numbers and validate - with explicit type checking
-      const cost = typeof costValue === 'string' ? parseFloat(costValue) : 
-                   typeof costValue === 'number' ? costValue : 
-                   parseFloat(String(costValue || '0'));
-      const weight = typeof weightValue === 'string' ? parseFloat(weightValue) : 
-                     typeof weightValue === 'number' ? weightValue : 
-                     parseFloat(String(weightValue || '0'));
+      const cost = this.safeParseFloat(costValue);
+      const weight = this.safeParseFloat(weightValue);
       
-      return !isNaN(cost) && !isNaN(weight) && cost > 0 && weight > 0;
+      return cost > 0 && weight > 0;
     });
 
     if (costsWithData.length === 0) return 0;
     
     const totalCost = costsWithData.reduce((sum, s) => {
       // Safely convert to numbers with proper type checking
-      const costValue = s.freight_carrier_cost;
-      const weightValue = s.weight_kg;
-      
-      const cost = typeof costValue === 'string' ? parseFloat(costValue) : 
-                   typeof costValue === 'number' ? costValue : 
-                   parseFloat(String(costValue || '0'));
-      const weight = typeof weightValue === 'string' ? parseFloat(weightValue) : 
-                     typeof weightValue === 'number' ? weightValue : 
-                     parseFloat(String(weightValue || '0'));
+      const cost = this.safeParseFloat(s.freight_carrier_cost);
+      const weight = this.safeParseFloat(s.weight_kg);
       
       // Only proceed with arithmetic if both are valid numbers
-      if (!isNaN(cost) && !isNaN(weight) && weight > 0) {
+      if (cost > 0 && weight > 0) {
         return sum + (cost / weight);
       }
       return sum;
@@ -342,33 +331,17 @@ export class FreightIntelligenceEngine {
     const forwarderQuotes = canonicalShipmentData.filter(s => {
       // Convert forwarder quotes to numbers and check if they exist - with explicit type checking
       const quotes = [
-        typeof s.kuehne_nagel === 'string' ? parseFloat(s.kuehne_nagel) : 
-        typeof s.kuehne_nagel === 'number' ? s.kuehne_nagel : 
-        parseFloat(String(s.kuehne_nagel || '0')),
-        typeof s.scan_global_logistics === 'string' ? parseFloat(s.scan_global_logistics) : 
-        typeof s.scan_global_logistics === 'number' ? s.scan_global_logistics : 
-        parseFloat(String(s.scan_global_logistics || '0')),
-        typeof s.dhl_express === 'string' ? parseFloat(s.dhl_express) : 
-        typeof s.dhl_express === 'number' ? s.dhl_express : 
-        parseFloat(String(s.dhl_express || '0')),
-        typeof s.dhl_global === 'string' ? parseFloat(s.dhl_global) : 
-        typeof s.dhl_global === 'number' ? s.dhl_global : 
-        parseFloat(String(s.dhl_global || '0')),
-        typeof s.siginon === 'string' ? parseFloat(s.siginon) : 
-        typeof s.siginon === 'number' ? s.siginon : 
-        parseFloat(String(s.siginon || '0')),
-        typeof s.agl === 'string' ? parseFloat(s.agl) : 
-        typeof s.agl === 'number' ? s.agl : 
-        parseFloat(String(s.agl || '0')),
-        typeof s.freight_in_time === 'string' ? parseFloat(s.freight_in_time) : 
-        typeof s.freight_in_time === 'number' ? s.freight_in_time : 
-        parseFloat(String(s.freight_in_time || '0')),
-        typeof s.bwosi === 'string' ? parseFloat(s.bwosi) : 
-        typeof s.bwosi === 'number' ? s.bwosi : 
-        parseFloat(String(s.bwosi || '0'))
+        this.safeParseFloat(s.kuehne_nagel),
+        this.safeParseFloat(s.scan_global_logistics),
+        this.safeParseFloat(s.dhl_express),
+        this.safeParseFloat(s.dhl_global),
+        this.safeParseFloat(s.siginon),
+        this.safeParseFloat(s.agl),
+        this.safeParseFloat(s.freight_in_time),
+        this.safeParseFloat(s.bwosi)
       ];
       
-      return quotes.some(quote => !isNaN(quote) && quote > 0);
+      return quotes.some(quote => quote > 0);
     }).length;
     
     return Math.round((forwarderQuotes / totalQuoteRequests) * 100);
@@ -394,6 +367,19 @@ export class FreightIntelligenceEngine {
     ethicsScore += (forwarder.reliabilityScore - 80) / 100 * 0.1;
     
     return Math.max(0, Math.min(1, ethicsScore));
+  }
+
+  // Helper method to safely parse float values
+  private safeParseFloat(value: unknown): number {
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+      const parsed = parseFloat(value);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+    if (value === null || value === undefined) return 0;
+    
+    const parsed = parseFloat(String(value));
+    return isNaN(parsed) ? 0 : parsed;
   }
 }
 
