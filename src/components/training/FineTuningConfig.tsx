@@ -18,7 +18,7 @@ export const FineTuningConfig = () => {
     includeNorthAfrica: true,
     includeCentralAfrica: true,
     includeEdgeCases: true,
-    exportFormat: 'jsonl' as const,
+    exportFormat: 'jsonl' as 'jsonl' | 'csv' | 'json',
     modelName: 'qwen-7b',
     epochs: 3,
     learningRate: 0.0001,
