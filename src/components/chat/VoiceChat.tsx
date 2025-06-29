@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Mic, MicOff, Volume2, VolumeX, Sparkles } from 'lucide-react';
-import { advancedTTS } from '@/services/advancedTTS';
+import { unifiedTTS } from '@/services/unifiedTTS';
 import { deepseekClient } from '@/services/deepseekClient';
 
 interface VoiceChatProps {
@@ -34,28 +34,36 @@ export const VoiceChat = ({ onSpeakResponse, isEnabled }: VoiceChatProps) => {
       // Callback to parent component
       onSpeakResponse(response);
 
-      // Generate speech
+      // Generate speech using unified TTS
       setIsPlaying(true);
-      const audioUrl = await advancedTTS.generateSpeech(response, {
-        voice: 'ballad',
+      const audioUrl = await unifiedTTS.generateSpeech(response, {
+        voice: unifiedTTS.getVoiceForPersonality('oracular'),
         emotion: 'mystical, wise and conversational',
         useRandomSeed: true
       });
 
-      if (audioUrl) {
+      if (audioUrl && audioUrl !== 'browser-speech') {
         const audio = new Audio(audioUrl);
         setCurrentAudio(audio);
         
         audio.onended = () => {
           setIsPlaying(false);
           setIsGenerating(false);
+          URL.revokeObjectURL(audioUrl); // Clean up
         };
         audio.onerror = () => {
           setIsPlaying(false);
           setIsGenerating(false);
+          URL.revokeObjectURL(audioUrl); // Clean up
         };
         
         await audio.play();
+      } else if (audioUrl === 'browser-speech') {
+        // Browser speech was used
+        setTimeout(() => {
+          setIsPlaying(false);
+          setIsGenerating(false);
+        }, 3000);
       } else {
         setIsPlaying(false);
         setIsGenerating(false);

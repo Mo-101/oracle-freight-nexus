@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { TOPSISResult } from '@/utils/neutrosophicEngine';
-import { advancedTTS } from '@/services/advancedTTS';
+import { unifiedTTS } from '@/services/unifiedTTS';
 import { deepseekClient } from '@/services/deepseekClient';
 
 interface VoiceNarrationProps {
@@ -91,28 +90,35 @@ export const VoiceNarration = ({
       text = await generateAINarrative();
     }
 
-    const emotion = advancedTTS.getEmotionForPersonality(currentMode);
+    const voiceId = unifiedTTS.getVoiceForPersonality(currentMode);
     
     setIsPlaying(true);
     
     try {
-      const audioUrl = await advancedTTS.generateSpeech(text, {
-        voice: 'ballad',
-        emotion: emotion,
+      const audioUrl = await unifiedTTS.generateSpeech(text, {
+        voice: voiceId,
+        emotion: 'engaging narrative voice',
         useRandomSeed: true
       });
 
-      if (audioUrl) {
+      if (audioUrl && audioUrl !== 'browser-speech') {
         const audio = new Audio(audioUrl);
         setAudioElement(audio);
         
-        audio.onended = () => setIsPlaying(false);
+        audio.onended = () => {
+          setIsPlaying(false);
+          URL.revokeObjectURL(audioUrl); // Clean up
+        };
         audio.onerror = () => {
           setIsPlaying(false);
           console.error('Audio playback failed');
+          URL.revokeObjectURL(audioUrl); // Clean up
         };
         
         await audio.play();
+      } else if (audioUrl === 'browser-speech') {
+        // Browser speech was used
+        setTimeout(() => setIsPlaying(false), 5000); // Longer for narratives
       } else {
         setIsPlaying(false);
         console.error('Failed to generate audio');
@@ -187,7 +193,7 @@ export const VoiceNarration = ({
       {(isPlaying || isGenerating) && (
         <div className="mt-4 flex items-center text-xs text-deepcal-light">
           <div className="w-2 h-2 bg-deepcal-light rounded-full mr-2 animate-pulse"></div>
-          {isGenerating ? 'DeepSeek generating narrative...' : 'Oracle transmission in progress... (Ballad Voice)'}
+          {isGenerating ? 'DeepSeek generating narrative...' : 'Oracle transmission in progress... (Premium AI Voice)'}
         </div>
       )}
     </div>

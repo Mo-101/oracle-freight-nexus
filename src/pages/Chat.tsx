@@ -3,7 +3,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { VoiceChat } from '../components/chat/VoiceChat';
 import { VoiceTestButton } from '../components/chat/VoiceTestButton';
-import { advancedTTS } from '../services/advancedTTS';
+import { unifiedTTS } from '../services/unifiedTTS';
 
 interface Message {
   id: string;
@@ -104,18 +104,20 @@ const Chat = () => {
       setMessages(prev => [...prev, aiMessage]);
       setIsTyping(false);
 
-      // Auto-speak AI responses with ballad voice
+      // Auto-speak AI responses with unified TTS
       if (voiceEnabled) {
         try {
-          const audioUrl = await advancedTTS.generateSpeech(responseData.response, {
-            voice: 'ballad',
+          const audioUrl = await unifiedTTS.generateSpeech(responseData.response, {
+            voice: '9BWtsMINqrJLrRacOk9x', // Aria voice
             emotion: 'conversational, wise and helpful',
             useRandomSeed: true
           });
           
-          if (audioUrl) {
+          if (audioUrl && audioUrl !== 'browser-speech') {
             const audio = new Audio(audioUrl);
-            audio.play().catch(console.error);
+            audio.play().then(() => {
+              audio.onended = () => URL.revokeObjectURL(audioUrl); // Clean up
+            }).catch(console.error);
           }
         } catch (error) {
           console.error('Auto-voice failed:', error);
@@ -126,15 +128,17 @@ const Chat = () => {
 
   const handleSpeakResponse = async (text: string) => {
     try {
-      const audioUrl = await advancedTTS.generateSpeech(text, {
-        voice: 'ballad',
+      const audioUrl = await unifiedTTS.generateSpeech(text, {
+        voice: '9BWtsMINqrJLrRacOk9x', // Aria
         emotion: 'mystical, wise and conversational',
         useRandomSeed: true
       });
       
-      if (audioUrl) {
+      if (audioUrl && audioUrl !== 'browser-speech') {
         const audio = new Audio(audioUrl);
-        audio.play();
+        audio.play().then(() => {
+          audio.onended = () => URL.revokeObjectURL(audioUrl); // Clean up
+        });
       }
     } catch (error) {
       console.error('Voice synthesis failed:', error);
@@ -174,7 +178,7 @@ const Chat = () => {
                     </div>
                     <div>
                       <h2 className="font-bold text-white">Oracle</h2>
-                      <p className="text-xs text-purple-100">DeepTalk Conversational AI (Ballad Voice)</p>
+                      <p className="text-xs text-purple-100">DeepTalk Conversational AI (Premium Voice)</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -223,7 +227,7 @@ const Chat = () => {
                             onClick={() => handleSpeakResponse(message.content)}
                             className="mt-2 text-xs bg-deepcal-purple/20 hover:bg-deepcal-purple/30 px-2 py-1 rounded transition"
                           >
-                            <i className="fas fa-play mr-1"></i> Speak (Ballad)
+                            <i className="fas fa-play mr-1"></i> Speak (AI Voice)
                           </button>
                         )}
                         
