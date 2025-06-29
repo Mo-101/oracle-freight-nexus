@@ -1,3 +1,4 @@
+
 import { canonicalShipmentData, getForwarderPerformance } from '@/data/canonicalData';
 import { 
   RouteOption, 
@@ -257,8 +258,8 @@ export class FreightIntelligenceEngine {
       const weightValue = s.weight_kg;
       
       // Convert to numbers and validate
-      const cost = typeof costValue === 'number' ? costValue : parseFloat(String(costValue));
-      const weight = typeof weightValue === 'number' ? weightValue : parseFloat(String(weightValue));
+      const cost = typeof costValue === 'number' ? costValue : parseFloat(String(costValue || '0'));
+      const weight = typeof weightValue === 'number' ? weightValue : parseFloat(String(weightValue || '0'));
       
       return !isNaN(cost) && !isNaN(weight) && cost > 0 && weight > 0;
     });
@@ -270,8 +271,8 @@ export class FreightIntelligenceEngine {
       const costValue = s.freight_carrier_cost;
       const weightValue = s.weight_kg;
       
-      const cost = typeof costValue === 'number' ? costValue : parseFloat(String(costValue));
-      const weight = typeof weightValue === 'number' ? weightValue : parseFloat(String(weightValue));
+      const cost = typeof costValue === 'number' ? costValue : parseFloat(String(costValue || '0'));
+      const weight = typeof weightValue === 'number' ? weightValue : parseFloat(String(weightValue || '0'));
       
       // Only proceed with arithmetic if both are valid numbers
       if (!isNaN(cost) && !isNaN(weight) && weight > 0) {
@@ -333,14 +334,14 @@ export class FreightIntelligenceEngine {
     const forwarderQuotes = canonicalShipmentData.filter(s => {
       // Convert forwarder quotes to numbers and check if they exist
       const quotes = [
-        typeof s.kuehne_nagel === 'number' ? s.kuehne_nagel : parseFloat(String(s.kuehne_nagel)) || 0,
-        typeof s.scan_global_logistics === 'number' ? s.scan_global_logistics : parseFloat(String(s.scan_global_logistics)) || 0,
-        typeof s.dhl_express === 'number' ? s.dhl_express : parseFloat(String(s.dhl_express)) || 0,
-        typeof s.dhl_global === 'number' ? s.dhl_global : parseFloat(String(s.dhl_global)) || 0,
-        typeof s.siginon === 'number' ? s.siginon : parseFloat(String(s.siginon)) || 0,
-        typeof s.agl === 'number' ? s.agl : parseFloat(String(s.agl)) || 0,
-        typeof s.freight_in_time === 'number' ? s.freight_in_time : parseFloat(String(s.freight_in_time)) || 0,
-        typeof s.bwosi === 'number' ? s.bwosi : parseFloat(String(s.bwosi)) || 0
+        typeof s.kuehne_nagel === 'number' ? s.kuehne_nagel : parseFloat(String(s.kuehne_nagel || '0')),
+        typeof s.scan_global_logistics === 'number' ? s.scan_global_logistics : parseFloat(String(s.scan_global_logistics || '0')),
+        typeof s.dhl_express === 'number' ? s.dhl_express : parseFloat(String(s.dhl_express || '0')),
+        typeof s.dhl_global === 'number' ? s.dhl_global : parseFloat(String(s.dhl_global || '0')),
+        typeof s.siginon === 'number' ? s.siginon : parseFloat(String(s.siginon || '0')),
+        typeof s.agl === 'number' ? s.agl : parseFloat(String(s.agl || '0')),
+        typeof s.freight_in_time === 'number' ? s.freight_in_time : parseFloat(String(s.freight_in_time || '0')),
+        typeof s.bwosi === 'number' ? s.bwosi : parseFloat(String(s.bwosi || '0'))
       ];
       
       return quotes.some(quote => !isNaN(quote) && quote > 0);

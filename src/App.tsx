@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './components/ThemeProvider';
@@ -22,6 +22,30 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  const [formData, setFormData] = useState({
+    origin: 'Kenya',
+    destination: 'Zambia',
+    weight: 1000,
+    volume: 2.5,
+    cargoType: 'Emergency Health Kits',
+    selectedForwarders: ['Kuehne + Nagel', 'DHL Global Forwarding', 'Siginon Logistics']
+  });
+
+  const [isOutputVisible, setIsOutputVisible] = useState(false);
+  const [rankings, setRankings] = useState([
+    { name: 'Kuehne + Nagel', transitDays: 7, cost: 4.2, risk: 8, score: 0.92, rank: 1 },
+    { name: 'DHL Global Forwarding', transitDays: 5, cost: 5.1, risk: 12, score: 0.85, rank: 2 },
+    { name: 'Siginon Logistics', transitDays: 9, cost: 3.8, risk: 15, score: 0.78, rank: 3 }
+  ]);
+
+  const handleOracleAwaken = () => {
+    setIsOutputVisible(true);
+  };
+
+  const handleFormChange = (data: any) => {
+    setFormData(data);
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
@@ -38,7 +62,11 @@ function App() {
                     <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 min-h-[calc(100vh-200px)]">
                       {/* Left Panel - Input */}
                       <div className="xl:col-span-1 space-y-6">
-                        <InputPanel />
+                        <InputPanel 
+                          onOracleAwaken={handleOracleAwaken}
+                          formData={formData}
+                          onFormChange={handleFormChange}
+                        />
                         <MCPIntegrationPanel className="max-h-96" />
                       </div>
                       
@@ -51,7 +79,11 @@ function App() {
                       
                       {/* Right Panel - Output */}
                       <div className="xl:col-span-1">
-                        <OutputPanel />
+                        <OutputPanel 
+                          isVisible={isOutputVisible}
+                          rankings={rankings}
+                          formData={formData}
+                        />
                       </div>
                     </div>
                   } 
