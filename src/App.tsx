@@ -4,10 +4,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Header } from './components/Header';
-import { Footer } from './components/Footer';
-import { InputPanel } from './components/InputPanel';
-import { OutputPanel } from './components/OutputPanel';
-import { QuantumParticles } from './components/QuantumParticles';
+import Footer from './components/Footer';
+import InputPanel from './components/InputPanel';
+import OutputPanel from './components/OutputPanel';
+import QuantumParticles from './components/QuantumParticles';
 import { Interactive3DGlobe } from './components/Interactive3DGlobe';
 import { MCPIntegrationPanel } from './components/mcp/MCPIntegrationPanel';
 import './App.css';
@@ -16,7 +16,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (replaces cacheTime)
     },
   },
 });
