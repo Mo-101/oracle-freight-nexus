@@ -1,5 +1,4 @@
 
-import { elevenLabsTTS } from './elevenLabsTTS';
 import { advancedTTS } from './advancedTTS';
 
 interface TTSConfig {
@@ -10,7 +9,7 @@ interface TTSConfig {
 }
 
 class UnifiedTTS {
-  private preferElevenLabs: boolean = true;
+  private preferKokoro: boolean = true;
 
   async generateSpeech(
     text: string,
@@ -20,39 +19,21 @@ class UnifiedTTS {
     console.log('🎵 Text length:', text.length);
     console.log('🎵 Config:', config);
 
-    // Try ElevenLabs first if API key is available
-    if (this.preferElevenLabs) {
-      try {
-        console.log('🎵 Trying ElevenLabs TTS...');
-        const audioUrl = await elevenLabsTTS.generateSpeech(text, {
-          voice: config.voice || '9BWtsMINqrJLrRacOk9x', // Aria
-          model: 'eleven_multilingual_v2'
-        });
-        
-        if (audioUrl) {
-          console.log('🎵 ElevenLabs TTS successful');
-          return audioUrl;
-        }
-      } catch (error) {
-        console.warn('🎵 ElevenLabs TTS failed, falling back to Kokoro-TTS:', error);
-      }
-    }
-
-    // Fallback to Kokoro-TTS
+    // Primary: Kokoro-TTS
     try {
-      console.log('🎵 Trying Kokoro-TTS fallback...');
+      console.log('🎵 Trying Kokoro-TTS...');
       const audioUrl = await advancedTTS.generateSpeech(text, {
-        voice: config.voice || 'default',
+        voice: config.voice || 'af',
         emotion: config.emotion || 'neutral',
         useRandomSeed: config.useRandomSeed || false,
         specificSeed: config.specificSeed
       });
       if (audioUrl) {
-        console.log('🎵 Kokoro-TTS fallback successful');
+        console.log('🎵 Kokoro-TTS successful');
         return audioUrl;
       }
     } catch (error) {
-      console.warn('🎵 Kokoro-TTS also failed:', error);
+      console.warn('🎵 Kokoro-TTS failed, falling back to browser speech:', error);
     }
 
     // Final fallback to browser speech synthesis
@@ -74,15 +55,16 @@ class UnifiedTTS {
   }
 
   getVoiceForPersonality(personality: 'oracular' | 'humorous' | 'corporate'): string {
-    if (this.preferElevenLabs) {
-      return elevenLabsTTS.getVoiceForPersonality(personality);
-    }
-    return advancedTTS.getEmotionForPersonality(personality);
+    const voiceMap = {
+      oracular: 'af_sarah',   // Clear, mystical
+      humorous: 'af_nicole',  // Friendly, casual
+      corporate: 'af'         // Professional default
+    };
+    return voiceMap[personality];
   }
 
-  setProvider(preferElevenLabs: boolean) {
-    this.preferElevenLabs = preferElevenLabs;
-    console.log('🎵 TTS Provider changed to:', preferElevenLabs ? 'ElevenLabs' : 'Kokoro-TTS');
+  getAvailableVoices() {
+    return advancedTTS.getAvailableVoices();
   }
 }
 

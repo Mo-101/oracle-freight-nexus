@@ -108,7 +108,7 @@ const Chat = () => {
       if (voiceEnabled) {
         try {
           const audioUrl = await unifiedTTS.generateSpeech(responseData.response, {
-            voice: '9BWtsMINqrJLrRacOk9x', // Aria voice
+            voice: 'af_sarah',
             emotion: 'conversational, wise and helpful',
             useRandomSeed: true
           });
@@ -129,7 +129,7 @@ const Chat = () => {
   const handleSpeakResponse = async (text: string) => {
     try {
       const audioUrl = await unifiedTTS.generateSpeech(text, {
-        voice: '9BWtsMINqrJLrRacOk9x', // Aria
+        voice: 'af_sarah',
         emotion: 'mystical, wise and conversational',
         useRandomSeed: true
       });
