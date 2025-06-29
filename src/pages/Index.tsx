@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import InputPanel from '../components/InputPanel';
@@ -6,6 +5,7 @@ import OutputPanel from '../components/OutputPanel';
 import Footer from '../components/Footer';
 import { PredictiveTimeline } from '../components/analytics/PredictiveTimeline';
 import { canonicalShipmentData, getForwarderPerformance, getUniqueForwarders } from '../data/canonicalData';
+import { FreightIntelligenceDashboard } from '../components/freight/FreightIntelligenceDashboard';
 
 interface FormData {
   origin: string;
@@ -129,11 +129,18 @@ const Index = () => {
               onFormChange={setFormData}
             />
             
-            <OutputPanel 
-              isVisible={showOutput}
-              rankings={rankings}
-              formData={formData}
-            />
+            {/* Replace basic OutputPanel with comprehensive FreightIntelligenceDashboard */}
+            {showOutput && (
+              <div className="lg:col-span-2 animate-scroll-appear" id="outputPanel">
+                <FreightIntelligenceDashboard
+                  origin={formData.origin}
+                  destination={formData.destination}
+                  cargoType={formData.cargoType}
+                  weight={formData.weight}
+                  volume={formData.volume}
+                />
+              </div>
+            )}
           </div>
           
           {/* Add Predictive Timeline when output is shown */}
@@ -145,7 +152,7 @@ const Index = () => {
           
           {showOutput && (
             <div className="mt-6 text-center text-sm text-slate-400">
-              DeepCAL++ vΩ • Symbolic Logistical Intelligence Engine • Powered by Canonical Data • First Transmission: {new Date().toISOString().split('T')[0]}
+              DeepCAL++ vΩ • Symbolic Freight Intelligence Engine • Powered by Canonical Data • First Transmission: {new Date().toISOString().split('T')[0]}
             </div>
           )}
         </div>
