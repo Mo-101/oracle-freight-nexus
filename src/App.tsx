@@ -1,36 +1,70 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Chat from "./pages/Chat";
-import Quantum from "./pages/Quantum";
-import Map from "./pages/Map";
-import Training from "./pages/Training";
-import NotFound from "./pages/NotFound";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from './components/ThemeProvider';
+import { Header } from './components/Header';
+import { Footer } from './components/Footer';
+import { InputPanel } from './components/InputPanel';
+import { OutputPanel } from './components/OutputPanel';
+import { QuantumParticles } from './components/QuantumParticles';
+import { Interactive3DGlobe } from './components/Interactive3DGlobe';
+import { MCPIntegrationPanel } from './components/mcp/MCPIntegrationPanel';
+import './App.css';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+    },
+  },
+});
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/quantum" element={<Quantum />} />
-          <Route path="/map" element={<Map />} />
-          <Route path="/training" element={<Training />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <Router>
+          <div className="min-h-screen bg-gradient-to-br from-deepcal-dark via-slate-900 to-deepcal-dark dark:from-gray-950 dark:via-slate-950 dark:to-gray-950">
+            <QuantumParticles />
+            <Header />
+            
+            <main className="container mx-auto px-4 py-8 relative z-10">
+              <Routes>
+                <Route 
+                  path="/" 
+                  element={
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 min-h-[calc(100vh-200px)]">
+                      {/* Left Panel - Input */}
+                      <div className="xl:col-span-1 space-y-6">
+                        <InputPanel />
+                        <MCPIntegrationPanel className="max-h-96" />
+                      </div>
+                      
+                      {/* Center Panel - 3D Globe */}
+                      <div className="xl:col-span-1 flex items-center justify-center">
+                        <div className="w-full h-[600px] max-w-lg">
+                          <Interactive3DGlobe />
+                        </div>
+                      </div>
+                      
+                      {/* Right Panel - Output */}
+                      <div className="xl:col-span-1">
+                        <OutputPanel />
+                      </div>
+                    </div>
+                  } 
+                />
+              </Routes>
+            </main>
+            
+            <Footer />
+          </div>
+        </Router>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
