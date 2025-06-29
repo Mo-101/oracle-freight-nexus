@@ -211,14 +211,22 @@ export class FreightIntelligenceEngine {
   private calculateAvgTransitDays(shipments: any[]): number {
     if (shipments.length === 0) return 7;
     
-    const totalDays = shipments.reduce((sum, s) => {
+    const shipmentsWithValidDates = shipments.filter(s => {
+      const collectionDate = new Date(s.date_of_collection);
+      const arrivalDate = new Date(s.date_of_arrival_destination);
+      return !isNaN(collectionDate.getTime()) && !isNaN(arrivalDate.getTime());
+    });
+
+    if (shipmentsWithValidDates.length === 0) return 7;
+    
+    const totalDays = shipmentsWithValidDates.reduce((sum, s) => {
       const collectionDate = new Date(s.date_of_collection);
       const arrivalDate = new Date(s.date_of_arrival_destination);
       const transitDays = Math.max(1, (arrivalDate.getTime() - collectionDate.getTime()) / (1000 * 60 * 60 * 24));
       return sum + transitDays;
     }, 0);
     
-    return Math.round(totalDays / shipments.length * 10) / 10;
+    return Math.round(totalDays / shipmentsWithValidDates.length * 10) / 10;
   }
 
   private calculateRiskFactor(shipments: any[]): number {
