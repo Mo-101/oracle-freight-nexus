@@ -34,20 +34,25 @@ class UnifiedTTS {
           return audioUrl;
         }
       } catch (error) {
-        console.warn('🎵 ElevenLabs TTS failed, falling back to F5-TTS:', error);
+        console.warn('🎵 ElevenLabs TTS failed, falling back to Kokoro-TTS:', error);
       }
     }
 
-    // Fallback to F5-TTS
+    // Fallback to Kokoro-TTS
     try {
-      console.log('🎵 Trying F5-TTS fallback...');
-      const audioUrl = await advancedTTS.generateSpeech(text, config);
+      console.log('🎵 Trying Kokoro-TTS fallback...');
+      const audioUrl = await advancedTTS.generateSpeech(text, {
+        voice: config.voice || 'default',
+        emotion: config.emotion || 'neutral',
+        useRandomSeed: config.useRandomSeed || false,
+        specificSeed: config.specificSeed
+      });
       if (audioUrl) {
-        console.log('🎵 F5-TTS fallback successful');
+        console.log('🎵 Kokoro-TTS fallback successful');
         return audioUrl;
       }
     } catch (error) {
-      console.warn('🎵 F5-TTS also failed:', error);
+      console.warn('🎵 Kokoro-TTS also failed:', error);
     }
 
     // Final fallback to browser speech synthesis
@@ -77,7 +82,7 @@ class UnifiedTTS {
 
   setProvider(preferElevenLabs: boolean) {
     this.preferElevenLabs = preferElevenLabs;
-    console.log('🎵 TTS Provider changed to:', preferElevenLabs ? 'ElevenLabs' : 'F5-TTS');
+    console.log('🎵 TTS Provider changed to:', preferElevenLabs ? 'ElevenLabs' : 'Kokoro-TTS');
   }
 }
 

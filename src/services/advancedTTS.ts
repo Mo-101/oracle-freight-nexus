@@ -1,3 +1,4 @@
+
 interface TTSConfig {
   voice: string;
   emotion: string;
@@ -8,29 +9,30 @@ interface TTSConfig {
 class AdvancedTTS {
   private baseUrl: string;
 
-  constructor(baseUrl: string = 'https://mrfakename-f5-tts.hf.space') {
+  constructor(baseUrl: string = 'https://hysts-mcp-kokoro-tts.hf.space') {
     this.baseUrl = baseUrl;
   }
 
   async generateSpeech(
     text: string, 
     config: TTSConfig = {
-      voice: 'ballad',
-      emotion: 'mystical and wise',
+      voice: 'default',
+      emotion: 'neutral',
       useRandomSeed: true
     }
   ): Promise<string | null> {
     try {
-      console.log('🎵 F5-TTS: Starting speech generation...');
+      console.log('🎵 Kokoro-TTS: Starting speech generation...');
       console.log('🎵 Text:', text.substring(0, 100) + (text.length > 100 ? '...' : ''));
       console.log('🎵 Config:', config);
       
-      // F5-TTS API format
+      // Kokoro-TTS API format - simplified for basic text-to-speech
       const payload = {
         data: [
           text,           // Text to synthesize
-          null,           // No reference audio (for voice cloning)
-          "F5-TTS_v1"     // Model name
+          "af",           // Voice style (default)
+          1.0,            // Speed
+          1.0             // Volume
         ]
       };
 
@@ -49,14 +51,14 @@ class AdvancedTTS {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('🎵 F5-TTS API Error Response:', errorText);
-        throw new Error(`F5-TTS API error: ${response.status} ${response.statusText}`);
+        console.error('🎵 Kokoro-TTS API Error Response:', errorText);
+        throw new Error(`Kokoro-TTS API error: ${response.status} ${response.statusText}`);
       }
 
       const result = await response.json();
-      console.log('🎵 F5-TTS API Full Response:', result);
+      console.log('🎵 Kokoro-TTS API Full Response:', result);
 
-      // The F5-TTS API returns data in the format: { data: [audioFileUrl] }
+      // The Kokoro-TTS API returns data in the format: { data: [audioFileUrl] }
       if (result.data && result.data[0]) {
         const audioUrl = result.data[0];
         console.log('🎵 Generated audio URL:', audioUrl);
@@ -76,7 +78,7 @@ class AdvancedTTS {
         return null;
       }
     } catch (error) {
-      console.error('🎵 F5-TTS Error:', error);
+      console.error('🎵 Kokoro-TTS Error:', error);
       
       // Try a fallback test with browser speech synthesis
       console.log('🎵 Attempting browser speech synthesis fallback...');
@@ -107,7 +109,7 @@ class AdvancedTTS {
 
   getAvailableVoices(): string[] {
     return [
-      "default", "natural", "expressive"
+      "af", "af_bella", "af_nicole", "af_sarah", "af_sky"
     ];
   }
 }
