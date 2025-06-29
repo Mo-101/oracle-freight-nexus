@@ -266,9 +266,18 @@ export class FreightIntelligenceEngine {
     if (costsWithData.length === 0) return 0;
     
     const totalCost = costsWithData.reduce((sum, s) => {
-      const cost = Number(s.freight_carrier_cost);
-      const weight = Number(s.weight_kg);
-      return sum + (cost / weight);
+      // Safely convert to numbers with proper type checking
+      const costValue = s.freight_carrier_cost;
+      const weightValue = s.weight_kg;
+      
+      const cost = Number(costValue);
+      const weight = Number(weightValue);
+      
+      // Only proceed with arithmetic if both are valid numbers
+      if (!isNaN(cost) && !isNaN(weight) && weight > 0) {
+        return sum + (cost / weight);
+      }
+      return sum;
     }, 0);
     
     return Math.round((totalCost / costsWithData.length) * 100) / 100;
