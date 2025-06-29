@@ -7,6 +7,7 @@ import HolographicCard from '../components/HolographicCard';
 import SymbolicStatusOrb from '../components/SymbolicStatusOrb';
 import QuantumTrainingProgress from '../components/QuantumTrainingProgress';
 import { QuantumOptimizationMatrix } from '../components/QuantumOptimizationMatrix';
+import { RiskHeatmap } from '../components/analytics/RiskHeatmap';
 import { ForwarderPerformance } from '../types/deeptrack';
 
 const Quantum = () => {
@@ -179,13 +180,19 @@ const Quantum = () => {
             <QuantumTrainingProgress />
           </div>
 
-          {/* 3D Quantum Optimization Matrix - Full Width */}
-          <div className="mb-16">
+          {/* Analytics and Visualization Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+            {/* 3D Quantum Optimization Matrix */}
             <HolographicCard className="w-full h-96" animationClass="animate-float">
               <div className="p-6 h-full">
                 <QuantumOptimizationMatrix forwarders={quantumForwarders} />
               </div>
             </HolographicCard>
+
+            {/* Risk Heatmap */}
+            <div className="h-96">
+              <RiskHeatmap />
+            </div>
           </div>
 
           {/* Quantum Decision Orb - Centered */}

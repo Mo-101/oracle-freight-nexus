@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import InputPanel from '../components/InputPanel';
 import OutputPanel from '../components/OutputPanel';
 import Footer from '../components/Footer';
+import { PredictiveTimeline } from '../components/analytics/PredictiveTimeline';
 
 interface FormData {
   origin: string;
@@ -155,6 +155,13 @@ const Index = () => {
               formData={formData}
             />
           </div>
+          
+          {/* Add Predictive Timeline when output is shown */}
+          {showOutput && (
+            <div className="mt-8">
+              <PredictiveTimeline />
+            </div>
+          )}
           
           {showOutput && (
             <div className="mt-6 text-center text-sm text-slate-400">

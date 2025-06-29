@@ -17,6 +17,7 @@ import { TrainingActivityMonitor } from '../components/training/TrainingActivity
 import { LiveMetricsPanel } from '../components/training/LiveMetricsPanel';
 import { SystemStatusSidebar } from '../components/training/SystemStatusSidebar';
 import { OracleOutputPanel } from '../components/oracle/OracleOutputPanel';
+import { QuantumCards } from '../components/enhanced/QuantumCards';
 
 // Types
 interface WeightVector {
@@ -185,6 +186,17 @@ const Training = () => {
             <QuantumPreprocessorCard />
             <QuantumAnalyticsCard />
             <QuantumInterfaceCard />
+          </div>
+
+          {/* Enhanced Quantum Cards Section */}
+          <div className="mb-10">
+            <div className="oracle-card p-6">
+              <h2 className="text-2xl font-bold text-deepcal-light mb-6 flex items-center">
+                <i className="fas fa-microchip mr-3"></i>
+                Advanced Quantum Processing Nodes
+              </h2>
+              <QuantumCards />
+            </div>
           </div>
 
           {/* Oracle Output Panel */}
