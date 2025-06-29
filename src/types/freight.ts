@@ -1,3 +1,4 @@
+
 import { NeutrosophicValue } from "@/utils/neutrosophicEngine";
 
 export interface ForwarderPerformance {
@@ -6,6 +7,40 @@ export interface ForwarderPerformance {
     avgTransitDays: number;
     reliabilityScore: number;
     quoteWinRate: number;
+}
+
+export interface ForwarderIntelligence {
+    name: string;
+    avgCostPerKg: number;
+    avgTransitDays: number;
+    reliabilityScore: number;
+    totalShipments: number;
+    emergencyGrade: string;
+    quoteCoverage: number;
+    specializations: string[];
+}
+
+export interface RouteOption {
+    mode: string;
+    corridor: string;
+    distanceKm: number;
+    transitTimeDays: number;
+    riskFactor: number;
+    confidence: number;
+    emissionScore: number;
+    avgCost: number;
+    historicalShipments: number;
+    successRate: number;
+}
+
+export interface CorridorIntelligence {
+    origin: string;
+    destination: string;
+    totalShipments: number;
+    successRate: number;
+    avgTransitDays: number;
+    predominantMode: string;
+    riskFactors: string[];
 }
 
 export interface SymbolicDecision {
@@ -58,6 +93,7 @@ export interface CanonicalShipment {
   communication_issues: boolean;
   payment_issues: boolean;
   shipment_status: string;
+  delivery_status: string;
   temperature_control_failures: boolean;
   security_breaches: boolean;
   risk_assessment_score: number;

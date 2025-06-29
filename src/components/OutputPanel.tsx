@@ -75,7 +75,7 @@ const OutputPanel: React.FC<OutputPanelProps> = ({ isVisible, rankings, formData
               <div className="text-sm grid grid-cols-2 gap-2">
                 <div>Historical: <span className="font-mono">{routeShipments} shipments</span></div>
                 <div>Success Rate: <span className="font-mono">
-                  {routeShipments > 0 ? Math.round((routeData.filter(r => r.delivery_status === 'Delivered').length / routeShipments) * 100) : 95}%
+                  {routeShipments > 0 ? Math.round((routeData.filter(r => r.shipment_status === 'Delivered').length / routeShipments) * 100) : 95}%
                 </span></div>
                 <div>Avg Weight: <span className="text-emerald-400">
                   {routeShipments > 0 ? Math.round(routeData.reduce((sum, r) => sum + r.weight_kg, 0) / routeShipments) : 'N/A'} kg
@@ -145,7 +145,7 @@ const OutputPanel: React.FC<OutputPanelProps> = ({ isVisible, rankings, formData
                 <p className="mb-3">📜 <span className="font-medium">The Chronicle of Real Shipments:</span> From {totalCanonicalShipments} canonical shipments across Africa, {routeShipments} journeys illuminate the {formData.origin} to {formData.destination} corridor. Time and cost dance with probability.</p>
                 <p className="mb-3">🧠 <span className="font-medium">Historical Wisdom:</span> {topForwarder.name} emerges from real performance data—not speculation, but proven delivery at ${topForwarder.cost}/kg over {topForwarder.transitDays} days. Risk factor {topForwarder.risk}% speaks from actual outcomes.</p>
                 <p className="mb-3">⚖️ <span className="font-medium">The Evidence Weighs:</span> In {routeShipments} route precedents, patterns reveal themselves. Your TOPSIS score of {topForwarder.score} is carved from operational reality, not theoretical models.</p>
-                <p>🔱 <span className="font-medium">Canonical Truth:</span> <em>"The ledger remembers what forecasts forget—{topForwarder.name} has walked this path {routeShipments > 0 ? routeData.filter(r => r.initial_quote_awarded === topForwarder.name || r.final_quote_awarded_freight_forwarder_carrier === topForwarder.name).length : 'multiple'} times before."</em></p>
+                <p>🔱 <span className="font-medium">Canonical Truth:</span> <em>"The ledger remembers what forecasts forget—{topForwarder.name} has walked this path {routeShipments > 0 ? routeData.filter(r => r.carrier === topForwarder.name).length : 'multiple'} times before."</em></p>
               </div>
             </div>
 
