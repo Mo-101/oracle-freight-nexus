@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -9,6 +8,7 @@ import QuantumTrainingProgress from '../components/QuantumTrainingProgress';
 import { QuantumOptimizationMatrix } from '../components/QuantumOptimizationMatrix';
 import { RiskHeatmap } from '../components/analytics/RiskHeatmap';
 import { ForwarderPerformance } from '../types/deeptrack';
+import { OracleGradioEmbed } from '../components/oracle/OracleGradioEmbed';
 
 const Quantum = () => {
   const [formData, setFormData] = useState({
@@ -76,6 +76,11 @@ const Quantum = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Quantum Oracle Engine - New Gradio Integration */}
+          <div className="mb-16">
+            <OracleGradioEmbed className="w-full" />
           </div>
 
           {/* Quantum Cards Grid */}
