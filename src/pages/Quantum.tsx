@@ -6,6 +6,8 @@ import QuantumParticles from '../components/QuantumParticles';
 import HolographicCard from '../components/HolographicCard';
 import SymbolicStatusOrb from '../components/SymbolicStatusOrb';
 import QuantumTrainingProgress from '../components/QuantumTrainingProgress';
+import { QuantumOptimizationMatrix } from '../components/QuantumOptimizationMatrix';
+import { ForwarderPerformance } from '../types/deeptrack';
 
 const Quantum = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +18,16 @@ const Quantum = () => {
     priority: 'Medical Supplies (Q-Priority 9)',
     emergency: false
   });
+
+  // Mock forwarder data with quantum-themed names
+  const quantumForwarders: ForwarderPerformance[] = [
+    { name: 'Quantum Express', avgCostPerKg: 2.4, avgTransitDays: 1.8, reliabilityScore: 96.2, quoteWinRate: 0.89 },
+    { name: 'Neural Logistics', avgCostPerKg: 1.9, avgTransitDays: 2.3, reliabilityScore: 94.8, quoteWinRate: 0.76 },
+    { name: 'Oracle Freight', avgCostPerKg: 2.8, avgTransitDays: 1.2, reliabilityScore: 98.1, quoteWinRate: 0.92 },
+    { name: 'Cosmic Carriers', avgCostPerKg: 1.6, avgTransitDays: 3.1, reliabilityScore: 89.5, quoteWinRate: 0.65 },
+    { name: 'Symbolic Transport', avgCostPerKg: 2.1, avgTransitDays: 2.7, reliabilityScore: 91.2, quoteWinRate: 0.71 },
+    { name: 'Ethereal Express', avgCostPerKg: 3.2, avgTransitDays: 0.9, reliabilityScore: 99.3, quoteWinRate: 0.95 }
+  ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -165,6 +177,15 @@ const Quantum = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
             <SymbolicStatusOrb />
             <QuantumTrainingProgress />
+          </div>
+
+          {/* 3D Quantum Optimization Matrix - Full Width */}
+          <div className="mb-16">
+            <HolographicCard className="w-full h-96" animationClass="animate-float">
+              <div className="p-6 h-full">
+                <QuantumOptimizationMatrix forwarders={quantumForwarders} />
+              </div>
+            </HolographicCard>
           </div>
 
           {/* Quantum Decision Orb - Centered */}
