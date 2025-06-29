@@ -4,6 +4,8 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import QuantumParticles from '../components/QuantumParticles';
 import HolographicCard from '../components/HolographicCard';
+import SymbolicStatusOrb from '../components/SymbolicStatusOrb';
+import QuantumTrainingProgress from '../components/QuantumTrainingProgress';
 
 const Quantum = () => {
   const [formData, setFormData] = useState({
@@ -157,6 +159,12 @@ const Quantum = () => {
                 </div>
               </div>
             </HolographicCard>
+          </div>
+
+          {/* Quantum Consciousness Row - Oracle Mindstream & Training Progress */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+            <SymbolicStatusOrb />
+            <QuantumTrainingProgress />
           </div>
 
           {/* Quantum Decision Orb - Centered */}
