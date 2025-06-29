@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { VoiceChat } from '../components/chat/VoiceChat';
+import { EnhancedChatInterface } from '../components/chat/EnhancedChatInterface';
 import { VoiceTestButton } from '../components/chat/VoiceTestButton';
-import { unifiedTTS } from '../services/unifiedTTS';
+import { newTTSService } from '../services/newTTSService';
 
 interface Message {
   id: string;
@@ -24,17 +24,15 @@ const Chat = () => {
     {
       id: '1',
       type: 'ai',
-      content: 'Greetings! I am DeepCAL, your advanced logistics oracle powered by Neutrosophic AI and Storytelling Analytics. With my enhanced Scenario Engine, Bayesian-Neural Fusion, and Explainable AI, I can provide deep insights into:\n\n• Shipment optimization with uncertainty quantification\n• Multi-criteria decision analysis (AHP-TOPSIS)\n• Predictive risk assessment and alternative scenarios\n• Natural language explanations of complex logistics decisions',
+      content: 'This is DeepCAL. How may I support your intelligence today? I am your advanced logistics oracle powered by Neutrosophic AI and Storytelling Analytics. With my enhanced Scenario Engine, Bayesian-Neural Fusion, and Explainable AI, I can provide deep insights into your freight and supply chain endeavors.',
       timestamp: new Date(),
     }
   ]);
-  const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const sampleResponses: Record<string, { response: string; metrics?: any[]; note?: string }> = {
-    "Fastest route to Mali": {
+    "fastest route to mali": {
       response: "For Mali, our Neutrosophic AHP analysis recommends air freight via Dakar (DHL) as optimal for speed.\n\nKey factors:\n- Transit time: 2 days (95% speed score)\n- Reliability: 85% on-time\n- Bayesian risk assessment: Low (12% disruption chance)\n\nScenario Engine evaluated 7 alternatives, with this route scoring highest in our N-TOPSIS model (0.87 closeness coefficient).",
       metrics: [
         {name: "Speed Score", value: "9.5/10", color: "blue", width: "95%"},
@@ -42,7 +40,7 @@ const Chat = () => {
       ],
       note: "Alternative analysis: Sea+road scored 0.72 with 70% cost savings but higher uncertainty (±2d)"
     },
-    "Cheapest shipping option": {
+    "cheapest shipping option": {
       response: "The most cost-effective option is sea freight to Mombasa with Maersk, then road transport. Total cost estimate: $1,850 for 2 tons. Transit time: 18 days with 75% reliability.",
       metrics: [
         {name: "Cost Score", value: "9.8/10", color: "green", width: "98%"},
@@ -50,30 +48,25 @@ const Chat = () => {
       ],
       note: "Best for non-urgent, high-volume shipments"
     },
-    "Compare Dakar vs Nairobi": {
-      response: "Comparison for East Africa shipments:\n\nDakar Hub:\n- Avg transit: 5 days\n- Cost: $2,200\n- Reliability: 82%\n\nNairobi Hub:\n- Avg transit: 3 days\n- Cost: $2,500\n- Reliability: 88%\n\nNairobi is faster but 14% more expensive.",
-      note: "Consider Dakar for West Africa destinations"
+    "hello": {
+      response: "Hello! I'm DeepCAL, your intelligence augmentation assistant specialized in African logistics. What freight challenge can I help you solve today?"
     },
-    "Current risks via Mombasa": {
-      response: "Mombasa port currently has moderate risk (Level 2/5):\n- Weather delays: 15% chance\n- Customs backlog: 2-day average\n- Security: Normal\n\nRecommendation: Add 2-day buffer for shipments this week.",
-      metrics: [
-        {name: "Risk Score", value: "4.2/10", color: "orange", width: "42%"}
-      ],
-      note: "Situation monitored daily - check for updates"
+    "hi": {
+      response: "Greetings! I'm here to assist with your logistics intelligence needs. How may I enhance your supply chain decisions today?"
     }
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Play welcome message on component mount
+    if (voiceEnabled && messages.length > 0) {
+      const welcomeMessage = messages[0].content;
+      setTimeout(() => {
+        handleSpeakResponse(welcomeMessage);
+      }, 1000);
+    }
+  }, []);
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
-
+  const handleSendMessage = async (inputValue: string) => {
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
@@ -82,14 +75,14 @@ const Chat = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
     setIsTyping(true);
 
     // Simulate AI response delay
     setTimeout(async () => {
-      const responseData = sampleResponses[inputValue] || {
-        response: "I understand you're asking about logistics in Africa. As your oracle, I can analyze routes, compare options, assess risks, and optimize shipments. Could you please clarify your specific need?",
-        note: "The more details you provide, the better I can assist"
+      const lowerInput = inputValue.toLowerCase();
+      const responseData = sampleResponses[lowerInput] || {
+        response: "That's an interesting logistics challenge. Let me analyze that for you using my DeepCAL intelligence engine. Based on my processing of 105 canonical shipments and neutrosophic analysis, I recommend exploring this topic further through our advanced freight optimization algorithms. Would you like me to suggest specific optimization strategies?",
+        note: "DeepCAL processes real shipment data to provide actionable insights"
       };
 
       const aiMessage: Message = {
@@ -104,67 +97,42 @@ const Chat = () => {
       setMessages(prev => [...prev, aiMessage]);
       setIsTyping(false);
 
-      // Auto-speak AI responses with unified TTS
+      // Auto-speak AI responses
       if (voiceEnabled) {
-        try {
-          const audioUrl = await unifiedTTS.generateSpeech(responseData.response, {
-            voice: 'af_sarah',
-            emotion: 'conversational, wise and helpful',
-            useRandomSeed: true
-          });
-          
-          if (audioUrl && audioUrl !== 'browser-speech') {
-            const audio = new Audio(audioUrl);
-            audio.play().then(() => {
-              audio.onended = () => URL.revokeObjectURL(audioUrl); // Clean up
-            }).catch(console.error);
-          }
-        } catch (error) {
-          console.error('Auto-voice failed:', error);
-        }
+        setTimeout(() => {
+          handleSpeakResponse(responseData.response);
+        }, 500);
       }
     }, 1500);
   };
 
   const handleSpeakResponse = async (text: string) => {
     try {
-      const audioUrl = await unifiedTTS.generateSpeech(text, {
-        voice: 'af_sarah',
-        emotion: 'mystical, wise and conversational',
+      const audioUrl = await newTTSService.generateSpeech(text, {
+        voice: 'alloy',
+        emotion: 'conversational, wise and helpful African logistics expert',
         useRandomSeed: true
       });
       
-      if (audioUrl && audioUrl !== 'browser-speech') {
+      if (audioUrl) {
         const audio = new Audio(audioUrl);
         audio.play().then(() => {
-          audio.onended = () => URL.revokeObjectURL(audioUrl); // Clean up
-        });
+          audio.onended = () => URL.revokeObjectURL(audioUrl);
+        }).catch(console.error);
       }
     } catch (error) {
       console.error('Voice synthesis failed:', error);
     }
   };
 
-  const handleQuickPrompt = (prompt: string) => {
-    setInputValue(prompt);
-    setTimeout(() => handleSendMessage(), 100);
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-deepcal-dark">
       <Header />
       
       <main className="flex-1 py-8">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Chat Interface */}
+        <div className="container mx-auto px-4 h-full">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
+            {/* Enhanced Chat Interface */}
             <div className="lg:col-span-2">
               <div className="oracle-card overflow-hidden flex flex-col h-[700px]">
                 {/* Chat Header */}
@@ -177,13 +145,12 @@ const Chat = () => {
                       <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border border-white"></div>
                     </div>
                     <div>
-                      <h2 className="font-bold text-white">Oracle</h2>
-                      <p className="text-xs text-purple-100">DeepTalk Conversational AI (Premium Voice)</p>
+                      <h2 className="font-bold text-white">DeepTalk Oracle</h2>
+                      <p className="text-xs text-purple-100">Enhanced Voice Intelligence System</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <VoiceTestButton />
-                    <VoiceChat onSpeakResponse={handleSpeakResponse} isEnabled={voiceEnabled} />
                     <button 
                       onClick={() => setVoiceEnabled(!voiceEnabled)}
                       className={`p-2 rounded-full transition ${
@@ -193,126 +160,14 @@ const Chat = () => {
                     >
                       <i className={`fas ${voiceEnabled ? 'fa-volume-up' : 'fa-volume-mute'} text-white`}></i>
                     </button>
-                    <button className="bg-white bg-opacity-20 p-2 rounded-full hover:bg-opacity-30 transition">
-                      <i className="fas fa-ellipsis-v text-white"></i>
-                    </button>
                   </div>
                 </div>
                 
-                {/* Messages */}
-                <div className="flex-1 p-4 overflow-y-auto bg-slate-800/20">
-                  {messages.map((message) => (
-                    <div key={message.id} className={`mb-4 flex ${message.type === 'user' ? 'justify-end' : ''}`}>
-                      <div className={`max-w-xs md:max-w-md lg:max-w-lg ${
-                        message.type === 'user' 
-                          ? 'bg-deepcal-purple text-white rounded-l-xl rounded-br-xl' 
-                          : 'bg-slate-700/50 text-slate-100 rounded-r-xl rounded-bl-xl'
-                      } shadow p-4`}>
-                        <div className={`flex items-center mb-2 ${message.type === 'user' ? 'justify-end' : ''}`}>
-                          {message.type === 'ai' && (
-                            <div className="w-6 h-6 bg-deepcal-purple rounded-full flex items-center justify-center mr-2">
-                              <i className="fas fa-infinity text-white text-xs"></i>
-                            </div>
-                          )}
-                          <span className="font-bold text-sm">{message.type === 'user' ? 'You' : 'Oracle'}</span>
-                          {message.type === 'user' && (
-                            <div className="w-6 h-6 bg-slate-600 rounded-full ml-2"></div>
-                          )}
-                        </div>
-                        <p className="whitespace-pre-line">{message.content}</p>
-                        
-                        {/* Voice button for AI messages */}
-                        {message.type === 'ai' && voiceEnabled && (
-                          <button
-                            onClick={() => handleSpeakResponse(message.content)}
-                            className="mt-2 text-xs bg-deepcal-purple/20 hover:bg-deepcal-purple/30 px-2 py-1 rounded transition"
-                          >
-                            <i className="fas fa-play mr-1"></i> Speak (AI Voice)
-                          </button>
-                        )}
-                        
-                        {/* Metrics */}
-                        {message.metrics && message.metrics.map((metric, index) => (
-                          <div key={index} className="mt-3 bg-slate-600/30 p-3 rounded-lg">
-                            <div className="flex justify-between items-center mb-1">
-                              <span className="text-sm font-medium">{metric.name}</span>
-                              <span className="text-sm font-bold">{metric.value}</span>
-                            </div>
-                            <div className="w-full bg-slate-700 rounded-full h-2">
-                              <div className={`bg-${metric.color}-500 h-2 rounded-full`} style={{width: metric.width}}></div>
-                            </div>
-                          </div>
-                        ))}
-                        
-                        {/* Note */}
-                        {message.note && (
-                          <div className="mt-2 text-sm text-slate-300">
-                            <i className="fas fa-info-circle mr-1 text-deepcal-light"></i> {message.note}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {/* Typing Indicator */}
-                  {isTyping && (
-                    <div className="mb-4 flex">
-                      <div className="max-w-xs bg-slate-700/50 rounded-r-xl rounded-bl-xl shadow p-4">
-                        <div className="flex items-center mb-2">
-                          <div className="w-6 h-6 bg-deepcal-purple rounded-full flex items-center justify-center mr-2">
-                            <i className="fas fa-infinity text-white text-xs"></i>
-                          </div>
-                          <span className="font-bold text-sm text-slate-100">Oracle</span>
-                        </div>
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-deepcal-light rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-deepcal-light rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                          <div className="w-2 h-2 bg-deepcal-light rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-                
-                {/* Input Area */}
-                <div className="border-t border-slate-700 p-4 bg-slate-800/30">
-                  <div className="flex items-center space-x-2">
-                    <button className="p-2 text-slate-400 hover:text-slate-200">
-                      <i className="fas fa-paperclip"></i>
-                    </button>
-                    <input
-                      type="text"
-                      placeholder="Ask the oracle about your shipment..."
-                      className="flex-1 bg-slate-700 border border-slate-600 rounded-full py-2 px-4 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-deepcal-light focus:border-transparent"
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                    />
-                    <button 
-                      onClick={handleSendMessage}
-                      className="p-2 bg-deepcal-purple text-white rounded-full hover:bg-deepcal-light transition"
-                    >
-                      <i className="fas fa-paper-plane"></i>
-                    </button>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {[
-                      { text: "Fastest", prompt: "Fastest route to Mali", icon: "fas fa-bolt" },
-                      { text: "Cheapest", prompt: "Cheapest shipping option", icon: "fas fa-coins" },
-                      { text: "Compare", prompt: "Compare Dakar vs Nairobi", icon: "fas fa-balance-scale" },
-                      { text: "Risks", prompt: "Current risks via Mombasa", icon: "fas fa-exclamation-triangle" }
-                    ].map((item, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleQuickPrompt(item.prompt)}
-                        className="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1 rounded-full transition flex items-center"
-                      >
-                        <i className={`${item.icon} mr-1 text-deepcal-light`}></i> {item.text}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <EnhancedChatInterface 
+                  onMessageSent={handleSendMessage}
+                  messages={messages}
+                  isTyping={isTyping}
+                />
               </div>
             </div>
             
@@ -420,6 +275,24 @@ const Chat = () => {
       </main>
       
       <Footer />
+      
+      <style jsx>{`
+        @keyframes pulse {
+          0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+          70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+        .pulse-animation {
+          animation: pulse 1.5s infinite;
+        }
+        .message-fade-in {
+          animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 };
