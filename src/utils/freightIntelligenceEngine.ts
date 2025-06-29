@@ -244,8 +244,22 @@ export class FreightIntelligenceEngine {
 
   private calculateAvgCost(shipments: any[]): number {
     if (shipments.length === 0) return 0;
-    const totalCost = shipments.reduce((sum, s) => sum + (s.freight_carrier_cost / s.weight_kg), 0);
-    return Math.round((totalCost / shipments.length) * 100) / 100;
+    
+    const costsWithData = shipments.filter(s => {
+      const cost = Number(s.freight_carrier_cost);
+      const weight = Number(s.weight_kg);
+      return !isNaN(cost) && !isNaN(weight) && cost > 0 && weight > 0;
+    });
+
+    if (costsWithData.length === 0) return 0;
+    
+    const totalCost = costsWithData.reduce((sum, s) => {
+      const cost = Number(s.freight_carrier_cost);
+      const weight = Number(s.weight_kg);
+      return sum + (cost / weight);
+    }, 0);
+    
+    return Math.round((totalCost / costsWithData.length) * 100) / 100;
   }
 
   private calculateSeasonalVariation(shipments: any[]): number {
@@ -296,18 +310,19 @@ export class FreightIntelligenceEngine {
   private calculateQuoteCoverage(forwarderName: string): number {
     const totalQuoteRequests = canonicalShipmentData.length;
     const forwarderQuotes = canonicalShipmentData.filter(s => {
-      const quotesProvided = [
-        s.kuehne_nagel > 0,
-        s.scan_global_logistics > 0,
-        s.dhl_express > 0,
-        s.dhl_global > 0,
-        s.siginon > 0,
-        s.agl > 0,
-        s.freight_in_time > 0,
-        s.bwosi > 0
-      ].filter(Boolean).length;
+      // Convert forwarder quotes to numbers and check if they exist
+      const quotes = [
+        Number(s.kuehne_nagel) || 0,
+        Number(s.scan_global_logistics) || 0,
+        Number(s.dhl_express) || 0,
+        Number(s.dhl_global) || 0,
+        Number(s.siginon) || 0,
+        Number(s.agl) || 0,
+        Number(s.freight_in_time) || 0,
+        Number(s.bwosi) || 0
+      ];
       
-      return quotesProvided > 0;
+      return quotes.some(quote => quote > 0);
     }).length;
     
     return Math.round((forwarderQuotes / totalQuoteRequests) * 100);
