@@ -1,8 +1,20 @@
-# Welcome to your Lovable project
+
+# DeepCAL++ - The First Symbolic Logistical Intelligence Engine
 
 ## Project info
 
 **URL**: https://lovable.dev/projects/38ce46e2-b124-49fe-bba5-a5a3b8ccee2d
+
+## About DeepCAL++
+
+DeepCAL++ is an advanced symbolic logistical intelligence engine designed to revolutionize supply chain management and freight forwarding through AI-powered decision making.
+
+### Development Phases
+
+- **PHASE I** – Simulated Symbolic Engine ✅
+- **PHASE II** – Visual Dashboard (In Development) 🔄
+- **PHASE III** – DeepTalk Voice (Q3 2025) 📅
+- **PHASE IV** – Live Shipment Integration (Q4 2025) 📅
 
 ## How can I edit this code?
 
@@ -59,6 +71,19 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- DeepSeek AI Integration
+- Advanced TTS (Text-to-Speech)
+- Neutrosophic Logic Engine
+- TOPSIS Decision Making Algorithm
+
+## Features
+
+- **Symbolic Logic Engine**: Advanced decision-making using neutrosophic logic
+- **AI Oracle Integration**: Powered by DeepSeek for intelligent logistics analysis  
+- **Voice Synthesis**: Advanced TTS capabilities for immersive user experience
+- **Real-time Analytics**: Interactive dashboards and predictive timelines
+- **3D Visualizations**: Interactive globe and quantum particle effects
+- **Multi-modal Interface**: Chat, voice, and visual interaction modes
 
 ## How can I deploy this project?
 
@@ -71,3 +96,7 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+---
+
+© 2025 DeepCAL++ Technologies • The First Symbolic Logistical Intelligence Engine • 🔱
