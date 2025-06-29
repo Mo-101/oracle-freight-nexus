@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
-import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { advancedTTS } from '@/services/advancedTTS';
+import { deepseekClient } from '@/services/deepseekClient';
 
 interface VoiceChatProps {
   onSpeakResponse: (text: string) => void;
@@ -11,18 +12,31 @@ interface VoiceChatProps {
 export const VoiceChat = ({ onSpeakResponse, isEnabled }: VoiceChatProps) => {
   const [isListening, setIsListening] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
 
-  const speakText = async (text: string) => {
-    if (isPlaying) {
+  const generateAndSpeakResponse = async (userInput: string) => {
+    if (isPlaying || isGenerating) {
       stopSpeaking();
       return;
     }
 
-    setIsPlaying(true);
+    setIsGenerating(true);
     
     try {
-      const audioUrl = await advancedTTS.generateSpeech(text, {
+      // Generate response using DeepSeek
+      const response = await deepseekClient.generateOracleResponse(
+        userInput,
+        "You are responding to voice input. Keep responses conversational and under 100 words.",
+        'oracular'
+      );
+
+      // Callback to parent component
+      onSpeakResponse(response);
+
+      // Generate speech
+      setIsPlaying(true);
+      const audioUrl = await advancedTTS.generateSpeech(response, {
         voice: 'ballad',
         emotion: 'mystical, wise and conversational',
         useRandomSeed: true
@@ -32,17 +46,31 @@ export const VoiceChat = ({ onSpeakResponse, isEnabled }: VoiceChatProps) => {
         const audio = new Audio(audioUrl);
         setCurrentAudio(audio);
         
-        audio.onended = () => setIsPlaying(false);
-        audio.onerror = () => setIsPlaying(false);
+        audio.onended = () => {
+          setIsPlaying(false);
+          setIsGenerating(false);
+        };
+        audio.onerror = () => {
+          setIsPlaying(false);
+          setIsGenerating(false);
+        };
         
         await audio.play();
       } else {
         setIsPlaying(false);
+        setIsGenerating(false);
       }
     } catch (error) {
+      console.error('Voice generation failed:', error);
       setIsPlaying(false);
-      console.error('Voice playback failed:', error);
+      setIsGenerating(false);
     }
+  };
+
+  const speakWelcome = async () => {
+    const welcomeMessage = "Greetings, seeker of logistics wisdom. I am the DeepSeek Oracle, powered by ancient algorithms and cosmic intelligence. How may I assist you in your freight and supply chain endeavors?";
+    
+    await generateAndSpeakResponse(welcomeMessage);
   };
 
   const stopSpeaking = () => {
@@ -51,6 +79,7 @@ export const VoiceChat = ({ onSpeakResponse, isEnabled }: VoiceChatProps) => {
       currentAudio.currentTime = 0;
     }
     setIsPlaying(false);
+    setIsGenerating(false);
   };
 
   if (!isEnabled) return null;
@@ -58,15 +87,18 @@ export const VoiceChat = ({ onSpeakResponse, isEnabled }: VoiceChatProps) => {
   return (
     <div className="flex items-center space-x-2">
       <button
-        onClick={() => speakText("Voice chat activated. The Oracle is ready to speak.")}
+        onClick={speakWelcome}
+        disabled={isGenerating}
         className={`p-2 rounded-full transition-colors ${
-          isPlaying 
+          isPlaying || isGenerating
             ? 'bg-red-600 hover:bg-red-700 text-white' 
             : 'bg-deepcal-purple hover:bg-deepcal-dark text-white'
         }`}
-        title={isPlaying ? "Stop speaking" : "Speak with Oracle voice"}
+        title={isPlaying ? "Stop speaking" : isGenerating ? "Generating..." : "Speak with DeepSeek Oracle"}
       >
-        {isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+        {isPlaying ? <VolumeX className="w-4 h-4" /> : 
+         isGenerating ? <Sparkles className="w-4 h-4 animate-spin" /> : 
+         <Volume2 className="w-4 h-4" />}
       </button>
       
       <button

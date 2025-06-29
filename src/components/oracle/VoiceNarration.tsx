@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
-import { Volume2, VolumeX } from 'lucide-react';
+import { Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { TOPSISResult } from '@/utils/neutrosophicEngine';
 import { advancedTTS } from '@/services/advancedTTS';
+import { deepseekClient } from '@/services/deepseekClient';
 
 interface VoiceNarrationProps {
   results: TOPSISResult[];
@@ -20,36 +21,63 @@ export const VoiceNarration = ({
   destination = "Lusaka" 
 }: VoiceNarrationProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [currentMode, setCurrentMode] = useState<'oracular' | 'humorous' | 'corporate'>('oracular');
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const [generatedNarrative, setGeneratedNarrative] = useState<string>('');
 
   const topForwarder = results[0];
   
-  const narratives = {
-    oracular: [
-      `🔮 Behold, mortal logistics coordinator! The cosmic freight matrix has spoken through the sacred algorithms of DeepCAL++.`,
-      `In the realm where ${emergency} casts shadows over ${destination}, your ${cargoType} cargo carries the weight of destiny.`,
-      `${topForwarder?.forwarder} emerges from the calculations not as mere carrier, but as the chosen vessel of probability.`,
-      `With a TOPSIS score of ${topForwarder?.normalizedScore.toFixed(3)}, they are neither cheapest nor fastest, but the golden mean of wisdom.`,
-      `The neutrosophic truth reveals: ${(topForwarder?.neutrosophic.truth * 100).toFixed(1)}% certainty in this path.`,
-      `May your cargo reach its destination blessed by the algorithms of ancient logistics wisdom.`
-    ],
-    humorous: [
-      `🎭 Alright, let's talk freight like adults who've had too much coffee and not enough sleep.`,
-      `Your ${cargoType} needs to get from ${origin} to ${destination}, and frankly, it's more urgent than my last Tinder date.`,
-      `${topForwarder?.forwarder} wins this beauty contest with a TOPSIS score that would make a statistician weep tears of joy.`,
-      `Sure, you could go with the cheapest option and pray to the shipping gods, or you could trust math. I recommend math.`,
-      `Fun fact: The probability of this working perfectly is ${(topForwarder?.neutrosophic.truth * 100).toFixed(1)}%. Better odds than most Netflix shows being good!`,
-      `Now ship it before I have to explain why your cargo is sitting in customs like a confused tourist.`
-    ],
-    corporate: [
-      `📊 Executive summary: Comprehensive analysis of freight forwarding options has been completed using advanced multicriteria decision analysis.`,
-      `${topForwarder?.forwarder} demonstrates optimal performance across weighted criteria with a normalized score of ${topForwarder?.normalizedScore.toFixed(3)}.`,
-      `Risk mitigation factors have been incorporated considering current ${emergency} situation affecting the ${origin}-${destination} corridor.`,
-      `Neutrosophic confidence interval indicates ${(topForwarder?.neutrosophic.truth * 100).toFixed(1)}% reliability with ${(topForwarder?.neutrosophic.indeterminacy * 100).toFixed(1)}% uncertainty margin.`,
-      `This recommendation aligns with corporate risk management protocols and emergency response requirements.`,
-      `Proceed with selected freight partner for optimal supply chain efficiency.`
-    ]
+  const generateAINarrative = async () => {
+    setIsGenerating(true);
+    try {
+      const context = `
+        Analysis Results:
+        - Top Forwarder: ${topForwarder?.forwarder}
+        - TOPSIS Score: ${topForwarder?.normalizedScore.toFixed(3)}
+        - Neutrosophic Truth: ${(topForwarder?.neutrosophic.truth * 100).toFixed(1)}%
+        - Emergency: ${emergency}
+        - Cargo: ${cargoType}
+        - Route: ${origin} to ${destination}
+      `;
+
+      const prompt = `Generate a narrative analysis of these freight forwarding results. 
+      Explain why ${topForwarder?.forwarder} is the optimal choice for shipping ${cargoType} 
+      from ${origin} to ${destination} during the ${emergency} situation. 
+      Include insights about the TOPSIS score and neutrosophic analysis.
+      Keep it engaging and informative, around 200-300 words.`;
+
+      const narrative = await deepseekClient.generateOracleResponse(prompt, context, currentMode);
+      setGeneratedNarrative(narrative);
+      return narrative;
+    } catch (error) {
+      console.error('Failed to generate AI narrative:', error);
+      return getFallbackNarrative();
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const getFallbackNarrative = () => {
+    const narratives = {
+      oracular: `🔮 Behold, the cosmic freight matrix has spoken through DeepSeek's ancient algorithms! 
+      In the realm where ${emergency} casts shadows over ${destination}, your ${cargoType} cargo carries the weight of destiny. 
+      ${topForwarder?.forwarder} emerges not as mere carrier, but as the chosen vessel with TOPSIS score ${topForwarder?.normalizedScore.toFixed(3)}. 
+      The neutrosophic truth reveals ${(topForwarder?.neutrosophic.truth * 100).toFixed(1)}% certainty in this path. 
+      May your cargo reach its destination blessed by the algorithms of logistics wisdom.`,
+      
+      humorous: `🎭 Alright, let's talk freight like adults who've had too much coffee. 
+      Your ${cargoType} needs to get from ${origin} to ${destination}, and it's more urgent than a deadline. 
+      ${topForwarder?.forwarder} wins this beauty contest with a TOPSIS score that would make statisticians weep tears of joy. 
+      The probability of success is ${(topForwarder?.neutrosophic.truth * 100).toFixed(1)}% - better odds than most Netflix shows being good!`,
+      
+      corporate: `📊 Comprehensive analysis indicates ${topForwarder?.forwarder} demonstrates optimal performance 
+      with normalized score ${topForwarder?.normalizedScore.toFixed(3)}. Risk mitigation factors incorporate 
+      current ${emergency} situation. Neutrosophic confidence interval: ${(topForwarder?.neutrosophic.truth * 100).toFixed(1)}% reliability. 
+      Recommendation aligns with corporate risk management protocols for ${cargoType} transport.`
+    };
+    
+    return narratives[currentMode];
   };
 
   const speakNarrative = async () => {
@@ -58,7 +86,11 @@ export const VoiceNarration = ({
       return;
     }
 
-    const text = narratives[currentMode].join(' ');
+    let text = generatedNarrative;
+    if (!text) {
+      text = await generateAINarrative();
+    }
+
     const emotion = advancedTTS.getEmotionForPersonality(currentMode);
     
     setIsPlaying(true);
@@ -103,12 +135,16 @@ export const VoiceNarration = ({
     <div className="oracle-card p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-bold text-deepcal-light flex items-center">
-          🎙️ Oracle Narration Engine
+          🎙️ DeepSeek Oracle Narration
+          <Sparkles className="ml-2 w-5 h-5 text-deepcal-light" />
         </h3>
         <div className="flex items-center space-x-2">
           <select 
             value={currentMode}
-            onChange={(e) => setCurrentMode(e.target.value as any)}
+            onChange={(e) => {
+              setCurrentMode(e.target.value as any);
+              setGeneratedNarrative(''); // Clear generated narrative when mode changes
+            }}
             className="bg-slate-700 text-white px-3 py-1 rounded text-sm border border-slate-600"
           >
             <option value="oracular">🔮 Mystical Oracle</option>
@@ -116,7 +152,15 @@ export const VoiceNarration = ({
             <option value="corporate">📊 Corporate Professional</option>
           </select>
           <button
+            onClick={generateAINarrative}
+            disabled={isGenerating}
+            className="px-3 py-1 bg-deepcal-purple hover:bg-deepcal-dark text-white rounded text-sm disabled:opacity-50"
+          >
+            {isGenerating ? 'Generating...' : 'AI Generate'}
+          </button>
+          <button
             onClick={speakNarrative}
+            disabled={isGenerating}
             className={`p-2 rounded-full transition-colors ${
               isPlaying 
                 ? 'bg-red-600 hover:bg-red-700 text-white' 
@@ -129,17 +173,21 @@ export const VoiceNarration = ({
       </div>
 
       <div className="space-y-3 text-sm text-slate-300">
-        {narratives[currentMode].map((line, index) => (
-          <p key={index} className="leading-relaxed">
-            {line}
-          </p>
-        ))}
+        {generatedNarrative ? (
+          <div className="bg-slate-800/50 p-4 rounded border border-slate-600/50">
+            <p className="leading-relaxed whitespace-pre-wrap">{generatedNarrative}</p>
+          </div>
+        ) : (
+          <div className="text-slate-400 italic">
+            Click "AI Generate" to create a personalized narrative analysis using DeepSeek AI
+          </div>
+        )}
       </div>
 
-      {isPlaying && (
+      {(isPlaying || isGenerating) && (
         <div className="mt-4 flex items-center text-xs text-deepcal-light">
           <div className="w-2 h-2 bg-deepcal-light rounded-full mr-2 animate-pulse"></div>
-          Oracle transmission in progress... (Ballad Voice)
+          {isGenerating ? 'DeepSeek generating narrative...' : 'Oracle transmission in progress... (Ballad Voice)'}
         </div>
       )}
     </div>
