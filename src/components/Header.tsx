@@ -38,12 +38,6 @@ const Header = () => {
                 <i className="fas fa-atom mr-2"></i> Quantum View
               </Link>
               <Link 
-                to="/globe" 
-                className="px-4 py-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition text-white"
-              >
-                <i className="fas fa-globe mr-2"></i> 3D Globe
-              </Link>
-              <Link 
                 to="/map" 
                 className="px-4 py-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition text-white"
               >

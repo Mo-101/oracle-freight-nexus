@@ -5,6 +5,9 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Interactive3DGlobe } from '../components/Interactive3DGlobe';
+import { PredictiveTimeline } from '../components/analytics/PredictiveTimeline';
+import { RiskHeatmap } from '../components/analytics/RiskHeatmap';
 
 // Set Mapbox access token
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2x4czNxbjU2MWM2eTJqc2gwNGIwaWhkMSJ9.jSwZdyaPa1dOHepNU5P71g';
@@ -43,6 +46,7 @@ const Map = () => {
   const [activeTab, setActiveTab] = useState('tracking');
   const [weatherData, setWeatherData] = useState<WeatherData[]>([]);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
 
   // Sample shipment locations based on the data
   const shipmentLocations: ShipmentLocation[] = [
@@ -74,7 +78,7 @@ const Map = () => {
   };
 
   useEffect(() => {
-    if (!mapContainer.current) return;
+    if (!mapContainer.current || viewMode !== '2d') return;
 
     // Initialize map
     map.current = new mapboxgl.Map({
@@ -175,7 +179,7 @@ const Map = () => {
     return () => {
       map.current?.remove();
     };
-  }, []);
+  }, [viewMode]);
 
   // Load weather data for all locations
   useEffect(() => {
@@ -192,11 +196,18 @@ const Map = () => {
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      {/* Full Screen Map */}
-      <div 
-        ref={mapContainer} 
-        className="absolute inset-0 w-full h-full"
-      />
+      {/* Map or Globe View */}
+      {viewMode === '2d' ? (
+        <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
+      ) : (
+        <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="w-full max-w-6xl h-96">
+              <Interactive3DGlobe />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Floating Header */}
       <div className="absolute top-4 left-4 right-4 z-10">
@@ -204,30 +215,63 @@ const Map = () => {
           <CardHeader className="pb-3">
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle className="text-deepcal-light text-xl">Global Shipment Tracking</CardTitle>
+                <CardTitle className="text-deepcal-light text-xl">
+                  {viewMode === '2d' ? 'Global Shipment Tracking' : 'Quantum Shipment Consciousness Field'}
+                </CardTitle>
                 <p className="text-slate-300 text-sm mt-1">
-                  Real-time visualization of emergency logistics operations
+                  {viewMode === '2d' 
+                    ? 'Real-time visualization of emergency logistics operations'
+                    : '3D visualization of quantum supply chain consciousness'
+                  }
                 </p>
               </div>
               <div className="flex space-x-2">
                 <Button 
-                  variant="outline" 
+                  variant={viewMode === '2d' ? 'default' : 'outline'}
                   size="sm"
-                  className="bg-deepcal-purple/20 border-deepcal-purple/50 text-deepcal-light hover:bg-deepcal-purple/30"
-                  onClick={() => map.current?.flyTo({ center: [36.990054, 1.2404475], zoom: 6 })}
+                  className={viewMode === '2d' 
+                    ? "bg-deepcal-purple text-white" 
+                    : "bg-deepcal-purple/20 border-deepcal-purple/50 text-deepcal-light hover:bg-deepcal-purple/30"
+                  }
+                  onClick={() => setViewMode('2d')}
                 >
-                  <i className="fas fa-home mr-2"></i>
-                  Nairobi Hub
+                  <i className="fas fa-map mr-2"></i>
+                  2D Map
                 </Button>
                 <Button 
-                  variant="outline" 
+                  variant={viewMode === '3d' ? 'default' : 'outline'}
                   size="sm"
-                  className="bg-deepcal-purple/20 border-deepcal-purple/50 text-deepcal-light hover:bg-deepcal-purple/30"
-                  onClick={() => map.current?.flyTo({ center: [30, 0], zoom: 3 })}
+                  className={viewMode === '3d' 
+                    ? "bg-deepcal-purple text-white" 
+                    : "bg-deepcal-purple/20 border-deepcal-purple/50 text-deepcal-light hover:bg-deepcal-purple/30"
+                  }
+                  onClick={() => setViewMode('3d')}
                 >
                   <i className="fas fa-globe mr-2"></i>
-                  Global View
+                  3D Globe
                 </Button>
+                {viewMode === '2d' && (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="bg-deepcal-purple/20 border-deepcal-purple/50 text-deepcal-light hover:bg-deepcal-purple/30"
+                      onClick={() => map.current?.flyTo({ center: [36.990054, 1.2404475], zoom: 6 })}
+                    >
+                      <i className="fas fa-home mr-2"></i>
+                      Nairobi Hub
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="bg-deepcal-purple/20 border-deepcal-purple/50 text-deepcal-light hover:bg-deepcal-purple/30"
+                      onClick={() => map.current?.flyTo({ center: [30, 0], zoom: 3 })}
+                    >
+                      <i className="fas fa-globe mr-2"></i>
+                      Global View
+                    </Button>
+                  </>
+                )}
                 <Button 
                   variant="outline" 
                   size="sm"
@@ -262,9 +306,11 @@ const Map = () => {
             </CardHeader>
             <CardContent>
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-2 bg-deepcal-purple/20">
-                  <TabsTrigger value="tracking" className="text-slate-300 data-[state=active]:bg-deepcal-purple data-[state=active]:text-white">Tracking</TabsTrigger>
-                  <TabsTrigger value="weather" className="text-slate-300 data-[state=active]:bg-deepcal-purple data-[state=active]:text-white">Weather</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-4 bg-deepcal-purple/20">
+                  <TabsTrigger value="tracking" className="text-slate-300 data-[state=active]:bg-deepcal-purple data-[state=active]:text-white text-xs">Track</TabsTrigger>
+                  <TabsTrigger value="weather" className="text-slate-300 data-[state=active]:bg-deepcal-purple data-[state=active]:text-white text-xs">Weather</TabsTrigger>
+                  <TabsTrigger value="timeline" className="text-slate-300 data-[state=active]:bg-deepcal-purple data-[state=active]:text-white text-xs">Timeline</TabsTrigger>
+                  <TabsTrigger value="risk" className="text-slate-300 data-[state=active]:bg-deepcal-purple data-[state=active]:text-white text-xs">Risk</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="tracking" className="space-y-4 mt-4">
@@ -317,6 +363,18 @@ const Map = () => {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="timeline" className="mt-4">
+                  <div className="scale-90 origin-top">
+                    <PredictiveTimeline />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="risk" className="mt-4">
+                  <div className="scale-90 origin-top">
+                    <RiskHeatmap />
                   </div>
                 </TabsContent>
               </Tabs>
@@ -383,18 +441,47 @@ const Map = () => {
                 </div>
               )}
 
-              <Button 
-                className="w-full bg-deepcal-purple hover:bg-deepcal-dark text-white"
-                onClick={() => {
-                  map.current?.flyTo({
-                    center: selectedLocation.coordinates,
-                    zoom: 8
-                  });
-                }}
-              >
-                <i className="fas fa-crosshairs mr-2"></i>
-                Center on Location
-              </Button>
+              {viewMode === '2d' && (
+                <Button 
+                  className="w-full bg-deepcal-purple hover:bg-deepcal-dark text-white"
+                  onClick={() => {
+                    map.current?.flyTo({
+                      center: selectedLocation.coordinates,
+                      zoom: 8
+                    });
+                  }}
+                >
+                  <i className="fas fa-crosshairs mr-2"></i>
+                  Center on Location
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Legend for 3D mode */}
+      {viewMode === '3d' && (
+        <div className="absolute bottom-4 right-4 w-80 z-10">
+          <Card className="oracle-card backdrop-blur-sm bg-black/60 border-deepcal-purple/30">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-deepcal-light text-lg">Quantum Field Legend</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-4 text-sm">
+                <div className="flex items-center">
+                  <div className="w-4 h-4 rounded-full bg-deepcal-light mr-2"></div>
+                  <span>Origin Points</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 rounded-full bg-deepcal-purple mr-2"></div>
+                  <span>Destination Points</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-8 h-1 bg-deepcal-purple mr-2"></div>
+                  <span>Active Routes</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

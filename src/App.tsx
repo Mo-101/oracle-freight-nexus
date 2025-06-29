@@ -8,7 +8,6 @@ import Index from "./pages/Index";
 import Chat from "./pages/Chat";
 import Quantum from "./pages/Quantum";
 import Map from "./pages/Map";
-import Globe from "./pages/Globe";
 import Training from "./pages/Training";
 import NotFound from "./pages/NotFound";
 
@@ -25,7 +24,6 @@ const App = () => (
           <Route path="/chat" element={<Chat />} />
           <Route path="/quantum" element={<Quantum />} />
           <Route path="/map" element={<Map />} />
-          <Route path="/globe" element={<Globe />} />
           <Route path="/training" element={<Training />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
