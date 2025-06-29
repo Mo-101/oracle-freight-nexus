@@ -1,4 +1,3 @@
-
 import { canonicalShipmentData, getForwarderPerformance } from '@/data/canonicalData';
 import { 
   RouteOption, 
@@ -254,8 +253,13 @@ export class FreightIntelligenceEngine {
     if (shipments.length === 0) return 0;
     
     const costsWithData = shipments.filter(s => {
-      const cost = Number(s.freight_carrier_cost);
-      const weight = Number(s.weight_kg);
+      const costValue = s.freight_carrier_cost;
+      const weightValue = s.weight_kg;
+      
+      // Convert to numbers and validate
+      const cost = Number(costValue);
+      const weight = Number(weightValue);
+      
       return !isNaN(cost) && !isNaN(weight) && cost > 0 && weight > 0;
     });
 
