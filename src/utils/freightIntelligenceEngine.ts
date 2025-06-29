@@ -23,11 +23,11 @@ export class FreightIntelligenceEngine {
 
   analyzeCorridorIntelligence(origin: string, destination: string): CorridorIntelligence {
     const corridorShipments = canonicalShipmentData.filter(
-      s => s.origin_country === origin && s.destination_country === destination
+      s => s.origin === origin && s.destination === destination
     );
 
     const totalShipments = corridorShipments.length;
-    const successfulShipments = corridorShipments.filter(s => s.delivery_status === 'Delivered').length;
+    const successfulShipments = corridorShipments.filter(s => s.delivery_status === 'On Time').length;
     const successRate = totalShipments > 0 ? Math.round((successfulShipments / totalShipments) * 100) : 0;
 
     // Calculate average transit days
@@ -72,7 +72,7 @@ export class FreightIntelligenceEngine {
 
   generateRouteOptions(origin: string, destination: string): RouteOption[] {
     const corridorShipments = canonicalShipmentData.filter(
-      s => s.origin_country === origin && s.destination_country === destination
+      s => s.origin === origin && s.destination === destination
     );
 
     const routeOptions: RouteOption[] = [];
@@ -134,14 +134,12 @@ export class FreightIntelligenceEngine {
   generateForwarderIntelligence(cargoType: string): ForwarderIntelligence[] {
     const forwarderNames = [
       'Kuehne Nagel', 'DHL Express', 'DHL Global', 'Scan Global Logistics',
-      'Siginon Logistics', 'Agility Logistics', 'Freight In Time', 'BWOSI'
+      'Siginon', 'AGL', 'Freight In Time', 'Bwosi'
     ];
 
     return forwarderNames.map(name => {
       const performance = getForwarderPerformance(name);
-      const forwarderShipments = canonicalShipmentData.filter(
-        s => s.initial_quote_awarded === name || s.final_quote_awarded_freight_forwarder_carrier === name
-      );
+      const forwarderShipments = canonicalShipmentData.filter(s => s.carrier === name);
 
       const specializations = this.analyzeSpecializations(forwarderShipments);
       const emergencyGrade = this.determineEmergencyGrade(forwarderShipments);
@@ -241,7 +239,7 @@ export class FreightIntelligenceEngine {
   }
 
   private calculateRiskFactor(shipments: any[]): number {
-    const failedShipments = shipments.filter(s => s.delivery_status !== 'Delivered').length;
+    const failedShipments = shipments.filter(s => s.delivery_status !== 'On Time').length;
     const riskPercentage = shipments.length > 0 ? (failedShipments / shipments.length) * 100 : 0;
     return Math.round(riskPercentage / 10); // Convert to 0-10 scale
   }
@@ -249,7 +247,7 @@ export class FreightIntelligenceEngine {
   private calculateConfidence(shipments: any[]): number {
     if (shipments.length === 0) return 0.5;
     
-    const successRate = shipments.filter(s => s.delivery_status === 'Delivered').length / shipments.length;
+    const successRate = shipments.filter(s => s.delivery_status === 'On Time').length / shipments.length;
     const dataQuality = Math.min(shipments.length / 10, 1); // More data = higher quality
     
     return Math.round((successRate * 0.7 + dataQuality * 0.3) * 100) / 100;
@@ -257,7 +255,7 @@ export class FreightIntelligenceEngine {
 
   private calculateSuccessRate(shipments: any[]): number {
     if (shipments.length === 0) return 0;
-    const successful = shipments.filter(s => s.delivery_status === 'Delivered').length;
+    const successful = shipments.filter(s => s.delivery_status === 'On Time').length;
     return Math.round((successful / shipments.length) * 100);
   }
 
@@ -265,7 +263,7 @@ export class FreightIntelligenceEngine {
     if (shipments.length === 0) return 0;
     
     const costsWithData = shipments.filter(s => {
-      const costValue = this.safeParseFloat(s.freight_carrier_cost);
+      const costValue = this.safeParseFloat(s.actual_cost);
       const weightValue = this.safeParseFloat(s.weight_kg);
       
       return costValue !== null && weightValue !== null && costValue > 0 && weightValue > 0;
@@ -274,7 +272,7 @@ export class FreightIntelligenceEngine {
     if (costsWithData.length === 0) return 0;
     
     const totalCost = costsWithData.reduce((sum, s) => {
-      const cost = this.safeParseFloat(s.freight_carrier_cost);
+      const cost = this.safeParseFloat(s.actual_cost);
       const weight = this.safeParseFloat(s.weight_kg);
       
       if (cost !== null && weight !== null && weight > 0) {

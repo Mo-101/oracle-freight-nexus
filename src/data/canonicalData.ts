@@ -1,3 +1,4 @@
+
 import { CanonicalShipment } from '@/types/freight';
 
 export const canonicalShipmentData: CanonicalShipment[] = [
@@ -1102,4 +1103,48 @@ export const getCargoTypeData = (cargoType: string): CanonicalShipment[] => {
   return canonicalShipmentData.filter(shipment => 
     shipment.cargo_type === cargoType
   );
+};
+
+// Get unique forwarders from the dataset
+export const getUniqueForwarders = (): string[] => {
+  const forwarders = new Set<string>();
+  canonicalShipmentData.forEach(shipment => {
+    if (shipment.carrier) forwarders.add(shipment.carrier);
+  });
+  return Array.from(forwarders);
+};
+
+// Get forwarder performance metrics
+export const getForwarderPerformance = (forwarderName: string) => {
+  const forwarderShipments = canonicalShipmentData.filter(s => s.carrier === forwarderName);
+  
+  if (forwarderShipments.length === 0) {
+    return {
+      totalShipments: 0,
+      avgCostPerKg: 0,
+      avgTransitDays: 0,
+      onTimeRate: 0,
+      reliabilityScore: 0
+    };
+  }
+
+  const totalCost = forwarderShipments.reduce((sum, s) => sum + (s.actual_cost || 0), 0);
+  const totalWeight = forwarderShipments.reduce((sum, s) => sum + (s.weight_kg || 1), 0);
+  const avgCostPerKg = totalWeight > 0 ? totalCost / totalWeight : 0;
+
+  const totalTransitDays = forwarderShipments.reduce((sum, s) => sum + (s.transit_days || 0), 0);
+  const avgTransitDays = totalTransitDays / forwarderShipments.length;
+
+  const onTimeShipments = forwarderShipments.filter(s => s.delay_days === 0).length;
+  const onTimeRate = onTimeShipments / forwarderShipments.length;
+
+  const avgSatisfaction = forwarderShipments.reduce((sum, s) => sum + (s.customer_satisfaction_score || 80), 0) / forwarderShipments.length;
+
+  return {
+    totalShipments: forwarderShipments.length,
+    avgCostPerKg: Math.round(avgCostPerKg * 100) / 100,
+    avgTransitDays: Math.round(avgTransitDays * 10) / 10,
+    onTimeRate: Math.round(onTimeRate * 100) / 100,
+    reliabilityScore: Math.round(avgSatisfaction)
+  };
 };
