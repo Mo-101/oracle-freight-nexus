@@ -1,4 +1,3 @@
-
 export type TransportMode = "Air" | "Sea" | "Land" | "Rail";
 
 export interface RouteOption {
@@ -52,4 +51,42 @@ export interface SymbolicDecision {
   dataPoints: number;
   ethicsScore: number;
   uncertaintyFactors: string[];
+}
+
+export interface CanonicalShipment {
+  id: string;
+  origin_city: string;
+  origin_country: string;
+  destination_city: string;
+  destination_country: string;
+  carrier: string; // Add missing carrier property
+  service_type: string;
+  weight_kg: number;
+  dimensions_cm: string;
+  freight_carrier_cost: number;
+  insurance_cost: number;
+  fuel_surcharge: number;
+  handling_fee: number;
+  total_cost: number;
+  transit_time_days: number;
+  delivery_status: string;
+  risk_score: number;
+  environmental_impact: number;
+  tracking_number: string;
+  pickup_date: string;
+  delivery_date: string;
+  special_requirements: string[];
+  customer_rating: number;
+  carrier_performance_score: number;
+  route_optimization_score: number;
+  customs_clearance_time: number;
+  packaging_type: string;
+  cargo_type: string;
+  priority_level: string;
+  weather_impact: number;
+  fuel_efficiency: number;
+  carbon_footprint: number;
+  compliance_score: number;
+  documentation_complete: boolean;
+  last_updated: string;
 }
