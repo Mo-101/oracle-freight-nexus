@@ -253,19 +253,28 @@ export class FreightIntelligenceEngine {
     if (shipments.length === 0) return 0;
     
     const costsWithData = shipments.filter(s => {
-      const cost = this.safeParseFloat(s.freight_carrier_cost);
-      const weight = this.safeParseFloat(s.weight_kg);
-      return cost > 0 && weight > 0;
+      const costValue = s.freight_carrier_cost;
+      const weightValue = s.weight_kg;
+      
+      // Convert to numbers and validate
+      const cost = Number(costValue);
+      const weight = Number(weightValue);
+      
+      return !isNaN(cost) && !isNaN(weight) && cost > 0 && weight > 0;
     });
 
     if (costsWithData.length === 0) return 0;
     
     const totalCost = costsWithData.reduce((sum, s) => {
-      const cost = this.safeParseFloat(s.freight_carrier_cost);
-      const weight = this.safeParseFloat(s.weight_kg);
+      // Safely convert to numbers with proper type checking
+      const costValue = s.freight_carrier_cost;
+      const weightValue = s.weight_kg;
       
-      // Type guard to ensure we have numbers before arithmetic
-      if (typeof cost === 'number' && typeof weight === 'number' && cost > 0 && weight > 0) {
+      const cost = Number(costValue);
+      const weight = Number(weightValue);
+      
+      // Only proceed with arithmetic if both are valid numbers
+      if (!isNaN(cost) && !isNaN(weight) && weight > 0) {
         return sum + (cost / weight);
       }
       return sum;
@@ -322,19 +331,19 @@ export class FreightIntelligenceEngine {
   private calculateQuoteCoverage(forwarderName: string): number {
     const totalQuoteRequests = canonicalShipmentData.length;
     const forwarderQuotes = canonicalShipmentData.filter(s => {
+      // Convert forwarder quotes to numbers and check if they exist
       const quotes = [
-        this.safeParseFloat(s.kuehne_nagel),
-        this.safeParseFloat(s.scan_global_logistics),
-        this.safeParseFloat(s.dhl_express),
-        this.safeParseFloat(s.dhl_global),
-        this.safeParseFloat(s.siginon),
-        this.safeParseFloat(s.agl),
-        this.safeParseFloat(s.freight_in_time),
-        this.safeParseFloat(s.bwosi)
+        Number(s.kuehne_nagel) || 0,
+        Number(s.scan_global_logistics) || 0,
+        Number(s.dhl_express) || 0,
+        Number(s.dhl_global) || 0,
+        Number(s.siginon) || 0,
+        Number(s.agl) || 0,
+        Number(s.freight_in_time) || 0,
+        Number(s.bwosi) || 0
       ];
       
-      // Type guard to ensure we have numbers before comparison
-      return quotes.some(quote => typeof quote === 'number' && quote > 0);
+      return quotes.some(quote => quote > 0);
     }).length;
     
     return Math.round((forwarderQuotes / totalQuoteRequests) * 100);
@@ -360,19 +369,6 @@ export class FreightIntelligenceEngine {
     ethicsScore += (forwarder.reliabilityScore - 80) / 100 * 0.1;
     
     return Math.max(0, Math.min(1, ethicsScore));
-  }
-
-  // Helper method to safely parse float values
-  private safeParseFloat(value: unknown): number {
-    if (typeof value === 'number') return value;
-    if (typeof value === 'string') {
-      const parsed = parseFloat(value);
-      return isNaN(parsed) ? 0 : parsed;
-    }
-    if (value === null || value === undefined) return 0;
-    
-    const parsed = parseFloat(String(value));
-    return isNaN(parsed) ? 0 : parsed;
   }
 }
 

@@ -1,35 +1,64 @@
 
 import React from 'react';
-import { ThemeToggle } from './ThemeToggle';
+import { Link } from 'react-router-dom';
 
-export const Header: React.FC = () => {
+const Header = () => {
   return (
-    <header className="relative z-50 border-b border-deepcal-oracle/20 bg-slate-900/80 dark:bg-gray-950/80 backdrop-blur-md">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="quantum-ring w-12 h-12 rounded-full bg-gradient-to-r from-deepcal-purple to-deepcal-oracle flex items-center justify-center">
-              <i className="fas fa-cube text-white text-xl"></i>
-            </div>
-            <div>
-              <h1 className="text-2xl font-display font-bold text-white">
-                DeepCAL <span className="text-deepcal-oracle">Industries</span>
+    <header className="sticky top-0 z-50">
+      <div className="bg-gradient-to-r from-deepcal-dark to-deepcal-purple py-4 px-6 symbolic-border">
+        <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
+          <div className="flex items-center space-x-3 animate-fade-in">
+            <Link to="/" className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-deepcal-purple rounded-full flex items-center justify-center glowing-border">
+                <i className="fas fa-infinity text-white text-xl"></i>
+              </div>
+              <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-purple-100">
+                DeepCAL++ vΩ
               </h1>
-              <p className="text-sm text-slate-400">
-                Quantum Freight Intelligence Engine
-              </p>
-            </div>
+            </Link>
           </div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="hidden sm:flex items-center space-x-2 text-sm text-slate-300">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span>Quantum Core Online</span>
+          <div className="mt-4 md:mt-0 flex items-center space-x-6">
+            <div className="hidden md:flex items-center space-x-4">
+              <Link 
+                to="/" 
+                className="px-4 py-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition text-white"
+              >
+                <i className="fas fa-chart-line mr-2"></i> Analytics
+              </Link>
+              <Link 
+                to="/chat" 
+                className="px-4 py-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition text-white"
+              >
+                <i className="fas fa-comments mr-2"></i> Chat Oracle
+              </Link>
+              <Link 
+                to="/quantum" 
+                className="px-4 py-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition text-white"
+              >
+                <i className="fas fa-atom mr-2"></i> Quantum View
+              </Link>
+              <Link 
+                to="/map" 
+                className="px-4 py-2 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition text-white"
+              >
+                <i className="fas fa-map mr-2"></i> Global Map
+              </Link>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center">
+              <div className="h-3 w-3 rounded-full bg-green-400 animate-pulse"></div>
+              <span className="ml-2 text-sm font-semibold">🟣 ASSEMBLY IN PROGRESS</span>
+            </div>
+            <div className="hidden md:block">
+              <span className="text-xl">🔱</span>
+              <span className="ml-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-200 to-pink-400">
+                The Oracle of Freight is Awakening...
+              </span>
+            </div>
           </div>
         </div>
       </div>
     </header>
   );
 };
+
+export default Header;
