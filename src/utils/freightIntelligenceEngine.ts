@@ -1,3 +1,4 @@
+
 import { canonicalShipmentData, getForwarderPerformance } from '@/data/canonicalData';
 import { 
   RouteOption, 
@@ -65,7 +66,6 @@ export class FreightIntelligenceEngine {
       successRate,
       avgTransitDays,
       predominantMode,
-      seasonalVariation,
       riskFactors
     };
   }

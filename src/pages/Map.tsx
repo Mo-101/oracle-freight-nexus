@@ -1,16 +1,58 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Interactive3DGlobe } from '../components/Interactive3DGlobe';
 import { PredictiveTimeline } from '../components/analytics/PredictiveTimeline';
 import { RiskHeatmap } from '../components/analytics/RiskHeatmap';
 
 // Set Mapbox access token
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2x4czNxbjU2MWM2eTJqc2gwNGIwaWhkMSJ9.jSwZdyaPa1dOHepNU5P71g';
+
+// Hybrid map style configuration
+const hybridMapStyle = {
+  "version": 8,
+  "name": "qgis2web export",
+  "pitch": 0,
+  "light": {
+    "intensity": 0.2
+  },
+  "sources": {
+    "GoogleSatellite_0": {
+      "type": "raster",
+      "tiles": ["https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"],
+      "tileSize": 256
+    },
+    "GoogleHybrid_1": {
+      "type": "raster",
+      "tiles": ["https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"],
+      "tileSize": 256
+    }
+  },
+  "sprite": "",
+  "glyphs": "https://glfonts.lukasmartinelli.ch/fonts/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "layout": {},
+      "paint": {
+        "background-color": "#ffffff"
+      }
+    },
+    {
+      "id": "lyr_GoogleSatellite_0_0",
+      "type": "raster",
+      "source": "GoogleSatellite_0"
+    },
+    {
+      "id": "lyr_GoogleHybrid_1_1",
+      "type": "raster",
+      "source": "GoogleHybrid_1"
+    }
+  ]
+};
 
 interface WeatherData {
   main: {
@@ -83,7 +125,7 @@ const Map = () => {
     // Initialize map
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
+      style: hybridMapStyle as any,
       center: [30, 0],
       zoom: 3,
       pitch: 30,
@@ -203,7 +245,7 @@ const Map = () => {
         <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
           <div className="w-full h-full flex items-center justify-center">
             <div className="w-full max-w-6xl h-96">
-              <Interactive3DGlobe />
+              {/*<Interactive3DGlobe />*/}
             </div>
           </div>
         </div>

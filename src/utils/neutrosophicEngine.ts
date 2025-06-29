@@ -6,6 +6,28 @@ export interface NeutrosophicValue {
   confidence: number;
 }
 
+export interface ForwarderData {
+  name: string;
+  cost: number;
+  time: number;
+  reliability: number;
+  experience: number;
+}
+
+export interface WeightVector {
+  cost: number;
+  time: number;
+  reliability: number;
+  experience: number;
+}
+
+export interface TOPSISResult {
+  forwarderName: string;
+  score: number;
+  rank: number;
+  reasoning: string[];
+}
+
 export class NeutrosophicEngine {
   static createValue(truth: number, indeterminacy: number, falsehood: number): NeutrosophicValue {
     const total = truth + indeterminacy + falsehood;
@@ -31,5 +53,79 @@ export class NeutrosophicEngine {
     const falsehood = 1 - truth - indeterminacy;
     
     return this.createValue(truth, indeterminacy, Math.max(0, falsehood));
+  }
+
+  static calculateTOPSIS(forwarders: ForwarderData[], weights: WeightVector): TOPSISResult[] {
+    // Normalize decision matrix
+    const normalizedMatrix = forwarders.map(f => ({
+      name: f.name,
+      cost: f.cost / Math.sqrt(forwarders.reduce((sum, fw) => sum + fw.cost * fw.cost, 0)),
+      time: f.time / Math.sqrt(forwarders.reduce((sum, fw) => sum + fw.time * fw.time, 0)),
+      reliability: f.reliability / Math.sqrt(forwarders.reduce((sum, fw) => sum + fw.reliability * fw.reliability, 0)),
+      experience: f.experience / Math.sqrt(forwarders.reduce((sum, fw) => sum + fw.experience * fw.experience, 0))
+    }));
+
+    // Apply weights
+    const weightedMatrix = normalizedMatrix.map(f => ({
+      name: f.name,
+      cost: f.cost * weights.cost,
+      time: f.time * weights.time,
+      reliability: f.reliability * weights.reliability,
+      experience: f.experience * weights.experience
+    }));
+
+    // Determine ideal and negative-ideal solutions
+    const ideal = {
+      cost: Math.min(...weightedMatrix.map(f => f.cost)), // Min for cost (beneficial)
+      time: Math.min(...weightedMatrix.map(f => f.time)), // Min for time (beneficial)
+      reliability: Math.max(...weightedMatrix.map(f => f.reliability)), // Max for reliability
+      experience: Math.max(...weightedMatrix.map(f => f.experience)) // Max for experience
+    };
+
+    const negativeIdeal = {
+      cost: Math.max(...weightedMatrix.map(f => f.cost)),
+      time: Math.max(...weightedMatrix.map(f => f.time)),
+      reliability: Math.min(...weightedMatrix.map(f => f.reliability)),
+      experience: Math.min(...weightedMatrix.map(f => f.experience))
+    };
+
+    // Calculate distances and scores
+    const results = weightedMatrix.map(f => {
+      const distanceToIdeal = Math.sqrt(
+        Math.pow(f.cost - ideal.cost, 2) +
+        Math.pow(f.time - ideal.time, 2) +
+        Math.pow(f.reliability - ideal.reliability, 2) +
+        Math.pow(f.experience - ideal.experience, 2)
+      );
+
+      const distanceToNegativeIdeal = Math.sqrt(
+        Math.pow(f.cost - negativeIdeal.cost, 2) +
+        Math.pow(f.time - negativeIdeal.time, 2) +
+        Math.pow(f.reliability - negativeIdeal.reliability, 2) +
+        Math.pow(f.experience - negativeIdeal.experience, 2)
+      );
+
+      const score = distanceToNegativeIdeal / (distanceToIdeal + distanceToNegativeIdeal);
+
+      return {
+        forwarderName: f.name,
+        score: score,
+        rank: 0, // Will be set after sorting
+        reasoning: [
+          `Cost efficiency: ${(f.cost * 100).toFixed(1)}%`,
+          `Time performance: ${(f.time * 100).toFixed(1)}%`,
+          `Reliability: ${(f.reliability * 100).toFixed(1)}%`,
+          `Experience: ${(f.experience * 100).toFixed(1)}%`
+        ]
+      };
+    });
+
+    // Sort by score and assign ranks
+    results.sort((a, b) => b.score - a.score);
+    results.forEach((result, index) => {
+      result.rank = index + 1;
+    });
+
+    return results;
   }
 }
