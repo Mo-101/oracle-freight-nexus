@@ -345,7 +345,7 @@ export class FreightIntelligenceEngine {
         this.safeParseFloat(s.bwosi) || 0
       ];
       
-      return quotes.some(quote => quote > 0);
+      return quotes.some(quote => typeof quote === 'number' && quote > 0);
     }).length;
     
     return Math.round((forwarderQuotes / totalQuoteRequests) * 100);

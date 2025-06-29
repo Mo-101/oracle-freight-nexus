@@ -1,3 +1,4 @@
+
 export type TransportMode = "Air" | "Sea" | "Land" | "Rail";
 
 export interface RouteOption {
@@ -59,7 +60,7 @@ export interface CanonicalShipment {
   origin_country: string;
   destination_city: string;
   destination_country: string;
-  carrier: string; // Add missing carrier property
+  carrier: string;
   service_type: string;
   weight_kg: number;
   dimensions_cm: string;
@@ -89,4 +90,23 @@ export interface CanonicalShipment {
   compliance_score: number;
   documentation_complete: boolean;
   last_updated: string;
+  
+  // Additional properties expected by freight intelligence engine
+  date_of_collection: string;
+  date_of_arrival_destination: string;
+  mode_of_shipment: string;
+  initial_quote_awarded?: string;
+  final_quote_awarded_freight_forwarder_carrier?: string;
+  item_category: string;
+  cargo_description: string;
+  
+  // Quote properties for different forwarders
+  kuehne_nagel?: number;
+  scan_global_logistics?: number;
+  dhl_express?: number;
+  dhl_global?: number;
+  siginon?: number;
+  agl?: number;
+  freight_in_time?: number;
+  bwosi?: number;
 }

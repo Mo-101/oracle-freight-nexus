@@ -1,4 +1,3 @@
-
 import { CanonicalShipment } from '@/types/freight';
 
 export const canonicalShipmentData: CanonicalShipment[] = [
@@ -37,7 +36,17 @@ export const canonicalShipmentData: CanonicalShipment[] = [
     carbon_footprint: 45.8,
     compliance_score: 95,
     documentation_complete: true,
-    last_updated: "2024-01-20"
+    last_updated: "2024-01-20",
+    date_of_collection: "2024-01-15",
+    date_of_arrival_destination: "2024-01-18",
+    mode_of_shipment: "Air",
+    initial_quote_awarded: "DHL Express",
+    final_quote_awarded_freight_forwarder_carrier: "DHL Express",
+    item_category: "Medical Supplies",
+    cargo_description: "Emergency Health Kits",
+    dhl_express: 125.50,
+    kuehne_nagel: 135.00,
+    siginon: 115.00
   },
   {
     id: "SHIP-002",
@@ -74,9 +83,26 @@ export const canonicalShipmentData: CanonicalShipment[] = [
     carbon_footprint: 78.4,
     compliance_score: 91,
     documentation_complete: true,
-    last_updated: "2024-01-22"
+    last_updated: "2024-01-22",
+    date_of_collection: "2024-01-20",
+    date_of_arrival_destination: "2024-01-27",
+    mode_of_shipment: "Road",
+    initial_quote_awarded: "Kuehne Nagel",
+    final_quote_awarded_freight_forwarder_carrier: "Kuehne Nagel",
+    item_category: "Industrial Equipment",
+    cargo_description: "Manufacturing Equipment",
+    kuehne_nagel: 285.00,
+    dhl_global: 295.00,
+    siginon: 275.00
   }
 ];
+
+// Helper function to get route-specific data
+export const getRouteData = (origin: string, destination: string) => {
+  return canonicalShipmentData.filter(
+    shipment => shipment.origin_country === origin && shipment.destination_country === destination
+  );
+};
 
 // Helper function to get forwarder performance data
 export const getForwarderPerformance = (forwarderName: string) => {
