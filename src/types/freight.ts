@@ -1,112 +1,73 @@
+import { NeutrosophicValue } from "@/utils/neutrosophicEngine";
 
-export type TransportMode = "Air" | "Sea" | "Land" | "Rail";
-
-export interface RouteOption {
-  mode: TransportMode;
-  corridor: string;
-  distanceKm: number;
-  transitTimeDays: number;
-  riskFactor: number; // 0-10
-  emissionScore: number; // gCO2/km
-  confidence: number; // 0-1 symbolic score
-  historicalShipments: number;
-  successRate: number;
-  avgCost: number;
-}
-
-export interface ForwarderIntelligence {
-  name: string;
-  totalShipments: number;
-  avgCostPerKg: number;
-  avgTransitDays: number;
-  successRate: number;
-  reliabilityScore: number;
-  specializations: string[];
-  emergencyGrade: 'Standard' | 'Priority' | 'Critical';
-  recentPerformance: PerformanceMetric[];
-  quoteCoverage: number; // percentage of routes quoted
-}
-
-export interface PerformanceMetric {
-  month: string;
-  shipmentsHandled: number;
-  successRate: number;
-  avgCost: number;
-}
-
-export interface CorridorIntelligence {
-  origin: string;
-  destination: string;
-  totalShipments: number;
-  successRate: number;
-  avgTransitDays: number;
-  predominantMode: TransportMode;
-  seasonalVariation: number;
-  riskFactors: string[];
+export interface ForwarderPerformance {
+    name: string;
+    avgCostPerKg: number;
+    avgTransitDays: number;
+    reliabilityScore: number;
+    quoteWinRate: number;
 }
 
 export interface SymbolicDecision {
   recommendation: string;
   confidence: number;
-  reasoning: string[];
-  dataPoints: number;
   ethicsScore: number;
+  dataPoints: number;
+  reasoning: string[];
   uncertaintyFactors: string[];
 }
 
 export interface CanonicalShipment {
-  id: string;
-  origin_city: string;
-  origin_country: string;
-  destination_city: string;
-  destination_country: string;
-  carrier: string;
-  service_type: string;
-  weight_kg: number;
-  dimensions_cm: string;
-  freight_carrier_cost: number;
-  insurance_cost: number;
-  fuel_surcharge: number;
-  handling_fee: number;
-  total_cost: number;
-  transit_time_days: number;
-  delivery_status: string;
-  risk_score: number;
-  environmental_impact: number;
-  tracking_number: string;
-  pickup_date: string;
-  delivery_date: string;
-  special_requirements: string[];
-  customer_rating: number;
-  carrier_performance_score: number;
-  route_optimization_score: number;
-  customs_clearance_time: number;
-  packaging_type: string;
-  cargo_type: string;
-  priority_level: string;
-  weather_impact: number;
-  fuel_efficiency: number;
-  carbon_footprint: number;
-  compliance_score: number;
-  documentation_complete: boolean;
-  last_updated: string;
-  
-  // Additional properties expected by freight intelligence engine
+  id: number;
   date_of_collection: string;
   date_of_arrival_destination: string;
+  date_of_greenlight_to_pickup: string;
   mode_of_shipment: string;
-  initial_quote_awarded?: string;
-  final_quote_awarded_freight_forwarder_carrier?: string;
-  item_category: string;
-  cargo_description: string;
-  
-  // Quote properties for different forwarders
-  kuehne_nagel?: number;
-  scan_global_logistics?: number;
-  dhl_express?: number;
-  dhl_global?: number;
-  siginon?: number;
-  agl?: number;
-  freight_in_time?: number;
-  bwosi?: number;
+  initial_quote_awarded: number;
+  final_quote_awarded_freight_forwarder_carrier: number;
+  kuehne_nagel: number;
+  scan_global_logistics: number;
+  dhl_express: number;
+  dhl_global: number;
+  siginon: number;
+  agl: number;
+  freight_in_time: number;
+  bwosi: number;
+  origin: string;
+  destination: string;
+  cargo_type: string;
+  weight_kg: number;
+  volume_cbm: number;
+  carrier: string;
+  routing: string;
+  transit_days: number;
+  actual_cost: number;
+  fuel_surcharge: number;
+  insurance: number;
+  customs_brokerage: number;
+  port_handling: number;
+  storage: number;
+  demurrage: number;
+  other_charges: number;
+  total_cost: number;
+  delay_days: number;
+  damage: boolean;
+  loss: boolean;
+  customer_complaints: string;
+  documentation_errors: boolean;
+  communication_issues: boolean;
+  payment_issues: boolean;
+  shipment_status: string;
+  temperature_control_failures: boolean;
+  security_breaches: boolean;
+  risk_assessment_score: number;
+  sustainability_metrics: number;
+  customer_satisfaction_score: number;
+  market_volatility_impact: number;
+  regulatory_compliance_issues: boolean;
+  force_majeure_events: boolean;
+  visibility_and_tracking_accuracy: number;
+  exception_handling_effectiveness: number;
+  overall_performance_score: number;
+  neutrosophic_interpretation?: NeutrosophicValue;
 }
