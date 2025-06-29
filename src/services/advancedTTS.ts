@@ -1,4 +1,3 @@
-
 interface TTSConfig {
   voice: string;
   emotion: string;
@@ -22,6 +21,10 @@ class AdvancedTTS {
     }
   ): Promise<string | null> {
     try {
+      console.log('🎵 F5-TTS: Starting speech generation...');
+      console.log('🎵 Text:', text.substring(0, 100) + (text.length > 100 ? '...' : ''));
+      console.log('🎵 Config:', config);
+      
       // F5-TTS API format
       const payload = {
         data: [
@@ -31,7 +34,8 @@ class AdvancedTTS {
         ]
       };
 
-      console.log('Sending F5-TTS request:', { text: text.substring(0, 50) + '...', config });
+      console.log('🎵 Sending request to:', `${this.baseUrl}/run/predict`);
+      console.log('🎵 Payload:', payload);
 
       const response = await fetch(`${this.baseUrl}/run/predict`, {
         method: 'POST',
@@ -41,24 +45,53 @@ class AdvancedTTS {
         body: JSON.stringify(payload)
       });
 
+      console.log('🎵 Response status:', response.status, response.statusText);
+
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('🎵 F5-TTS API Error Response:', errorText);
         throw new Error(`F5-TTS API error: ${response.status} ${response.statusText}`);
       }
 
       const result = await response.json();
-      console.log('F5-TTS API Response:', result);
+      console.log('🎵 F5-TTS API Full Response:', result);
 
       // The F5-TTS API returns data in the format: { data: [audioFileUrl] }
       if (result.data && result.data[0]) {
         const audioUrl = result.data[0];
-        console.log('Generated audio URL:', audioUrl);
+        console.log('🎵 Generated audio URL:', audioUrl);
+        console.log('🎵 Audio URL type:', typeof audioUrl);
+        
+        // Test if the audio URL is accessible
+        try {
+          const audioTestResponse = await fetch(audioUrl, { method: 'HEAD' });
+          console.log('🎵 Audio URL test:', audioTestResponse.status, audioTestResponse.statusText);
+        } catch (testError) {
+          console.error('🎵 Audio URL test failed:', testError);
+        }
+        
         return audioUrl;
       } else {
-        console.error('No audio URL in response:', result);
+        console.error('🎵 No audio URL in response. Full response:', result);
         return null;
       }
     } catch (error) {
-      console.error('F5-TTS Error:', error);
+      console.error('🎵 F5-TTS Error:', error);
+      
+      // Try a fallback test with browser speech synthesis
+      console.log('🎵 Attempting browser speech synthesis fallback...');
+      try {
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance(text.substring(0, 200));
+          utterance.rate = 0.8;
+          utterance.pitch = 1.1;
+          window.speechSynthesis.speak(utterance);
+          console.log('🎵 Browser speech synthesis triggered as fallback');
+        }
+      } catch (fallbackError) {
+        console.error('🎵 Browser speech synthesis also failed:', fallbackError);
+      }
+      
       return null;
     }
   }
@@ -72,7 +105,6 @@ class AdvancedTTS {
     return emotionMap[personality];
   }
 
-  // Available voices for F5-TTS (simplified since F5-TTS uses text-to-speech without specific voice IDs)
   getAvailableVoices(): string[] {
     return [
       "default", "natural", "expressive"

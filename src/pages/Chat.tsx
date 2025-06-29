@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { VoiceChat } from '../components/chat/VoiceChat';
+import { VoiceTestButton } from '../components/chat/VoiceTestButton';
 import { advancedTTS } from '../services/advancedTTS';
 
 interface Message {
@@ -177,6 +178,7 @@ const Chat = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
+                    <VoiceTestButton />
                     <VoiceChat onSpeakResponse={handleSpeakResponse} isEnabled={voiceEnabled} />
                     <button 
                       onClick={() => setVoiceEnabled(!voiceEnabled)}
