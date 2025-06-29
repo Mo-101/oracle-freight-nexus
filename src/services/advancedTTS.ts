@@ -9,7 +9,7 @@ interface TTSConfig {
 class AdvancedTTS {
   private baseUrl: string;
 
-  constructor(baseUrl: string = 'https://nihal-gazi-io-advanced-openai-text-to-speech-unlimited.hf.space') {
+  constructor(baseUrl: string = 'https://mrfakename-f5-tts.hf.space') {
     this.baseUrl = baseUrl;
   }
 
@@ -22,33 +22,33 @@ class AdvancedTTS {
     }
   ): Promise<string | null> {
     try {
-      const formData = new FormData();
-      formData.append('data', JSON.stringify([
-        text,                           // prompt
-        config.voice,                   // voice
-        config.emotion,                 // emotion
-        config.useRandomSeed,           // use_random_seed
-        config.specificSeed || 12345    // specific_seed
-      ]));
+      // F5-TTS API format
+      const payload = {
+        data: [
+          text,           // Text to synthesize
+          null,           // No reference audio (for voice cloning)
+          "F5-TTS_v1"     // Model name
+        ]
+      };
 
-      console.log('Sending TTS request:', { text: text.substring(0, 50) + '...', config });
+      console.log('Sending F5-TTS request:', { text: text.substring(0, 50) + '...', config });
 
-      const response = await fetch(`${this.baseUrl}/api/predict`, {
+      const response = await fetch(`${this.baseUrl}/run/predict`, {
         method: 'POST',
-        body: formData,
         headers: {
-          'Accept': 'application/json',
-        }
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
-        throw new Error(`TTS API error: ${response.status} ${response.statusText}`);
+        throw new Error(`F5-TTS API error: ${response.status} ${response.statusText}`);
       }
 
       const result = await response.json();
-      console.log('TTS API Response:', result);
+      console.log('F5-TTS API Response:', result);
 
-      // The Gradio API returns data in the format: { data: [audioFileUrl, statusMessage] }
+      // The F5-TTS API returns data in the format: { data: [audioFileUrl] }
       if (result.data && result.data[0]) {
         const audioUrl = result.data[0];
         console.log('Generated audio URL:', audioUrl);
@@ -58,7 +58,7 @@ class AdvancedTTS {
         return null;
       }
     } catch (error) {
-      console.error('Advanced TTS Error:', error);
+      console.error('F5-TTS Error:', error);
       return null;
     }
   }
@@ -72,11 +72,10 @@ class AdvancedTTS {
     return emotionMap[personality];
   }
 
-  // Get available voices from the service
+  // Available voices for F5-TTS (simplified since F5-TTS uses text-to-speech without specific voice IDs)
   getAvailableVoices(): string[] {
     return [
-      "alloy", "echo", "fable", "onyx", "nova", "shimmer",
-      "coral", "verse", "ballad", "ash", "sage", "amuch", "dan"
+      "default", "natural", "expressive"
     ];
   }
 }
