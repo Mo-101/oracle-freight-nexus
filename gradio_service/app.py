@@ -1,14 +1,22 @@
 
 import gradio as gr
-import openai
+import requests
 import numpy as np
 import pandas as pd
 import os
 import hashlib
 from datetime import datetime
+import urllib.parse
+import tempfile
 
-# Initialize OpenAI client
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Advanced TTS Service Configuration
+TTS_URL_TEMPLATE = os.getenv("TTS_API_URL_TEMPLATE")
+NSFW_URL_TEMPLATE = os.getenv("NSFW_API_URL_TEMPLATE")
+
+if not TTS_URL_TEMPLATE:
+    print("Warning: TTS_API_URL_TEMPLATE not set. Voice features will be limited.")
+if not NSFW_URL_TEMPLATE:
+    print("Warning: NSFW_API_URL_TEMPLATE not set. Content filtering disabled.")
 
 class NeutrosophicEngine:
     def __init__(self):
@@ -95,25 +103,38 @@ class NeutrosophicEngine:
             
         return results
 
-def oracle_tts(text, voice="sage", instructions="Speak as the DeepCAL Oracle, with mystical wisdom and authority."):
-    """Generate TTS using OpenAI API"""
+def generate_advanced_tts(text, voice="ballad", emotion="mystical and wise"):
+    """Generate TTS using the advanced TTS service"""
+    if not TTS_URL_TEMPLATE:
+        return None
+    
     try:
-        response = openai.audio.speech.create(
-            model="gpt-4o-mini-tts",
+        encoded_prompt = urllib.parse.quote(text)
+        encoded_emotion = urllib.parse.quote(emotion)
+        
+        url = TTS_URL_TEMPLATE.format(
+            prompt=encoded_prompt,
+            emotion=encoded_emotion,
             voice=voice,
-            input=text,
-            instructions=instructions,
-            response_format="mp3"
+            seed=12345
         )
         
-        # Save to file
-        speech_file_path = f"oracle_voice_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp3"
-        with open(speech_file_path, "wb") as f:
-            f.write(response.content)
+        response = requests.get(url, timeout=60)
+        response.raise_for_status()
         
-        return speech_file_path
+        content_type = response.headers.get('content-type', '').lower()
+        if 'audio' not in content_type:
+            print(f"Warning: Unexpected content type: {content_type}")
+            return None
+        
+        # Save to temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
+            temp_file.write(response.content)
+            return temp_file.name
+            
     except Exception as e:
-        return f"Error generating voice: {str(e)}"
+        print(f"Advanced TTS Error: {e}")
+        return None
 
 def oracle_decision_engine(
     cost1, time1, rel1, risk1, name1,
@@ -122,7 +143,7 @@ def oracle_decision_engine(
     weight_cost, weight_time, weight_rel, weight_risk,
     oracle_text, voice_mode, emergency_context
 ):
-    """Main Oracle decision function"""
+    """Main Oracle decision function with advanced TTS"""
     
     # Prepare forwarder data
     forwarders = [
@@ -148,13 +169,13 @@ def oracle_decision_engine(
     # Get top result
     winner = results[0]
     
-    # Voice mapping
-    voice_map = {
-        "Mystical Oracle": "sage",
-        "Humorous Logistics": "nova", 
-        "Corporate Professional": "onyx"
+    # Emotion mapping for different voice modes
+    emotion_map = {
+        "Mystical Oracle": "mystical, ancient wisdom with reverent tone",
+        "Humorous Logistics": "witty, sarcastic and playful", 
+        "Corporate Professional": "professional, authoritative and confident"
     }
-    voice = voice_map.get(voice_mode, "sage")
+    emotion = emotion_map.get(voice_mode, "mystical and wise")
     
     # Generate oracle verdict
     verdict = f"""🔮 DEEPCAL++ ORACLE TRANSMISSION vΩ
@@ -182,21 +203,21 @@ The Oracle has spoken through quantum algorithms.
         medal = ["🥇", "🥈", "🥉"][result['rank']-1] if result['rank'] <= 3 else "🔹"
         ranking_text += f"{medal} #{result['rank']} {result['name']} - Score: {result['topsis_score']:.3f}\n"
     
-    # Generate TTS
+    # Generate TTS with ballad voice
     tts_text = f"""Behold, the quantum freight matrix has rendered its judgment. 
     In this hour of {emergency_context}, I declare {winner['name']} as the chosen vessel, 
     with a TOPSIS score of {winner['topsis_score']:.3f}. 
     The neutrosophic truth reveals {winner['neutrosophic']['truth']*100:.0f} percent certainty. 
-    {oracle_text}"""
+    {oracle_text} May this decision guide your logistics destiny."""
     
-    audio_file = oracle_tts(tts_text, voice)
+    audio_file = generate_advanced_tts(tts_text, voice="ballad", emotion=emotion)
     
     return verdict, audio_file, ranking_text
 
 # Create Gradio Interface
 with gr.Blocks(title="🔮 DeepCAL++ Quantum Oracle", theme=gr.themes.Dark()) as demo:
     gr.Markdown("# 🔮 DeepCAL++ Quantum Oracle vΩ")
-    gr.Markdown("*Neutrosophic TOPSIS Decision Engine with AI Voice*")
+    gr.Markdown("*Neutrosophic TOPSIS Decision Engine with Advanced Ballad Voice*")
     
     with gr.Row():
         with gr.Column():
@@ -249,7 +270,7 @@ with gr.Blocks(title="🔮 DeepCAL++ Quantum Oracle", theme=gr.themes.Dark()) as
             ranking_output = gr.Textbox(label="📊 Complete Rankings", lines=8)
         
         with gr.Column():
-            audio_output = gr.Audio(label="🎙️ Oracle Voice", type="filepath")
+            audio_output = gr.Audio(label="🎙️ Oracle Voice (Ballad)", type="filepath")
     
     calculate_btn.click(
         fn=oracle_decision_engine,

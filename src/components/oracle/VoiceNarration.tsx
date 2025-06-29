@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import { TOPSISResult } from '@/utils/neutrosophicEngine';
+import { advancedTTS } from '@/services/advancedTTS';
 
 interface VoiceNarrationProps {
   results: TOPSISResult[];
@@ -20,6 +21,7 @@ export const VoiceNarration = ({
 }: VoiceNarrationProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentMode, setCurrentMode] = useState<'oracular' | 'humorous' | 'corporate'>('oracular');
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
 
   const topForwarder = results[0];
   
@@ -50,27 +52,50 @@ export const VoiceNarration = ({
     ]
   };
 
-  const speakNarrative = () => {
-    if (!('speechSynthesis' in window)) {
-      console.log('Speech synthesis not supported');
+  const speakNarrative = async () => {
+    if (isPlaying) {
+      stopNarrative();
       return;
     }
 
     const text = narratives[currentMode].join(' ');
-    const utterance = new SpeechSynthesisUtterance(text);
+    const emotion = advancedTTS.getEmotionForPersonality(currentMode);
     
-    utterance.rate = currentMode === 'humorous' ? 1.1 : 0.9;
-    utterance.pitch = currentMode === 'oracular' ? 0.8 : 1.0;
-    utterance.volume = 0.8;
+    setIsPlaying(true);
+    
+    try {
+      const audioUrl = await advancedTTS.generateSpeech(text, {
+        voice: 'ballad',
+        emotion: emotion,
+        useRandomSeed: true
+      });
 
-    utterance.onstart = () => setIsPlaying(true);
-    utterance.onend = () => setIsPlaying(false);
-
-    speechSynthesis.speak(utterance);
+      if (audioUrl) {
+        const audio = new Audio(audioUrl);
+        setAudioElement(audio);
+        
+        audio.onended = () => setIsPlaying(false);
+        audio.onerror = () => {
+          setIsPlaying(false);
+          console.error('Audio playback failed');
+        };
+        
+        await audio.play();
+      } else {
+        setIsPlaying(false);
+        console.error('Failed to generate audio');
+      }
+    } catch (error) {
+      setIsPlaying(false);
+      console.error('TTS generation failed:', error);
+    }
   };
 
   const stopNarrative = () => {
-    speechSynthesis.cancel();
+    if (audioElement) {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+    }
     setIsPlaying(false);
   };
 
@@ -91,7 +116,7 @@ export const VoiceNarration = ({
             <option value="corporate">📊 Corporate Professional</option>
           </select>
           <button
-            onClick={isPlaying ? stopNarrative : speakNarrative}
+            onClick={speakNarrative}
             className={`p-2 rounded-full transition-colors ${
               isPlaying 
                 ? 'bg-red-600 hover:bg-red-700 text-white' 
@@ -114,7 +139,7 @@ export const VoiceNarration = ({
       {isPlaying && (
         <div className="mt-4 flex items-center text-xs text-deepcal-light">
           <div className="w-2 h-2 bg-deepcal-light rounded-full mr-2 animate-pulse"></div>
-          Oracle transmission in progress...
+          Oracle transmission in progress... (Ballad Voice)
         </div>
       )}
     </div>

@@ -1,7 +1,8 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { VoiceChat } from '../components/chat/VoiceChat';
+import { advancedTTS } from '../services/advancedTTS';
 
 interface Message {
   id: string;
@@ -28,6 +29,7 @@ const Chat = () => {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const sampleResponses: Record<string, { response: string; metrics?: any[]; note?: string }> = {
@@ -83,7 +85,7 @@ const Chat = () => {
     setIsTyping(true);
 
     // Simulate AI response delay
-    setTimeout(() => {
+    setTimeout(async () => {
       const responseData = sampleResponses[inputValue] || {
         response: "I understand you're asking about logistics in Africa. As your oracle, I can analyze routes, compare options, assess risks, and optimize shipments. Could you please clarify your specific need?",
         note: "The more details you provide, the better I can assist"
@@ -100,7 +102,42 @@ const Chat = () => {
 
       setMessages(prev => [...prev, aiMessage]);
       setIsTyping(false);
+
+      // Auto-speak AI responses with ballad voice
+      if (voiceEnabled) {
+        try {
+          const audioUrl = await advancedTTS.generateSpeech(responseData.response, {
+            voice: 'ballad',
+            emotion: 'conversational, wise and helpful',
+            useRandomSeed: true
+          });
+          
+          if (audioUrl) {
+            const audio = new Audio(audioUrl);
+            audio.play().catch(console.error);
+          }
+        } catch (error) {
+          console.error('Auto-voice failed:', error);
+        }
+      }
     }, 1500);
+  };
+
+  const handleSpeakResponse = async (text: string) => {
+    try {
+      const audioUrl = await advancedTTS.generateSpeech(text, {
+        voice: 'ballad',
+        emotion: 'mystical, wise and conversational',
+        useRandomSeed: true
+      });
+      
+      if (audioUrl) {
+        const audio = new Audio(audioUrl);
+        audio.play();
+      }
+    } catch (error) {
+      console.error('Voice synthesis failed:', error);
+    }
   };
 
   const handleQuickPrompt = (prompt: string) => {
@@ -136,12 +173,19 @@ const Chat = () => {
                     </div>
                     <div>
                       <h2 className="font-bold text-white">Oracle</h2>
-                      <p className="text-xs text-purple-100">DeepTalk Conversational AI</p>
+                      <p className="text-xs text-purple-100">DeepTalk Conversational AI (Ballad Voice)</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <button className="bg-white bg-opacity-20 p-2 rounded-full hover:bg-opacity-30 transition">
-                      <i className="fas fa-microphone text-white"></i>
+                    <VoiceChat onSpeakResponse={handleSpeakResponse} isEnabled={voiceEnabled} />
+                    <button 
+                      onClick={() => setVoiceEnabled(!voiceEnabled)}
+                      className={`p-2 rounded-full transition ${
+                        voiceEnabled ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-600 hover:bg-slate-500'
+                      }`}
+                      title={voiceEnabled ? "Disable voice" : "Enable voice"}
+                    >
+                      <i className={`fas ${voiceEnabled ? 'fa-volume-up' : 'fa-volume-mute'} text-white`}></i>
                     </button>
                     <button className="bg-white bg-opacity-20 p-2 rounded-full hover:bg-opacity-30 transition">
                       <i className="fas fa-ellipsis-v text-white"></i>
@@ -170,6 +214,16 @@ const Chat = () => {
                           )}
                         </div>
                         <p className="whitespace-pre-line">{message.content}</p>
+                        
+                        {/* Voice button for AI messages */}
+                        {message.type === 'ai' && voiceEnabled && (
+                          <button
+                            onClick={() => handleSpeakResponse(message.content)}
+                            className="mt-2 text-xs bg-deepcal-purple/20 hover:bg-deepcal-purple/30 px-2 py-1 rounded transition"
+                          >
+                            <i className="fas fa-play mr-1"></i> Speak (Ballad)
+                          </button>
+                        )}
                         
                         {/* Metrics */}
                         {message.metrics && message.metrics.map((metric, index) => (
