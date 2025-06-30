@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { canonicalShipmentData, getRouteData } from '../data/canonicalData';
+import { safeParseNumber } from '../utils/dataTypeUtils';
 
 interface ForwarderRanking {
   name: string;
@@ -78,7 +79,7 @@ const OutputPanel: React.FC<OutputPanelProps> = ({ isVisible, rankings, formData
                   {routeShipments > 0 ? Math.round((routeData.filter(r => r.shipment_status === 'Delivered').length / routeShipments) * 100) : 95}%
                 </span></div>
                 <div>Avg Weight: <span className="text-emerald-400">
-                  {routeShipments > 0 ? Math.round(routeData.reduce((sum, r) => sum + r.weight_kg, 0) / routeShipments) : 'N/A'} kg
+                  {routeShipments > 0 ? Math.round(routeData.reduce((sum, r) => sum + safeParseNumber(r.weight_kg), 0) / routeShipments) : 'N/A'} kg
                 </span></div>
                 <div>Data Quality: <span className="text-emerald-400">✅ Canonical</span></div>
               </div>

@@ -98,6 +98,7 @@ export interface DynamicRankingConfig {
 
 export interface CanonicalShipment {
   id: number;
+  request_reference?: string;
   date_of_collection: string;
   date_of_arrival_destination: string;
   date_of_greenlight_to_pickup: string;

@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { ForwarderIntelligence, DynamicRankingConfig } from '@/types/freight';
 import { dynamicRankingEngine } from '@/utils/dynamicRankingEngine';
 import { RefreshCw, TrendingUp, Clock, DollarSign, Shield } from 'lucide-react';
@@ -103,9 +102,9 @@ export const RealTimeRankingPanel = ({ forwarders, onRankingUpdate }: RealTimeRa
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-3">
-                  <Badge className={getRankBadgeColor(forwarder.rankPosition || 0)}>
+                  <span className={`px-2 py-1 rounded text-xs border ${getRankBadgeColor(forwarder.rankPosition || 0)}`}>
                     #{forwarder.rankPosition}
-                  </Badge>
+                  </span>
                   <div>
                     <h3 className="font-semibold text-white">{forwarder.name}</h3>
                     <div className="flex items-center space-x-2">
