@@ -67,40 +67,97 @@ export const FreightIntelligenceDashboard = ({
         onRankingUpdate={handleRankingUpdate}
       />
 
-      {/* 3. Route Intelligence - Distance/Route Options */}
+      {/* 3. Combined Corridor Intelligence & Shipment Context */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Corridor Intelligence */}
+        <div className="oracle-card p-6">
+          <h3 className="font-semibold text-deepcal-light mb-4 flex items-center">
+            🛣️ Corridor Intelligence: {corridorIntelligence.origin} → {corridorIntelligence.destination}
+          </h3>
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-deepcal-light">
+                {corridorIntelligence.totalShipments}
+              </div>
+              <div className="text-sm text-slate-400">Historical Shipments</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-400">
+                {corridorIntelligence.successRate}%
+              </div>
+              <div className="text-sm text-slate-400">Success Rate</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-400">
+                {corridorIntelligence.avgTransitDays}
+              </div>
+              <div className="text-sm text-slate-400">Avg Transit Days</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-400">
+                {corridorIntelligence.predominantMode}
+              </div>
+              <div className="text-sm text-slate-400">Primary Mode</div>
+            </div>
+          </div>
+          
+          {corridorIntelligence.riskFactors.length > 0 && (
+            <div className="p-3 bg-amber-900/20 rounded border-l-4 border-amber-400">
+              <div className="flex items-center text-amber-400 mb-2">
+                <span className="font-semibold">Corridor Risk Factors</span>
+              </div>
+              <div className="text-sm text-slate-300">
+                {corridorIntelligence.riskFactors.join(' • ')}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Shipment Context */}
+        <div className="oracle-card p-6">
+          <h3 className="font-semibold text-deepcal-light mb-4">📦 Shipment Context</h3>
+          <div className="grid grid-cols-1 gap-4 text-sm">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <span className="text-slate-400">Cargo Type:</span>
+                <div className="font-semibold text-white">{cargoType}</div>
+              </div>
+              <div>
+                <span className="text-slate-400">Weight:</span>
+                <div className="font-semibold text-white">{weight.toLocaleString()} kg</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <span className="text-slate-400">Volume:</span>
+                <div className="font-semibold text-white">{volume} CBM</div>
+              </div>
+              <div>
+                <span className="text-slate-400">Density:</span>
+                <div className="font-semibold text-white">{Math.round(weight / volume)} kg/CBM</div>
+              </div>
+            </div>
+            <div className="mt-4 p-3 bg-blue-900/20 rounded border-l-4 border-blue-400">
+              <div className="text-blue-400 font-semibold mb-2">Route Analysis</div>
+              <div className="text-sm text-slate-300">
+                {origin} → {destination} corridor shows optimal performance with {corridorIntelligence.predominantMode.toLowerCase()} transport mode
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Route Intelligence - Distance/Route Options */}
       <RouteIntelligencePanel 
         corridorData={corridorIntelligence}
         routeOptions={routeOptions}
       />
 
-      {/* 4. Forwarder Matrix - Detailed Analysis */}
+      {/* 5. Forwarder Matrix - Detailed Analysis */}
       <ForwarderIntelligenceMatrix 
         forwarders={rankedForwarders.length > 0 ? rankedForwarders : forwarderIntelligence}
         cargoType={cargoType}
       />
-
-      {/* 5. Cargo & Weight Context - Supporting Information */}
-      <div className="oracle-card p-6">
-        <h3 className="font-semibold text-deepcal-light mb-4">📦 Shipment Context</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          <div>
-            <span className="text-slate-400">Cargo Type:</span>
-            <div className="font-semibold text-white">{cargoType}</div>
-          </div>
-          <div>
-            <span className="text-slate-400">Weight:</span>
-            <div className="font-semibold text-white">{weight.toLocaleString()} kg</div>
-          </div>
-          <div>
-            <span className="text-slate-400">Volume:</span>
-            <div className="font-semibold text-white">{volume} CBM</div>
-          </div>
-          <div>
-            <span className="text-slate-400">Density:</span>
-            <div className="font-semibold text-white">{Math.round(weight / volume)} kg/CBM</div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
