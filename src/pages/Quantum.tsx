@@ -9,6 +9,7 @@ import { QuantumOptimizationMatrix } from '../components/QuantumOptimizationMatr
 import { RiskHeatmap } from '../components/analytics/RiskHeatmap';
 import { ForwarderPerformance } from '../types/deeptrack';
 import AnimatedNodeOracle from '../components/oracle/AnimatedNodeOracle';
+import { AnimatedQuantumOrb } from '../components/quantum/AnimatedQuantumOrb';
 
 const Quantum = () => {
   const [formData, setFormData] = useState({
@@ -208,57 +209,8 @@ const Quantum = () => {
             </div>
           </div>
 
-          {/* Quantum Decision Orb - Centered */}
-          <div className="flex justify-center mb-16">
-            <div className="w-96 h-96 rounded-full oracle-card flex items-center justify-center animate-pulse">
-              <div className="text-center relative">
-                {/* Quantum particles orbiting */}
-                <div className="absolute w-2 h-2 rounded-full bg-deepcal-light animate-bounce" style={{top: '-40px', left: '50px'}}></div>
-                <div className="absolute w-2 h-2 rounded-full bg-deepcal-purple animate-bounce" style={{top: '30px', left: '-60px', animationDelay: '0.5s'}}></div>
-                <div className="absolute w-2 h-2 rounded-full bg-deepcal-light animate-bounce" style={{top: '80px', left: '20px', animationDelay: '1s'}}></div>
-                
-                <div className="w-20 h-20 rounded-full bg-gradient-to-r from-deepcal-purple to-deepcal-light flex items-center justify-center mx-auto mb-4 glowing-border">
-                  <i className="fas fa-infinity text-white text-3xl"></i>
-                </div>
-                <h3 className="font-bold text-2xl text-deepcal-light mb-2">Quantum Decision Orb</h3>
-                <div className="text-xs text-slate-400 mb-4">Grey-Quantum AHP-TOPSIS</div>
-                
-                <div className="relative w-28 h-28 mx-auto mb-4">
-                  <div className="absolute inset-0 rounded-full border-2 border-deepcal-purple/30 animate-spin-slow"></div>
-                  <div className="absolute inset-4 rounded-full border-2 border-deepcal-light/30 animate-spin-slow" style={{animationDirection: 'reverse'}}></div>
-                  <div className="absolute inset-8 rounded-full border-2 border-slate-400/30 animate-spin-slow"></div>
-                </div>
-                
-                <div className="text-xs text-slate-300">
-                  <div className="mb-3 text-center font-mono text-deepcal-light">
-                    "Collapsing wavefunctions for optimal decisions"
-                  </div>
-                  <div className="grid grid-cols-4 gap-2 text-center">
-                    <div className="bg-green-900/30 p-1 rounded border border-green-500/20">
-                      <div className="text-green-300">#1</div>
-                      <div className="font-bold text-white">Q4</div>
-                      <div className="text-xs text-green-400">0.892</div>
-                    </div>
-                    <div className="bg-blue-900/30 p-1 rounded border border-blue-500/20">
-                      <div className="text-blue-300">#2</div>
-                      <div className="font-bold text-white">Q3</div>
-                      <div className="text-xs text-blue-400">0.845</div>
-                    </div>
-                    <div className="bg-yellow-900/30 p-1 rounded border border-yellow-500/20">
-                      <div className="text-yellow-300">#3</div>
-                      <div className="font-bold text-white">Q1</div>
-                      <div className="text-xs text-yellow-400">0.712</div>
-                    </div>
-                    <div className="bg-red-900/30 p-1 rounded border border-red-500/20">
-                      <div className="text-red-300">#4</div>
-                      <div className="font-bold text-white">Q2</div>
-                      <div className="text-xs text-red-400">0.301</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Enhanced Animated Quantum Decision Orb */}
+          <AnimatedQuantumOrb />
           
           {/* Status Bar */}
           <div className="oracle-card p-6">

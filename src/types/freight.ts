@@ -117,6 +117,10 @@ export interface CanonicalShipment {
   destination: string;
   origin_country?: string;
   destination_country?: string;
+  origin_latitude?: number | string;
+  origin_longitude?: number | string;
+  destination_latitude?: number | string;
+  destination_longitude?: number | string;
   cargo_type: string;
   cargo_description?: string;
   item_category?: string;
