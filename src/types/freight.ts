@@ -23,6 +23,9 @@ export interface RealTimeRate {
     totalRate: number;
     validUntil: string;
     currency: string;
+    volumeDiscount?: number;
+    seasonalAdjustment?: number;
+    confidence?: 'High' | 'Good' | 'Medium' | 'Low';
 }
 
 export interface ForwarderIntelligence {
@@ -98,7 +101,7 @@ export interface DynamicRankingConfig {
 
 export interface CanonicalShipment {
   id: number;
-  request_reference?: string;
+  request_reference: string;
   date_of_collection: string;
   date_of_arrival_destination: string;
   date_of_greenlight_to_pickup: string;
@@ -115,22 +118,22 @@ export interface CanonicalShipment {
   bwosi: number | string;
   origin: string;
   destination: string;
-  origin_country?: string;
-  destination_country?: string;
-  origin_latitude?: number | string;
-  origin_longitude?: number | string;
-  destination_latitude?: number | string;
-  destination_longitude?: number | string;
+  origin_country: string;
+  destination_country: string;
+  origin_latitude: number | string;
+  origin_longitude: number | string;
+  destination_latitude: number | string;
+  destination_longitude: number | string;
   cargo_type: string;
-  cargo_description?: string;
-  item_category?: string;
+  cargo_description: string;
+  item_category: string;
   weight_kg: number | string;
   volume_cbm: number | string;
   carrier: string;
   routing: string;
   transit_days: number | string;
   actual_cost: number | string;
-  freight_carrier_cost?: number | string;
+  freight_carrier_cost: number | string;
   fuel_surcharge: number | string;
   insurance: number | string;
   customs_brokerage: number | string;
