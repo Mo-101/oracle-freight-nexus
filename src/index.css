@@ -48,8 +48,8 @@
 
     /* DeepCAL color variables */
     --deepcal-purple: #7e22ce;
-    --deepcal-light: #a855f7;
-    --deepcal-oracle: #c084fc;
+    --deepcal-light: #09079b;
+    --deepcal-oracle: #09079b;
   }
 
   .dark {
@@ -131,12 +131,12 @@
   }
   
   ::-webkit-scrollbar-thumb {
-    background: rgba(126, 34, 206, 0.5);
+    background: rgba(5, 39, 190, 0.5);
     @apply rounded-full transition-colors;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    background: #a855f7;
+    background: #03b1a2;
   }
   
   /* Scanline effect for cyberpunk feel */
@@ -146,7 +146,7 @@
     left: 0;
     width: 100%;
     height: 2px;
-    background: rgba(126, 34, 206, 0.1);
+    background: rgba(5, 39, 190, 0.349);
     opacity: 0.75;
     z-index: 100;
     pointer-events: none;
@@ -156,26 +156,27 @@
 
 @layer components {
   .symbolic-border {
-    border: 1px solid rgba(126, 34, 206, 0.3);
-    box-shadow: 0 0 15px rgba(126, 34, 206, 0.2), inset 0 0 10px rgba(126, 34, 206, 0.1);
+    border: 1px solid rgba(5, 39, 190, 0.3);
+    box-shadow: 0 0 15px rgba(5, 39, 190, 0.2), inset 0 0 10px rgba(5, 39, 190, 0.1);
   }
 
   .glowing-border {
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+    box-shadow: 0 0 20px rgba(5, 39, 190, 0.6);
   }
 
   .oracle-card {
     background: linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
-    border: 1px solid rgba(126, 34, 206, 0.4);
+    border: 1px solid rgba(5, 39, 190, 0.4);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     border-radius: 1rem;
   }
 
   /* Tech card hover effects */
   .tech-card {
-    @apply relative overflow-hidden rounded-lg border border-white/10 p-6 transition-all duration-300;
-    background: rgba(10, 14, 23, 0.5);
-    backdrop-filter: blur(12px);
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
+    border: 1px solid rgba(5, 39, 190, 0.4);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    border-radius: 1rem;
   }
   
   .tech-card::before {
