@@ -10,7 +10,7 @@ interface VoiceInterfaceProps {
 export const VoiceInterface = ({ onUserMessage, isProcessing }: VoiceInterfaceProps) => {
   const [isListening, setIsListening] = useState(false);
   const [statusMessage, setStatusMessage] = useState("Click the microphone to start speaking");
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     // Check for Web Speech API support

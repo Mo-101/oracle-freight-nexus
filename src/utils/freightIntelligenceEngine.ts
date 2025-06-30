@@ -285,11 +285,15 @@ export class FreightIntelligenceEngine {
   }
 
   private calculateSeasonalVariation(shipments: any[]): number {
-    // Simplified seasonal variation calculation
+    if (shipments.length === 0) return 0;
+    
+    // Simplified seasonal variation calculation  
     const monthlyData = shipments.reduce((acc, s) => {
       const collectionDate = new Date(s.date_of_collection);
-      const month = collectionDate.getMonth();
-      acc[month] = (acc[month] || 0) + 1;
+      if (!isNaN(collectionDate.getTime())) {  
+        const month = collectionDate.getMonth();
+        acc[month] = (acc[month] || 0) + 1;
+      }
       return acc;
     }, {} as Record<number, number>);
     
@@ -351,7 +355,6 @@ export class FreightIntelligenceEngine {
   }
 
   private generateRecentPerformance(shipments: any[]): any[] {
-    // Remove redundant safeParseFloat wrapper - calculateAvgCost already returns number
     const avgCostValue = this.calculateAvgCost(shipments) || 4.5;
     
     return [
