@@ -1,7 +1,6 @@
-
 import { CanonicalShipment } from '@/types/freight';
 import { canonicalShipmentData } from '@/data/canonicalData';
-import { syntheticDataGenerator } from './syntheticDataGenerator';
+import { canonicalDataGenerator } from './syntheticDataGenerator';
 
 interface ExportConfig {
   includeCanonical: boolean;
@@ -37,7 +36,7 @@ class DataExportService {
         languageVariants: ['en', 'fr', 'sw'] // English, French, Swahili
       };
 
-      const syntheticData = syntheticDataGenerator.generateSyntheticData(syntheticConfig);
+      const syntheticData = canonicalDataGenerator.generateSyntheticData(syntheticConfig);
       allData.push(...syntheticData);
     }
 
