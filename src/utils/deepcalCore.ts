@@ -1,4 +1,3 @@
-
 import { baseDataStore } from '@/services/baseDataStore';
 import { NeutrosophicAHP, TNN } from './neutrosophicAHP';
 import { DeepCALTOPSIS, TOPSISCriteria, TOPSISAlternative, TOPSISResult } from './deepcalTOPSIS';
@@ -30,6 +29,19 @@ export interface DeepCALDecision {
   dataVersion: string;
 }
 
+export interface ShipmentData {
+  shipment_id: string;
+  origin_country: string;
+  destination_country: string;
+  weight_kg: string | number;
+  volume_cbm: string | number;
+  cost: string | number;
+  forwarder: string;
+  transit_days: string | number;
+  delay_days?: string | number;
+  [key: string]: any;
+}
+
 export class DeepCALCore {
   private ahp: NeutrosophicAHP;
 
@@ -42,11 +54,11 @@ export class DeepCALCore {
   }
 
   analyzeForwarders(): ForwarderAnalysis[] {
-    const rawData = baseDataStore.getRawData();
+    const rawData: ShipmentData[] = baseDataStore.getRawData() as ShipmentData[];
     console.log('🔍 Analyzing forwarders from', rawData.length, 'shipments');
 
     // Group by forwarder
-    const forwarderGroups = rawData.reduce((groups: Record<string, any[]>, shipment) => {
+    const forwarderGroups = rawData.reduce((groups: Record<string, ShipmentData[]>, shipment) => {
       const forwarder = shipment.forwarder || 'Unknown';
       if (!groups[forwarder]) groups[forwarder] = [];
       groups[forwarder].push(shipment);
@@ -55,14 +67,14 @@ export class DeepCALCore {
 
     const analyses: ForwarderAnalysis[] = [];
 
-    Object.entries(forwarderGroups).forEach(([forwarder, shipments]) => {
+    Object.entries(forwarderGroups).forEach(([forwarder, shipments]: [string, ShipmentData[]]) => {
       if (shipments.length === 0) return;
 
       // Calculate metrics
-      const costs = shipments.map(s => parseFloat(s.cost) || 0).filter(c => c > 0);
-      const weights = shipments.map(s => parseFloat(s.weight_kg) || 1).filter(w => w > 0);
-      const transitTimes = shipments.map(s => parseFloat(s.transit_days) || 0).filter(t => t > 0);
-      const delays = shipments.map(s => parseFloat(s.delay_days) || 0);
+      const costs = shipments.map(s => parseFloat(s.cost as string) || 0).filter(c => c > 0);
+      const weights = shipments.map(s => parseFloat(s.weight_kg as string) || 1).filter(w => w > 0);
+      const transitTimes = shipments.map(s => parseFloat(s.transit_days as string) || 0).filter(t => t > 0);
+      const delays = shipments.map(s => parseFloat(s.delay_days as string) || 0);
       
       // Cost per kg
       const totalCost = costs.reduce((a, b) => a + b, 0);
