@@ -262,26 +262,19 @@ export class FreightIntelligenceEngine {
   private calculateAvgCost(shipments: any[]): number {
     if (shipments.length === 0) return 0;
     
-    const costsWithData = shipments.filter(s => {
-      const cost = this.safeParseFloat(s.actual_cost);
-      const weight = this.safeParseFloat(s.weight_kg);
-      
-      return cost > 0 && weight > 0;
-    });
-
-    if (costsWithData.length === 0) return 0;
+    // Create a new array with properly typed values
+    const validShipments = shipments.map(s => ({
+        cost: this.safeParseFloat(s.actual_cost),
+        weight: this.safeParseFloat(s.weight_kg)
+    })).filter(item => item.cost > 0 && item.weight > 0);
     
-    const totalCost = costsWithData.reduce((sum, s) => {
-      const cost = this.safeParseFloat(s.actual_cost);
-      const weight = this.safeParseFloat(s.weight_kg);
-      
-      if (cost > 0 && weight > 0) {
-        return sum + (cost / weight);
-      }
-      return sum;
+    if (validShipments.length === 0) return 0;
+    
+    const totalCost = validShipments.reduce((sum, item) => {
+        return sum + (item.cost / item.weight);
     }, 0);
     
-    return Math.round((totalCost / costsWithData.length) * 100) / 100;
+    return Math.round((totalCost / validShipments.length) * 100) / 100;
   }
 
   private calculateSeasonalVariation(shipments: any[]): number {
