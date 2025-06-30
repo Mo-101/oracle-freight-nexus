@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Volume2, VolumeX, Sparkles } from 'lucide-react';
+import { Volume2, VolumeX, Sparkles } from 'lucide-react'; // This line is already correct, no change needed.
 import { TOPSISResult } from '@/utils/neutrosophicEngine';
 import { unifiedTTS } from '@/services/unifiedTTS';
 import { deepseekClient } from '@/services/deepseekClient';
@@ -147,14 +147,14 @@ export const VoiceNarration = ({
           <Sparkles className="ml-2 w-5 h-5 text-deepcal-light" />
         </h3>
         <div className="flex items-center space-x-2">
-          <select 
+          <select
             value={currentMode}
-            onChange={(e) => {
-              setCurrentMode(e.target.value as any);
+            onChange={(e)=>{
+              setCurrentMode(e.target.value as typeof currentMode);
               setGeneratedNarrative(''); // Clear generated narrative when mode changes
             }}
             className="bg-slate-700 text-white px-3 py-1 rounded text-sm border border-slate-600"
-          >
+            >
             <option value="oracular">🔮 Mystical Oracle</option>
             <option value="humorous">😄 Sarcastic Logistics</option>
             <option value="corporate">📊 Corporate Professional</option>

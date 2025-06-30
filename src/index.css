@@ -205,25 +205,25 @@
   
   /* Futuristic button */
   .button-cyber {
-    @apply relative overflow-hidden font-display uppercase tracking-wide text-sm font-medium py-3 px-6 bg-deepcal-dark border border-deepcal-oracle/30 rounded text-white transition-all duration-300;
+    relative overflow-hidden font-display uppercase tracking-wide text-sm font-medium py-3 px-6 bg-deepcal-dark border border-deepcal-oracle/30 rounded text-white transition-all duration-300;
   }
   
   .button-cyber::before {
     content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-deepcal-purple to-deepcal-oracle opacity-0 transition-opacity duration-300;
+    absolute inset-0 bg-gradient-to-r from-deepcal-purple to-deepcal-oracle opacity-0 transition-opacity duration-300;
   }
   
   .button-cyber:hover::before {
-    @apply opacity-20;
+    opacity-20;
   }
   
   .button-cyber::after {
     content: '';
-    @apply absolute bottom-0 left-0 h-[2px] w-0 bg-deepcal-oracle transition-all duration-300;
+    absolute bottom-0 left-0 h-[2px] w-0 bg-deepcal-oracle transition-all duration-300;
   }
   
   .button-cyber:hover::after {
-    @apply w-full;
+    w-full;
   }
 
   .map-container {
@@ -285,7 +285,7 @@
     position: absolute;
     width: 2px;
     height: 2px;
-    background-color: rgba(126, 34, 206, 0.7);
+    background-color: rgba(196, 230, 4, 0.932);
     border-radius: 50%;
     animation: particle-move 2s linear forwards;
   }
@@ -306,14 +306,6 @@
     width: 200%;
     height: 200%;
     background: linear-gradient(
-      to bottom right,
-      rgba(126, 34, 206, 0) 0%,
-      rgba(126, 34, 206, 0) 35%,
-      rgba(126, 34, 206, 0.1) 45%,
-      rgba(126, 34, 206, 0) 55%,
-      rgba(126, 34, 206, 0) 100%
-    );
-    transform: rotate(30deg);
     animation: shine 3s infinite;
   }
 
@@ -459,3 +451,12 @@
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
+
+      to bottom right,
+      rgba(126, 34, 206, 0) 0%,
+      rgba(126, 34, 206, 0) 35%,
+      rgba(126, 34, 206, 0.1) 45%,
+      rgba(126, 34, 206, 0) 55%,
+      rgba(126, 34, 206, 0) 100%
+    );
+    transform: rotate(30deg);
