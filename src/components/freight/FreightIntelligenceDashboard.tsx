@@ -56,30 +56,30 @@ export const FreightIntelligenceDashboard = ({
 
   return (
     <div className="space-y-8">
-      {/* Real-Time Dynamic Ranking - New Feature */}
+      {/* 1. Oracle Recommendations - First Display */}
+      <SymbolicDecisionEngine 
+        decision={symbolicDecision}
+      />
+
+      {/* 2. Real-Time Dynamic Ranking - Price/Performance */}
       <RealTimeRankingPanel 
         forwarders={forwarderIntelligence}
         onRankingUpdate={handleRankingUpdate}
       />
 
-      {/* Symbolic Decision - Show After Ranking */}
-      <SymbolicDecisionEngine 
-        decision={symbolicDecision}
-      />
-
-      {/* Route Intelligence */}
+      {/* 3. Route Intelligence - Distance/Route Options */}
       <RouteIntelligencePanel 
         corridorData={corridorIntelligence}
         routeOptions={routeOptions}
       />
 
-      {/* Forwarder Matrix - Now uses ranked data if available */}
+      {/* 4. Forwarder Matrix - Detailed Analysis */}
       <ForwarderIntelligenceMatrix 
         forwarders={rankedForwarders.length > 0 ? rankedForwarders : forwarderIntelligence}
         cargoType={cargoType}
       />
 
-      {/* Cargo & Weight Context */}
+      {/* 5. Cargo & Weight Context - Supporting Information */}
       <div className="oracle-card p-6">
         <h3 className="font-semibold text-deepcal-light mb-4">📦 Shipment Context</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
