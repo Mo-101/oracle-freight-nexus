@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -10,13 +11,14 @@ import { RiskHeatmap } from '../components/analytics/RiskHeatmap';
 import { ForwarderPerformance } from '../types/deeptrack';
 import AnimatedNodeOracle from '../components/oracle/AnimatedNodeOracle';
 import { AnimatedQuantumOrb } from '../components/quantum/AnimatedQuantumOrb';
+import { MCPAnalyticsDashboard } from '../components/quantum/MCPAnalyticsDashboard';
 
 const Quantum = () => {
   const [formData, setFormData] = useState({
-    origin: '',
-    destination: '',
-    weight: '',
-    volume: '',
+    origin: 'Nairobi, Kenya',
+    destination: 'Lagos, Nigeria',
+    weight: '500',
+    volume: '2.5',
     priority: 'Medical Supplies (Q-Priority 9)',
     emergency: false
   });
@@ -62,18 +64,18 @@ const Quantum = () => {
                     DeepCAL++ Quantum Decision Matrix
                   </h1>
                   <p className="text-slate-400 mt-1">
-                    Optimizing supply chains at quantum speed with Grey-AHP-TOPSIS
+                    Real-time AI-powered optimization with MCP integration
                   </p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
                 <div className="oracle-card px-4 py-2 flex items-center">
                   <div className="w-3 h-3 rounded-full bg-green-400 mr-2 animate-pulse"></div>
-                  <span className="text-sm text-slate-200">Quantum Core Online</span>
+                  <span className="text-sm text-slate-200">MCP Connected</span>
                 </div>
                 <div className="oracle-card px-4 py-2 flex items-center">
                   <i className="fas fa-database text-deepcal-light mr-2"></i>
-                  <span className="text-sm text-slate-200">v2.1.0-quantum</span>
+                  <span className="text-sm text-slate-200">v2.1.0-quantum+mcp</span>
                 </div>
               </div>
             </div>
@@ -92,6 +94,19 @@ const Quantum = () => {
             </div>
           </div>
 
+          {/* MCP Analytics Dashboard - Real-time AI-driven outputs */}
+          <div className="mb-16">
+            <MCPAnalyticsDashboard 
+              shipmentData={{
+                origin: formData.origin,
+                destination: formData.destination,
+                cargoType: formData.priority,
+                weight: parseFloat(formData.weight) || 500,
+                volume: parseFloat(formData.volume) || 2.5
+              }}
+            />
+          </div>
+
           {/* Quantum Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 mb-16">
             {/* Data Input Quantum Node */}
@@ -103,21 +118,21 @@ const Quantum = () => {
                   </div>
                   <div>
                     <h3 className="font-bold text-deepcal-light text-lg">Quantum Data Input</h3>
-                    <div className="text-xs text-slate-400">Emergency Health Kits Dataset</div>
+                    <div className="text-xs text-slate-400">Real-time Dataset Integration</div>
                   </div>
                 </div>
                 <div className="text-xs text-slate-300 space-y-2 flex-1">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Quantum Entanglement</span>
-                    <span className="text-green-400">✓ Superpositioned</span>
+                    <span className="text-slate-400">MCP Integration</span>
+                    <span className="text-green-400">✓ Active</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Data Integrity</span>
-                    <span className="text-green-400">✓ Verified</span>
+                    <span className="text-slate-400">Data Streams</span>
+                    <span className="text-green-400">✓ Live</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Qubits Allocated</span>
-                    <span className="text-deepcal-light">1,024</span>
+                    <span className="text-slate-400">Model Predictions</span>
+                    <span className="text-deepcal-light">Real-time</span>
                   </div>
                 </div>
               </div>
@@ -131,24 +146,24 @@ const Quantum = () => {
                     <i className="fas fa-microchip text-white text-xl"></i>
                   </div>
                   <div>
-                    <h3 className="font-bold text-deepcal-light text-lg">Quantum Preprocessor</h3>
-                    <div className="text-xs text-slate-400">Parallel Dimension Reduction</div>
+                    <h3 className="font-bold text-deepcal-light text-lg">AI Model Engine</h3>
+                    <div className="text-xs text-slate-400">Neural Network Processing</div>
                   </div>
                 </div>
                 <div className="space-y-3 flex-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <div className="w-2 h-2 rounded-full bg-green-400 mr-2 animate-pulse"></div>
-                      <span className="text-xs text-slate-300">Quantum Validation</span>
+                      <span className="text-xs text-slate-300">Model Inference</span>
                     </div>
-                    <span className="text-xs font-mono text-green-400">99.8%</span>
+                    <span className="text-xs font-mono text-green-400">Active</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <div className="w-2 h-2 rounded-full bg-deepcal-light mr-2 animate-pulse"></div>
-                      <span className="text-xs text-slate-300">Entanglement Mapping</span>
+                      <span className="text-xs text-slate-300">Feature Engineering</span>
                     </div>
-                    <span className="text-xs font-mono text-deepcal-light">64q</span>
+                    <span className="text-xs font-mono text-deepcal-light">Live</span>
                   </div>
                 </div>
               </div>
@@ -162,26 +177,26 @@ const Quantum = () => {
                     <i className="fas fa-brain text-white text-xl"></i>
                   </div>
                   <div>
-                    <h3 className="font-bold text-blue-300 text-lg">Quantum Analytics Core</h3>
-                    <div className="text-xs text-slate-400">Neural Quantum Network</div>
+                    <h3 className="font-bold text-blue-300 text-lg">MCP Intelligence</h3>
+                    <div className="text-xs text-slate-400">Multi-Modal AI Context</div>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-xs flex-1">
                   <div className="bg-slate-800/50 p-3 rounded border border-slate-600/50">
-                    <div className="text-deepcal-light mb-1">Avg Transit</div>
-                    <div className="font-mono text-slate-200">2.4d <span className="text-green-400">(-18%)</span></div>
+                    <div className="text-deepcal-light mb-1">Research Papers</div>
+                    <div className="font-mono text-slate-200">Live <span className="text-green-400">Analysis</span></div>
                   </div>
                   <div className="bg-slate-800/50 p-3 rounded border border-slate-600/50">
-                    <div className="text-deepcal-light mb-1">Cost Efficiency</div>
-                    <div className="font-mono text-slate-200">$0.98/kg <span className="text-green-400">(+9.5%)</span></div>
+                    <div className="text-deepcal-light mb-1">ML Models</div>
+                    <div className="font-mono text-slate-200">Auto <span className="text-green-400">Discovery</span></div>
                   </div>
                   <div className="bg-slate-800/50 p-3 rounded border border-slate-600/50">
-                    <div className="text-deepcal-light mb-1">Reliability</div>
-                    <div className="font-mono text-slate-200">96.2% <span className="text-green-400">(+4.2pp)</span></div>
+                    <div className="text-deepcal-light mb-1">AI Insights</div>
+                    <div className="font-mono text-slate-200">Real-time <span className="text-green-400">Gen</span></div>
                   </div>
                   <div className="bg-slate-800/50 p-3 rounded border border-slate-600/50">
-                    <div className="text-deepcal-light mb-1">Risk Factor</div>
-                    <div className="font-mono text-slate-200">3.8% <span className="text-green-400">(-4.2pp)</span></div>
+                    <div className="text-deepcal-light mb-1">Context</div>
+                    <div className="font-mono text-slate-200">Dynamic <span className="text-green-400">Update</span></div>
                   </div>
                 </div>
               </div>
@@ -192,21 +207,6 @@ const Quantum = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
             <SymbolicStatusOrb />
             <QuantumTrainingProgress />
-          </div>
-
-          {/* Analytics and Visualization Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
-            {/* 3D Quantum Optimization Matrix */}
-            <HolographicCard className="w-full h-96" animationClass="animate-float">
-              <div className="p-6 h-full">
-                <QuantumOptimizationMatrix forwarders={quantumForwarders} />
-              </div>
-            </HolographicCard>
-
-            {/* Risk Heatmap */}
-            <div className="h-96">
-              <RiskHeatmap />
-            </div>
           </div>
 
           {/* Enhanced Animated Quantum Decision Orb */}
@@ -220,19 +220,19 @@ const Quantum = () => {
                   <i className="fas fa-shield-alt text-white text-sm"></i>
                 </div>
                 <div className="text-sm">
-                  <div className="text-deepcal-light font-medium">Quantum Security Protocol</div>
-                  <div className="text-xs text-slate-400">All computations encrypted with QKD</div>
+                  <div className="text-deepcal-light font-medium">MCP Quantum Security Protocol</div>
+                  <div className="text-xs text-slate-400">All AI computations secured with quantum encryption</div>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="text-xs font-mono bg-slate-800/50 px-3 py-1 rounded-full border border-slate-600/30">
-                  <span className="text-deepcal-light">Qubits:</span> <span className="text-slate-200">1,024/1,024</span>
+                  <span className="text-deepcal-light">MCP:</span> <span className="text-slate-200">Connected</span>
                 </div>
                 <div className="text-xs font-mono bg-slate-800/50 px-3 py-1 rounded-full border border-slate-600/30">
-                  <span className="text-green-400">Coherence:</span> <span className="text-slate-200">98.7%</span>
+                  <span className="text-green-400">AI Models:</span> <span className="text-slate-200">Live</span>
                 </div>
                 <div className="text-xs font-mono bg-slate-800/50 px-3 py-1 rounded-full border border-slate-600/30">
-                  <span className="text-deepcal-light">Entanglement:</span> <span className="text-slate-200">64q</span>
+                  <span className="text-deepcal-light">Analytics:</span> <span className="text-slate-200">Real-time</span>
                 </div>
               </div>
             </div>

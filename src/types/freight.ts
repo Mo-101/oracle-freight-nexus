@@ -160,4 +160,5 @@ export interface CanonicalShipment {
   exception_handling_effectiveness: number | string;
   overall_performance_score: number | string;
   neutrosophic_interpretation?: NeutrosophicValue;
+  comments?: string;
 }
