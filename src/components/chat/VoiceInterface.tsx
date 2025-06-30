@@ -10,19 +10,19 @@ interface VoiceInterfaceProps {
 export const VoiceInterface = ({ onUserMessage, isProcessing }: VoiceInterfaceProps) => {
   const [isListening, setIsListening] = useState(false);
   const [statusMessage, setStatusMessage] = useState("Click the microphone to start speaking");
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
     // Check for Web Speech API support
-    const SpeechRecognitionConstructor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
-    if (!SpeechRecognitionConstructor) {
+    if (!SpeechRecognition) {
       setStatusMessage("Your browser doesn't support speech recognition. Please use Chrome or Edge.");
       return;
     }
 
     // Initialize speech recognition
-    const recognition = new SpeechRecognitionConstructor();
+    const recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = 'en-US';
@@ -38,13 +38,13 @@ export const VoiceInterface = ({ onUserMessage, isProcessing }: VoiceInterfacePr
       }
     };
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       onUserMessage(transcript);
       stopListening();
     };
 
-    recognition.onerror = (event: any) => {
+    recognition.onerror = (event) => {
       console.error('Recognition error:', event.error);
       setStatusMessage(`Error: ${event.error}`);
       stopListening();

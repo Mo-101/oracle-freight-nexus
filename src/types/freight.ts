@@ -1,16 +1,12 @@
 
 import { NeutrosophicValue } from "@/utils/neutrosophicEngine";
 
-export type TransportMode = 'Air' | 'Sea' | 'Road' | 'Rail' | 'Multimodal' | 'Land';
-
 export interface ForwarderPerformance {
     name: string;
     avgCostPerKg: number;
     avgTransitDays: number;
     reliabilityScore: number;
     quoteWinRate: number;
-    totalShipments: number;
-    onTimeRate: number;
 }
 
 export interface ForwarderIntelligence {
@@ -22,13 +18,6 @@ export interface ForwarderIntelligence {
     emergencyGrade: string;
     quoteCoverage: number;
     specializations: string[];
-    successRate: number;
-    recentPerformance: Array<{
-        month: string;
-        shipmentsHandled: number;
-        successRate: number;
-        avgCost: number;
-    }>;
 }
 
 export interface RouteOption {
@@ -52,7 +41,6 @@ export interface CorridorIntelligence {
     avgTransitDays: number;
     predominantMode: string;
     riskFactors: string[];
-    seasonalVariation: number;
 }
 
 export interface SymbolicDecision {

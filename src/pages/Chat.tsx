@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -277,7 +276,7 @@ const Chat = () => {
       
       <Footer />
       
-      <style>{`
+      <style jsx>{`
         @keyframes pulse {
           0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
           70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }

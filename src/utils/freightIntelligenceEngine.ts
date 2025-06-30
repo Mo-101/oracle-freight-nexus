@@ -1,4 +1,3 @@
-
 import { canonicalShipmentData, getForwarderPerformance } from '@/data/canonicalData';
 import { 
   RouteOption, 
@@ -11,24 +10,24 @@ import {
 export class FreightIntelligenceEngine {
   
   // Helper function to safely parse unknown values to numbers
-  private safeParseFloat(value: unknown): number {
+  private safeParseFloat(value: unknown): number | null {
     if (typeof value === 'number' && !isNaN(value)) {
       return value;
     }
     if (typeof value === 'string') {
       const parsed = parseFloat(value);
-      return isNaN(parsed) ? 0 : parsed;
+      return isNaN(parsed) ? null : parsed;
     }
-    return 0;
+    return null;
   }
 
   analyzeCorridorIntelligence(origin: string, destination: string): CorridorIntelligence {
     const corridorShipments = canonicalShipmentData.filter(
-      s => s.origin === origin && s.destination === destination
+      s => s.origin_country === origin && s.destination_country === destination
     );
 
     const totalShipments = corridorShipments.length;
-    const successfulShipments = corridorShipments.filter(s => s.delivery_status === 'On Time').length;
+    const successfulShipments = corridorShipments.filter(s => s.delivery_status === 'Delivered').length;
     const successRate = totalShipments > 0 ? Math.round((successfulShipments / totalShipments) * 100) : 0;
 
     // Calculate average transit days
@@ -66,14 +65,14 @@ export class FreightIntelligenceEngine {
       successRate,
       avgTransitDays,
       predominantMode,
-      riskFactors,
-      seasonalVariation
+      seasonalVariation,
+      riskFactors
     };
   }
 
   generateRouteOptions(origin: string, destination: string): RouteOption[] {
     const corridorShipments = canonicalShipmentData.filter(
-      s => s.origin === origin && s.destination === destination
+      s => s.origin_country === origin && s.destination_country === destination
     );
 
     const routeOptions: RouteOption[] = [];
@@ -135,12 +134,14 @@ export class FreightIntelligenceEngine {
   generateForwarderIntelligence(cargoType: string): ForwarderIntelligence[] {
     const forwarderNames = [
       'Kuehne Nagel', 'DHL Express', 'DHL Global', 'Scan Global Logistics',
-      'Siginon', 'AGL', 'Freight In Time', 'Bwosi'
+      'Siginon Logistics', 'Agility Logistics', 'Freight In Time', 'BWOSI'
     ];
 
     return forwarderNames.map(name => {
       const performance = getForwarderPerformance(name);
-      const forwarderShipments = canonicalShipmentData.filter(s => s.carrier === name);
+      const forwarderShipments = canonicalShipmentData.filter(
+        s => s.initial_quote_awarded === name || s.final_quote_awarded_freight_forwarder_carrier === name
+      );
 
       const specializations = this.analyzeSpecializations(forwarderShipments);
       const emergencyGrade = this.determineEmergencyGrade(forwarderShipments);
@@ -240,7 +241,7 @@ export class FreightIntelligenceEngine {
   }
 
   private calculateRiskFactor(shipments: any[]): number {
-    const failedShipments = shipments.filter(s => s.delivery_status !== 'On Time').length;
+    const failedShipments = shipments.filter(s => s.delivery_status !== 'Delivered').length;
     const riskPercentage = shipments.length > 0 ? (failedShipments / shipments.length) * 100 : 0;
     return Math.round(riskPercentage / 10); // Convert to 0-10 scale
   }
@@ -248,7 +249,7 @@ export class FreightIntelligenceEngine {
   private calculateConfidence(shipments: any[]): number {
     if (shipments.length === 0) return 0.5;
     
-    const successRate = shipments.filter(s => s.delivery_status === 'On Time').length / shipments.length;
+    const successRate = shipments.filter(s => s.delivery_status === 'Delivered').length / shipments.length;
     const dataQuality = Math.min(shipments.length / 10, 1); // More data = higher quality
     
     return Math.round((successRate * 0.7 + dataQuality * 0.3) * 100) / 100;
@@ -256,39 +257,40 @@ export class FreightIntelligenceEngine {
 
   private calculateSuccessRate(shipments: any[]): number {
     if (shipments.length === 0) return 0;
-    const successful = shipments.filter(s => s.delivery_status === 'On Time').length;
+    const successful = shipments.filter(s => s.delivery_status === 'Delivered').length;
     return Math.round((successful / shipments.length) * 100);
   }
 
   private calculateAvgCost(shipments: any[]): number {
     if (shipments.length === 0) return 0;
     
-    // Create a new array with properly typed values
-    const validShipments = shipments.map(s => {
-      const cost = this.safeParseFloat(s.actual_cost);
+    const costsWithData = shipments.filter(s => {
+      const costValue = this.safeParseFloat(s.freight_carrier_cost);
+      const weightValue = this.safeParseFloat(s.weight_kg);
+      
+      return costValue !== null && weightValue !== null && costValue > 0 && weightValue > 0;
+    });
+
+    if (costsWithData.length === 0) return 0;
+    
+    const totalCost = costsWithData.reduce((sum, s) => {
+      const cost = this.safeParseFloat(s.freight_carrier_cost);
       const weight = this.safeParseFloat(s.weight_kg);
-      return { cost, weight };
-    }).filter(item => item.cost > 0 && item.weight > 0);
-    
-    if (validShipments.length === 0) return 0;
-    
-    const totalCost = validShipments.reduce((sum, item) => {
-      return sum + (item.cost / item.weight);
+      
+      if (cost !== null && weight !== null && weight > 0) {
+        return sum + (cost / weight);
+      }
+      return sum;
     }, 0);
     
-    return Math.round((totalCost / validShipments.length) * 100) / 100;
+    return Math.round((totalCost / costsWithData.length) * 100) / 100;
   }
 
   private calculateSeasonalVariation(shipments: any[]): number {
-    if (shipments.length === 0) return 0;
-    
-    // Simplified seasonal variation calculation  
+    // Simplified seasonal variation calculation
     const monthlyData = shipments.reduce((acc, s) => {
-      const collectionDate = new Date(s.date_of_collection);
-      if (!isNaN(collectionDate.getTime())) {  
-        const month = collectionDate.getMonth();
-        acc[month] = (acc[month] || 0) + 1;
-      }
+      const month = new Date(s.date_of_collection).getMonth();
+      acc[month] = (acc[month] || 0) + 1;
       return acc;
     }, {} as Record<number, number>);
     
@@ -333,29 +335,28 @@ export class FreightIntelligenceEngine {
     const totalQuoteRequests = canonicalShipmentData.length;
     const forwarderQuotes = canonicalShipmentData.filter(s => {
       const quotes = [
-        this.safeParseFloat(s.kuehne_nagel),
-        this.safeParseFloat(s.scan_global_logistics),
-        this.safeParseFloat(s.dhl_express),
-        this.safeParseFloat(s.dhl_global),
-        this.safeParseFloat(s.siginon),
-        this.safeParseFloat(s.agl),
-        this.safeParseFloat(s.freight_in_time),
-        this.safeParseFloat(s.bwosi)
+        this.safeParseFloat(s.kuehne_nagel) || 0,
+        this.safeParseFloat(s.scan_global_logistics) || 0,
+        this.safeParseFloat(s.dhl_express) || 0,
+        this.safeParseFloat(s.dhl_global) || 0,
+        this.safeParseFloat(s.siginon) || 0,
+        this.safeParseFloat(s.agl) || 0,
+        this.safeParseFloat(s.freight_in_time) || 0,
+        this.safeParseFloat(s.bwosi) || 0
       ];
       
-      return quotes.some(quote => quote > 0);
+      return quotes.some(quote => typeof quote === 'number' && quote > 0);
     }).length;
     
     return Math.round((forwarderQuotes / totalQuoteRequests) * 100);
   }
 
   private generateRecentPerformance(shipments: any[]): any[] {
-    const avgCostValue = this.calculateAvgCost(shipments) || 4.5;
-    
+    // Simplified recent performance - would normally use actual recent data
     return [
-      { month: 'Dec', shipmentsHandled: shipments.length, successRate: 92, avgCost: avgCostValue },
-      { month: 'Nov', shipmentsHandled: Math.max(1, shipments.length - 2), successRate: 89, avgCost: avgCostValue + 0.2 },
-      { month: 'Oct', shipmentsHandled: Math.max(1, shipments.length - 1), successRate: 94, avgCost: avgCostValue - 0.2 }
+      { month: 'Dec', shipmentsHandled: shipments.length, successRate: 92, avgCost: 4.5 },
+      { month: 'Nov', shipmentsHandled: Math.max(1, shipments.length - 2), successRate: 89, avgCost: 4.7 },
+      { month: 'Oct', shipmentsHandled: Math.max(1, shipments.length - 1), successRate: 94, avgCost: 4.3 }
     ];
   }
 

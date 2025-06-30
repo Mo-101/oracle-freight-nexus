@@ -1,58 +1,16 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Interactive3DGlobe } from '../components/Interactive3DGlobe';
 import { PredictiveTimeline } from '../components/analytics/PredictiveTimeline';
 import { RiskHeatmap } from '../components/analytics/RiskHeatmap';
 
 // Set Mapbox access token
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2x4czNxbjU2MWM2eTJqc2gwNGIwaWhkMSJ9.jSwZdyaPa1dOHepNU5P71g';
-
-// Hybrid map style configuration
-const hybridMapStyle = {
-  "version": 8,
-  "name": "qgis2web export",
-  "pitch": 0,
-  "light": {
-    "intensity": 0.2
-  },
-  "sources": {
-    "GoogleSatellite_0": {
-      "type": "raster",
-      "tiles": ["https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"],
-      "tileSize": 256
-    },
-    "GoogleHybrid_1": {
-      "type": "raster",
-      "tiles": ["https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"],
-      "tileSize": 256
-    }
-  },
-  "sprite": "",
-  "glyphs": "https://glfonts.lukasmartinelli.ch/fonts/{fontstack}/{range}.pbf",
-  "layers": [
-    {
-      "id": "background",
-      "type": "background",
-      "layout": {},
-      "paint": {
-        "background-color": "#ffffff"
-      }
-    },
-    {
-      "id": "lyr_GoogleSatellite_0_0",
-      "type": "raster",
-      "source": "GoogleSatellite_0"
-    },
-    {
-      "id": "lyr_GoogleHybrid_1_1",
-      "type": "raster",
-      "source": "GoogleHybrid_1"
-    }
-  ]
-};
 
 interface WeatherData {
   main: {
@@ -90,13 +48,13 @@ const Map = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
 
-  // Updated Nairobi Warehouse coordinates and other locations
+  // Sample shipment locations based on the data
   const shipmentLocations: ShipmentLocation[] = [
-    { id: 'nairobi_warehouse', name: 'Warehouse Nairobi', coordinates: [36.990054, -1.2404475], status: 'origin', shipmentCount: 87 },
+    { id: 'nairobi', name: 'Nairobi Hub', coordinates: [36.990054, 1.2404475], status: 'origin', shipmentCount: 87 },
     { id: 'zimbabwe', name: 'Zimbabwe', coordinates: [31.08848075, -17.80269125], status: 'destination', shipmentCount: 12 },
-    { id: 'zambia', name: 'Zambia', coordinates: [28.3174378, -15.4136414], status: 'destination', shipmentCount: 8 },
+    { id: 'zambia', name: 'Zambia', coordinates: [28.3174378, 15.4136414], status: 'destination', shipmentCount: 8 },
     { id: 'madagascar', name: 'Madagascar', coordinates: [47.50866443, -14.71204234], status: 'destination', shipmentCount: 5 },
-    { id: 'comoros', name: 'Comoros', coordinates: [43.2413774, -11.7209701], status: 'destination', shipmentCount: 4 },
+    { id: 'comoros', name: 'Comoros', coordinates: [43.2413774, 11.7209701], status: 'destination', shipmentCount: 4 },
     { id: 'south_sudan', name: 'South Sudan', coordinates: [29.69490516, 7.86237248], status: 'destination', shipmentCount: 3 },
     { id: 'ethiopia', name: 'Ethiopia', coordinates: [38.7675998, 9.0146129], status: 'destination', shipmentCount: 6 },
     { id: 'burundi', name: 'Burundi', coordinates: [29.3731839, -3.3806734], status: 'destination', shipmentCount: 7 },
@@ -122,14 +80,13 @@ const Map = () => {
   useEffect(() => {
     if (!mapContainer.current || viewMode !== '2d') return;
 
-    // Initialize map with roof-level zoom on Nairobi Warehouse
+    // Initialize map
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: hybridMapStyle as any,
-      center: [36.990054, -1.2404475], // Nairobi Warehouse coordinates
-      zoom: 20, // Roof level zoom
-      pitch: 45, // Angle for 3D building view
-      bearing: 0
+      style: 'mapbox://styles/mapbox/dark-v11',
+      center: [30, 0],
+      zoom: 3,
+      pitch: 30,
     });
 
     // Add navigation controls
@@ -180,7 +137,7 @@ const Map = () => {
       });
 
       // Add routes from Nairobi to destinations
-      const nairobi = shipmentLocations.find(loc => loc.id === 'nairobi_warehouse');
+      const nairobi = shipmentLocations.find(loc => loc.id === 'nairobi');
       if (nairobi) {
         shipmentLocations
           .filter(loc => loc.status === 'destination')
@@ -239,14 +196,14 @@ const Map = () => {
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      {/* Map View */}
+      {/* Map or Globe View */}
       {viewMode === '2d' ? (
         <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
       ) : (
         <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
           <div className="w-full h-full flex items-center justify-center">
             <div className="w-full max-w-6xl h-96">
-              {/*<Interactive3DGlobe />*/}
+              <Interactive3DGlobe />
             </div>
           </div>
         </div>
@@ -299,16 +256,16 @@ const Map = () => {
                       variant="outline" 
                       size="sm"
                       className="bg-deepcal-purple/20 border-deepcal-purple/50 text-deepcal-light hover:bg-deepcal-purple/30"
-                      onClick={() => map.current?.flyTo({ center: [36.990054, -1.2404475], zoom: 20, pitch: 45 })}
+                      onClick={() => map.current?.flyTo({ center: [36.990054, 1.2404475], zoom: 6 })}
                     >
-                      <i className="fas fa-warehouse mr-2"></i>
-                      Warehouse Roof
+                      <i className="fas fa-home mr-2"></i>
+                      Nairobi Hub
                     </Button>
                     <Button 
                       variant="outline" 
                       size="sm"
                       className="bg-deepcal-purple/20 border-deepcal-purple/50 text-deepcal-light hover:bg-deepcal-purple/30"
-                      onClick={() => map.current?.flyTo({ center: [30, 0], zoom: 3, pitch: 0 })}
+                      onClick={() => map.current?.flyTo({ center: [30, 0], zoom: 3 })}
                     >
                       <i className="fas fa-globe mr-2"></i>
                       Global View
@@ -447,7 +404,7 @@ const Map = () => {
               <div>
                 <h3 className="font-bold text-slate-200">{selectedLocation.name}</h3>
                 <p className="text-sm text-slate-400">
-                  {selectedLocation.coordinates[1].toFixed(6)}, {selectedLocation.coordinates[0].toFixed(6)}
+                  {selectedLocation.coordinates[1].toFixed(4)}, {selectedLocation.coordinates[0].toFixed(4)}
                 </p>
               </div>
               
@@ -488,17 +445,14 @@ const Map = () => {
                 <Button 
                   className="w-full bg-deepcal-purple hover:bg-deepcal-dark text-white"
                   onClick={() => {
-                    const zoom = selectedLocation.id === 'nairobi_warehouse' ? 20 : 8;
-                    const pitch = selectedLocation.id === 'nairobi_warehouse' ? 45 : 30;
                     map.current?.flyTo({
                       center: selectedLocation.coordinates,
-                      zoom,
-                      pitch
+                      zoom: 8
                     });
                   }}
                 >
                   <i className="fas fa-crosshairs mr-2"></i>
-                  {selectedLocation.id === 'nairobi_warehouse' ? 'Roof View' : 'Center on Location'}
+                  Center on Location
                 </Button>
               )}
             </CardContent>

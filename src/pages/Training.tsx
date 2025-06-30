@@ -25,7 +25,6 @@ interface WeightVector {
   time: number;
   reliability: number;
   risk: number;
-  experience: number; // Added missing property
 }
 
 interface ModelConfig {
@@ -68,11 +67,10 @@ const Training = () => {
   const [isTraining, setIsTraining] = useState(true);
   const [showOracle, setShowOracle] = useState(false);
   const [weights, setWeights] = useState<WeightVector>({ 
-    cost: 0.2, 
-    time: 0.2, 
-    reliability: 0.2, 
-    risk: 0.2,
-    experience: 0.2
+    cost: 0.25, 
+    time: 0.25, 
+    reliability: 0.25, 
+    risk: 0.25 
   });
 
   const modelConfig: ModelConfig = { 

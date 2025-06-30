@@ -1,147 +1,137 @@
 
-export interface NeutrosophicValue {
+export interface NeutrosophicScore {
   truth: number;
   indeterminacy: number;
-  falsehood: number;
-  falsity: number; // Added for compatibility
-  confidence: number;
-  crispScore: number; // Added for compatibility
+  falsity: number;
+  crispScore: number;
 }
 
 export interface ForwarderData {
   name: string;
-  cost: number;
-  time: number;
+  costPerKg: number;
+  transitDays: number;
   reliability: number;
-  experience: number;
+  riskLevel: number;
 }
 
 export interface WeightVector {
   cost: number;
   time: number;
   reliability: number;
-  experience: number;
+  risk: number;
 }
 
 export interface TOPSISResult {
-  forwarderName: string;
-  score: number;
-  rank: number;
-  reasoning: string[];
   forwarder: string;
   normalizedScore: number;
-  neutrosophic: NeutrosophicValue;
+  rank: number;
+  neutrosophic: NeutrosophicScore;
   sha256Hash: string;
 }
 
 export class NeutrosophicEngine {
-  static createValue(truth: number, indeterminacy: number, falsehood: number): NeutrosophicValue {
-    const total = truth + indeterminacy + falsehood;
-    const normalized = total > 0 ? {
-      truth: truth / total,
-      indeterminacy: indeterminacy / total,
-      falsehood: falsehood / total
-    } : { truth: 0.33, indeterminacy: 0.33, falsehood: 0.34 };
-
-    const confidence = Math.max(0, Math.min(1, normalized.truth - normalized.falsehood));
-    const crispScore = normalized.truth - normalized.falsehood;
-
-    return {
-      ...normalized,
-      falsity: normalized.falsehood, // Added for compatibility
-      confidence,
-      crispScore
-    };
+  private generateHash(data: string): string {
+    // Simple hash generation for demonstration
+    let hash = 0;
+    for (let i = 0; i < data.length; i++) {
+      const char = data.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash).toString(16).padStart(8, '0');
   }
 
-  static interpretShipment(shipment: any): NeutrosophicValue {
-    const onTimeScore = shipment.delay_days === 0 ? 1 : Math.max(0, 1 - shipment.delay_days / 10);
-    const damageScore = shipment.damage ? 0 : 1;
-    const satisfactionScore = (shipment.customer_satisfaction_score || 80) / 100;
+  calculateTOPSIS(forwarders: ForwarderData[], weights: WeightVector): TOPSISResult[] {
+    // Normalize the decision matrix
+    const normalizedMatrix = this.normalizeMatrix(forwarders);
     
-    const truth = (onTimeScore + damageScore + satisfactionScore) / 3;
-    const indeterminacy = Math.abs(0.5 - truth) * 2;
-    const falsehood = 1 - truth - indeterminacy;
+    // Calculate weighted normalized matrix
+    const weightedMatrix = this.applyWeights(normalizedMatrix, weights);
     
-    return this.createValue(truth, indeterminacy, Math.max(0, falsehood));
-  }
-
-  static calculateTOPSIS(forwarders: ForwarderData[], weights: WeightVector): TOPSISResult[] {
-    // Normalize decision matrix
-    const normalizedMatrix = forwarders.map(f => ({
-      name: f.name,
-      cost: f.cost / Math.sqrt(forwarders.reduce((sum, fw) => sum + fw.cost * fw.cost, 0)),
-      time: f.time / Math.sqrt(forwarders.reduce((sum, fw) => sum + fw.time * fw.time, 0)),
-      reliability: f.reliability / Math.sqrt(forwarders.reduce((sum, fw) => sum + fw.reliability * fw.reliability, 0)),
-      experience: f.experience / Math.sqrt(forwarders.reduce((sum, fw) => sum + fw.experience * fw.experience, 0))
-    }));
-
-    // Apply weights
-    const weightedMatrix = normalizedMatrix.map(f => ({
-      name: f.name,
-      cost: f.cost * weights.cost,
-      time: f.time * weights.time,
-      reliability: f.reliability * weights.reliability,
-      experience: f.experience * weights.experience
-    }));
-
-    // Determine ideal and negative-ideal solutions
-    const ideal = {
-      cost: Math.min(...weightedMatrix.map(f => f.cost)), // Min for cost (beneficial)
-      time: Math.min(...weightedMatrix.map(f => f.time)), // Min for time (beneficial)
-      reliability: Math.max(...weightedMatrix.map(f => f.reliability)), // Max for reliability
-      experience: Math.max(...weightedMatrix.map(f => f.experience)) // Max for experience
-    };
-
-    const negativeIdeal = {
-      cost: Math.max(...weightedMatrix.map(f => f.cost)),
-      time: Math.max(...weightedMatrix.map(f => f.time)),
-      reliability: Math.min(...weightedMatrix.map(f => f.reliability)),
-      experience: Math.min(...weightedMatrix.map(f => f.experience))
-    };
-
-    // Calculate distances and scores
-    const results = weightedMatrix.map(f => {
-      const distanceToIdeal = Math.sqrt(
-        Math.pow(f.cost - ideal.cost, 2) +
-        Math.pow(f.time - ideal.time, 2) +
-        Math.pow(f.reliability - ideal.reliability, 2) +
-        Math.pow(f.experience - ideal.experience, 2)
-      );
-
-      const distanceToNegativeIdeal = Math.sqrt(
-        Math.pow(f.cost - negativeIdeal.cost, 2) +
-        Math.pow(f.time - negativeIdeal.time, 2) +
-        Math.pow(f.reliability - negativeIdeal.reliability, 2) +
-        Math.pow(f.experience - negativeIdeal.experience, 2)
-      );
-
-      const score = distanceToNegativeIdeal / (distanceToIdeal + distanceToNegativeIdeal);
-      const neutrosophic = this.createValue(score, 0.1, 1 - score - 0.1);
-
+    // Find ideal and anti-ideal solutions
+    const { ideal, antiIdeal } = this.findIdealSolutions(weightedMatrix);
+    
+    // Calculate distances and TOPSIS scores
+    const results = forwarders.map((forwarder, index) => {
+      const distanceToIdeal = this.calculateDistance(weightedMatrix[index], ideal);
+      const distanceToAntiIdeal = this.calculateDistance(weightedMatrix[index], antiIdeal);
+      
+      const topsisScore = distanceToAntiIdeal / (distanceToIdeal + distanceToAntiIdeal);
+      
+      // Calculate neutrosophic components
+      const truth = Math.min(forwarder.reliability / 100, topsisScore);
+      const falsity = Math.max(forwarder.riskLevel / 100, 1 - topsisScore);
+      const indeterminacy = Math.abs(truth - falsity) * 0.1;
+      const crispScore = truth - falsity;
+      
+      const dataString = `${forwarder.name}-${topsisScore}-${Date.now()}`;
+      
       return {
-        forwarderName: f.name,
-        forwarder: f.name,
-        score: score,
-        normalizedScore: score,
+        forwarder: forwarder.name,
+        normalizedScore: topsisScore,
         rank: 0, // Will be set after sorting
-        reasoning: [
-          `Cost efficiency: ${(f.cost * 100).toFixed(1)}%`,
-          `Time performance: ${(f.time * 100).toFixed(1)}%`,
-          `Reliability: ${(f.reliability * 100).toFixed(1)}%`,
-          `Experience: ${(f.experience * 100).toFixed(1)}%`
-        ],
-        neutrosophic,
-        sha256Hash: Math.random().toString(36).substring(2, 15)
+        neutrosophic: {
+          truth,
+          indeterminacy,
+          falsity,
+          crispScore
+        },
+        sha256Hash: this.generateHash(dataString)
       };
     });
-
-    // Sort by score and assign ranks
-    results.sort((a, b) => b.score - a.score);
+    
+    // Sort by TOPSIS score and assign ranks
+    results.sort((a, b) => b.normalizedScore - a.normalizedScore);
     results.forEach((result, index) => {
       result.rank = index + 1;
     });
-
+    
     return results;
+  }
+
+  private normalizeMatrix(forwarders: ForwarderData[]): number[][] {
+    const matrix = forwarders.map(f => [f.costPerKg, f.transitDays, f.reliability, f.riskLevel]);
+    const normalizedMatrix: number[][] = [];
+    
+    for (let i = 0; i < matrix.length; i++) {
+      normalizedMatrix[i] = [];
+      for (let j = 0; j < matrix[i].length; j++) {
+        const sum = matrix.reduce((acc, row) => acc + Math.pow(row[j], 2), 0);
+        normalizedMatrix[i][j] = matrix[i][j] / Math.sqrt(sum);
+      }
+    }
+    
+    return normalizedMatrix;
+  }
+
+  private applyWeights(matrix: number[][], weights: WeightVector): number[][] {
+    const weightArray = [weights.cost, weights.time, weights.reliability, weights.risk];
+    return matrix.map(row => row.map((value, index) => value * weightArray[index]));
+  }
+
+  private findIdealSolutions(matrix: number[][]): { ideal: number[], antiIdeal: number[] } {
+    const ideal: number[] = [];
+    const antiIdeal: number[] = [];
+    
+    for (let j = 0; j < matrix[0].length; j++) {
+      const column = matrix.map(row => row[j]);
+      // For cost and time (minimize), ideal is min, anti-ideal is max
+      // For reliability (maximize), ideal is max, anti-ideal is min
+      // For risk (minimize), ideal is min, anti-ideal is max
+      if (j === 0 || j === 1 || j === 3) { // cost, time, risk - minimize
+        ideal[j] = Math.min(...column);
+        antiIdeal[j] = Math.max(...column);
+      } else { // reliability - maximize
+        ideal[j] = Math.max(...column);
+        antiIdeal[j] = Math.min(...column);
+      }
+    }
+    
+    return { ideal, antiIdeal };
+  }
+
+  private calculateDistance(point: number[], reference: number[]): number {
+    return Math.sqrt(point.reduce((sum, value, index) => 
+      sum + Math.pow(value - reference[index], 2), 0));
   }
 }
