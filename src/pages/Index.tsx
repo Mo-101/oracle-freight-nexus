@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import InputPanel from '../components/InputPanel';
 import OutputPanel from '../components/OutputPanel';
 import Footer from '../components/Footer';
 import { PredictiveTimeline } from '../components/analytics/PredictiveTimeline';
+import { CompactRealTimePanel } from '../components/freight/CompactRealTimePanel';
 import { canonicalShipmentData, getForwarderPerformance, getUniqueForwarders } from '../data/canonicalData';
 import { FreightIntelligenceDashboard } from '../components/freight/FreightIntelligenceDashboard';
 
@@ -123,11 +125,17 @@ const Index = () => {
       <main className="flex-1 py-8">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <InputPanel 
-              onOracleAwaken={handleOracleAwaken}
-              formData={formData}
-              onFormChange={setFormData}
-            />
+            {/* Left Sidebar - Input Panel + Real-Time Analytics */}
+            <div className="space-y-6">
+              <InputPanel 
+                onOracleAwaken={handleOracleAwaken}
+                formData={formData}
+                onFormChange={setFormData}
+              />
+              
+              {/* Add Compact Real-Time Panel below input */}
+              <CompactRealTimePanel />
+            </div>
             
             {/* Replace basic OutputPanel with comprehensive FreightIntelligenceDashboard */}
             {showOutput && (
