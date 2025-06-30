@@ -1,4 +1,3 @@
-
 import { canonicalShipmentData, getForwarderPerformance } from '@/data/canonicalData';
 import { 
   RouteOption, 
@@ -11,15 +10,15 @@ import {
 export class FreightIntelligenceEngine {
   
   // Helper function to safely parse unknown values to numbers
-  private safeParseFloat(value: unknown): number | null {
+  private safeParseFloat(value: unknown): number {
     if (typeof value === 'number' && !isNaN(value)) {
       return value;
     }
     if (typeof value === 'string') {
       const parsed = parseFloat(value);
-      return isNaN(parsed) ? null : parsed;
+      return isNaN(parsed) ? 0 : parsed;
     }
-    return null;
+    return 0;
   }
 
   analyzeCorridorIntelligence(origin: string, destination: string): CorridorIntelligence {
@@ -264,10 +263,10 @@ export class FreightIntelligenceEngine {
     if (shipments.length === 0) return 0;
     
     const costsWithData = shipments.filter(s => {
-      const costValue = this.safeParseFloat(s.actual_cost);
-      const weightValue = this.safeParseFloat(s.weight_kg);
+      const cost = this.safeParseFloat(s.actual_cost);
+      const weight = this.safeParseFloat(s.weight_kg);
       
-      return costValue !== null && weightValue !== null && costValue > 0 && weightValue > 0;
+      return cost > 0 && weight > 0;
     });
 
     if (costsWithData.length === 0) return 0;
@@ -276,7 +275,7 @@ export class FreightIntelligenceEngine {
       const cost = this.safeParseFloat(s.actual_cost);
       const weight = this.safeParseFloat(s.weight_kg);
       
-      if (cost !== null && weight !== null && weight > 0) {
+      if (cost > 0 && weight > 0) {
         return sum + (cost / weight);
       }
       return sum;
@@ -344,15 +343,15 @@ export class FreightIntelligenceEngine {
         this.safeParseFloat(s.bwosi)
       ];
       
-      return quotes.some(quote => quote !== null && quote > 0);
+      return quotes.some(quote => quote > 0);
     }).length;
     
     return Math.round((forwarderQuotes / totalQuoteRequests) * 100);
   }
 
   private generateRecentPerformance(shipments: any[]): any[] {
-    // Simplified recent performance - would normally use actual recent data
-    const avgCostValue = this.safeParseFloat(this.calculateAvgCost(shipments)) || 4.5;
+    // Remove redundant safeParseFloat wrapper - calculateAvgCost already returns number
+    const avgCostValue = this.calculateAvgCost(shipments) || 4.5;
     
     return [
       { month: 'Dec', shipmentsHandled: shipments.length, successRate: 92, avgCost: avgCostValue },

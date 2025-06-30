@@ -14,15 +14,15 @@ export const VoiceInterface = ({ onUserMessage, isProcessing }: VoiceInterfacePr
 
   useEffect(() => {
     // Check for Web Speech API support
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
     
-    if (!SpeechRecognition) {
+    if (!SpeechRecognitionConstructor) {
       setStatusMessage("Your browser doesn't support speech recognition. Please use Chrome or Edge.");
       return;
     }
 
     // Initialize speech recognition
-    const recognition = new SpeechRecognition();
+    const recognition = new SpeechRecognitionConstructor();
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = 'en-US';
