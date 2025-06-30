@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -9,7 +8,7 @@ import QuantumTrainingProgress from '../components/QuantumTrainingProgress';
 import { QuantumOptimizationMatrix } from '../components/QuantumOptimizationMatrix';
 import { RiskHeatmap } from '../components/analytics/RiskHeatmap';
 import { ForwarderPerformance } from '../types/deeptrack';
-import { OracleGradioEmbed } from '../components/oracle/OracleGradioEmbed';
+import AnimatedNodeOracle from '../components/oracle/AnimatedNodeOracle';
 
 const Quantum = () => {
   const [formData, setFormData] = useState({
@@ -79,9 +78,17 @@ const Quantum = () => {
             </div>
           </div>
 
-          {/* Quantum Oracle Engine - New Gradio Integration */}
+          {/* Quantum Oracle Engine - New Animated Node Visualization */}
           <div className="mb-16">
-            <OracleGradioEmbed className="w-full" />
+            <div className="oracle-card p-6">
+              <h2 className="text-2xl font-bold text-deepcal-light mb-6 flex items-center">
+                <i className="fas fa-atom mr-3"></i>
+                Quantum Oracle Processing Engine
+              </h2>
+              <div className="h-96">
+                <AnimatedNodeOracle />
+              </div>
+            </div>
           </div>
 
           {/* Quantum Cards Grid */}
