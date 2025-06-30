@@ -10,15 +10,29 @@ import { Textarea } from '@/components/ui/textarea';
 import { dataExportService } from '@/services/dataExportService';
 import { Download, Play, Settings } from 'lucide-react';
 
+interface FineTuningConfig {
+  includeCanonical: boolean;
+  syntheticCount: number;
+  includeWestAfrica: boolean;
+  includeNorthAfrica: boolean;
+  includeCentralAfrica: boolean;
+  includeEdgeCases: boolean;
+  exportFormat: 'jsonl' | 'csv' | 'json';
+  modelName: string;
+  epochs: number;
+  learningRate: number;
+  batchSize: number;
+}
+
 export const FineTuningConfig = () => {
-  const [config, setConfig] = useState({
+  const [config, setConfig] = useState<FineTuningConfig>({
     includeCanonical: true,
     syntheticCount: 5000,
     includeWestAfrica: true,
     includeNorthAfrica: true,
     includeCentralAfrica: true,
     includeEdgeCases: true,
-    exportFormat: 'jsonl' as const,
+    exportFormat: 'jsonl',
     modelName: 'qwen-7b',
     epochs: 3,
     learningRate: 0.0001,
@@ -151,7 +165,7 @@ push_to_hub: false
                     <div key={key} className="flex items-center space-x-2">
                       <Checkbox
                         id={key}
-                        checked={config[key as keyof typeof config] as boolean}
+                        checked={config[key as keyof FineTuningConfig] as boolean}
                         onCheckedChange={(checked) =>
                           setConfig(prev => ({...prev, [key]: checked as boolean}))
                         }
