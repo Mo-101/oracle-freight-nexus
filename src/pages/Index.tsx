@@ -121,7 +121,28 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-        {showOutput && (
+      
+      <main className="flex-1 py-8">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Sidebar - Input Panel + Real-Time Analytics */}
+            <div className="space-y-6">
+              <InputPanel 
+                onOracleAwaken={handleOracleAwaken}
+                formData={formData}
+                onFormChange={setFormData}
+              />
+              
+              {showOutput && (
+                <div className="mt-4">
+                  <PredictiveTimeline />
+                  <CompactRealTimePanel />
+                </div>
+              )}
+            </div>
+
+            {/* Right Side - Output Panel */}
+            {showOutput && (
               <div className="lg:col-span-2 animate-scroll-appear" id="outputPanel">
                 <FreightIntelligenceDashboard
                   origin={formData.origin}
@@ -133,25 +154,6 @@ const Index = () => {
               </div>
             )}
           </div>
-      
-      <main className="flex-1 py-8">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Sidebar - Input Panel + Real-Time Analytics */}
-            
-            <div className="space-y-6">
-              <InputPanel 
-                onOracleAwaken={handleOracleAwaken}
-                formData={formData}
-                onFormChange={setFormData}
-              />
-              
-          {showOutput && (
-            <div className="mt-4">
-              <PredictiveTimeline />
-              <CompactRealTimePanel />
-            </div>
-          )}
           
           {showOutput && (
             <div className="mt-6 text-center text-sm text-slate-400">
