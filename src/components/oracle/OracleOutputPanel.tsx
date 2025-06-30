@@ -197,7 +197,7 @@ export const OracleOutputPanel = ({
                           {(result.neutrosophic.indeterminacy * 100).toFixed(1)}%
                         </td>
                         <td className="px-4 py-3 text-red-400">
-                          {(result.neutrosophic.falsity * 100).toFixed(1)}%
+                          {(result.neutrosophic.falsehood * 100).toFixed(1)}%
                         </td>
                         <td className={`px-4 py-3 font-bold ${getRankColor(result.rank)}`}>
                           {result.neutrosophic.crispScore.toFixed(3)}

@@ -1,3 +1,4 @@
+
 import { CanonicalShipment } from '@/types/freight';
 
 interface Location {
@@ -5,6 +6,15 @@ interface Location {
   country: string;
   latitude: number;
   longitude: number;
+}
+
+interface SyntheticConfig {
+  count: number;
+  includeWestAfrica: boolean;
+  includeNorthAfrica: boolean;
+  includeCentralAfrica: boolean;
+  includeEdgeCases: boolean;
+  languageVariants: string[];
 }
 
 const kenyaLocations: Location[] = [
@@ -61,6 +71,10 @@ export class SyntheticDataGenerator {
 
   generateLoss(): boolean {
     return Math.random() > 0.9;
+  }
+
+  generateSyntheticData(config: SyntheticConfig): CanonicalShipment[] {
+    return Array.from({ length: config.count }, () => this.generateCanonicalShipment());
   }
 
   generateCanonicalShipment(baseShipment?: Partial<CanonicalShipment>): CanonicalShipment {
