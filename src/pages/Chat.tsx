@@ -4,6 +4,14 @@ import Footer from '../components/Footer';
 import { EnhancedChatInterface } from '../components/chat/EnhancedChatInterface';
 import { VoiceTestButton } from '../components/chat/VoiceTestButton';
 import { newTTSService } from '../services/newTTSService';
+import { Toaster } from '@/components/ui/toaster';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Index from './Index';
+import NotFound from './NotFound';
+import Quantum from './Quantum';
+import Training from './Training';
+import Map from './Map';
 
 interface Message {
   id: string;
@@ -128,7 +136,6 @@ const Chat = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-deepcal-dark">
       <Header />
-      
       <main className="flex-1 py-8">
         <div className="container mx-auto px-4 h-full">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
@@ -276,7 +283,7 @@ const Chat = () => {
       
       <Footer />
       
-      <style jsx>{`
+      <style>{`
         @keyframes pulse {
           0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
           70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
@@ -296,5 +303,24 @@ const Chat = () => {
     </div>
   );
 };
+
+const App = () => (
+  <>
+    <TooltipProvider>
+      <Toaster />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/quantum" element={<Quantum />} />
+          <Route path="/map" element={<Map />} />
+          <Route path="/training" element={<Training />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </>
+);
 
 export default Chat;
