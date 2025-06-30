@@ -1,3 +1,4 @@
+
 import { canonicalShipmentData, getForwarderPerformance } from '@/data/canonicalData';
 import { 
   RouteOption, 
@@ -263,15 +264,16 @@ export class FreightIntelligenceEngine {
     if (shipments.length === 0) return 0;
     
     // Create a new array with properly typed values
-    const validShipments = shipments.map(s => ({
-        cost: this.safeParseFloat(s.actual_cost),
-        weight: this.safeParseFloat(s.weight_kg)
-    })).filter(item => item.cost > 0 && item.weight > 0);
+    const validShipments = shipments.map(s => {
+      const cost = this.safeParseFloat(s.actual_cost);
+      const weight = this.safeParseFloat(s.weight_kg);
+      return { cost, weight };
+    }).filter(item => item.cost > 0 && item.weight > 0);
     
     if (validShipments.length === 0) return 0;
     
     const totalCost = validShipments.reduce((sum, item) => {
-        return sum + (item.cost / item.weight);
+      return sum + (item.cost / item.weight);
     }, 0);
     
     return Math.round((totalCost / validShipments.length) * 100) / 100;
