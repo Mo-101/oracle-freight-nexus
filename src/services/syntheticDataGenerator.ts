@@ -1,244 +1,142 @@
-
 import { CanonicalShipment } from '@/types/freight';
 
-interface SyntheticDataConfig {
-  count: number;
-  includeWestAfrica: boolean;
-  includeNorthAfrica: boolean;
-  includeCentralAfrica: boolean;
-  includeEdgeCases: boolean;
-  languageVariants: string[];
+interface Location {
+  city: string;
+  country: string;
+  latitude: number;
+  longitude: number;
 }
 
-class SyntheticDataGenerator {
-  private africanCities = {
-    east: ['Nairobi', 'Kampala', 'Dar es Salaam', 'Addis Ababa', 'Kigali', 'Juba', 'Mombasa', 'Djibouti'],
-    west: ['Lagos', 'Accra', 'Dakar', 'Abidjan', 'Freetown', 'Monrovia', 'Bamako', 'Ouagadougou'],
-    north: ['Cairo', 'Tunis', 'Algiers', 'Casablanca', 'Tripoli', 'Alexandria', 'Rabat', 'Benghazi'],
-    central: ['Kinshasa', 'Brazzaville', 'Yaoundé', 'Bangui', 'N\'Djamena', 'Libreville', 'Malabo'],
-    south: ['Johannesburg', 'Cape Town', 'Durban', 'Lusaka', 'Harare', 'Gaborone', 'Windhoek', 'Maputo']
-  };
+const kenyaLocations: Location[] = [
+  { city: 'Nairobi', country: 'Kenya', latitude: -1.2921, longitude: 36.8219 },
+  { city: 'Mombasa', country: 'Kenya', latitude: -4.0435, longitude: 39.6682 },
+  { city: 'Kisumu', country: 'Kenya', latitude: -0.0917, longitude: 34.7536 }
+];
 
-  private carriers = [
-    'Kuehne Nagel', 'Scan Global Logistics', 'DHL Express', 'DHL Global', 
-    'Siginon', 'AGL', 'Freight in Time', 'Bwosi', 'Maersk Line', 'MSC',
-    'Bollore Logistics', 'Imperial Logistics', 'Expeditors', 'Panalpina'
-  ];
+const zambiaLocations: Location[] = [
+  { city: 'Lusaka', country: 'Zambia', latitude: -15.4135, longitude: 28.2772 },
+  { city: 'Ndola', country: 'Zambia', latitude: -12.9586, longitude: 28.6463 },
+  { city: 'Kitwe', country: 'Zambia', latitude: -12.8167, longitude: 28.2167 }
+];
 
-  private cargoTypes = [
-    'Medical Supplies', 'Electronics', 'Textiles', 'Machinery', 'Food Products',
-    'Pharmaceuticals', 'Automotive Parts', 'Mining Equipment', 'Agricultural Products',
-    'Construction Materials', 'Oil & Gas Equipment', 'Solar Panels', 'Computers',
-    'Emergency Relief', 'Educational Materials', 'Vaccines', 'Water Purification'
-  ];
+const cargoTypes = ['General', 'Perishable', 'Fragile', 'Medical', 'Electronics'];
 
-  private emergencyScenarios = [
-    'cholera outbreak', 'drought emergency', 'flood relief', 'conflict zone',
-    'infrastructure damage', 'port congestion', 'fuel shortage', 'border closure',
-    'political instability', 'natural disaster', 'pandemic response', 'refugee crisis'
-  ];
+const getRandomElement = <T>(array: T[]): T => {
+  return array[Math.floor(Math.random() * array.length)];
+};
 
-  generateSyntheticData(config: SyntheticDataConfig): CanonicalShipment[] {
-    const syntheticData: CanonicalShipment[] = [];
-    
-    for (let i = 0; i < config.count; i++) {
-      const shipment = this.generateSingleShipment(i + 1000, config);
-      syntheticData.push(shipment);
-    }
-
-    return syntheticData;
+export class SyntheticDataGenerator {
+  generateLocation(): Location {
+    const locations = Math.random() > 0.5 ? kenyaLocations : zambiaLocations;
+    return getRandomElement(locations);
   }
 
-  private generateSingleShipment(id: number, config: SyntheticDataConfig): CanonicalShipment {
-    const origin = this.getRandomCity(config);
-    const destination = this.getRandomCity(config, origin);
-    const cargoType = this.getRandomElement(this.cargoTypes);
-    const carrier = this.getRandomElement(this.carriers);
-    const mode = this.getRandomElement(['Air', 'Sea', 'Road', 'Rail']);
-    
-    const weight = this.getRandomWeight();
-    const volume = weight * (0.3 + Math.random() * 0.7); // CBM roughly related to weight
-    const distance = this.calculateDistance(origin, destination);
-    const transitDays = this.calculateTransitDays(mode, distance);
-    
-    const baseDate = new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28));
-    const collectionDate = baseDate.toISOString().split('T')[0];
-    const greenlightDate = new Date(baseDate.getTime() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const arrivalDate = new Date(baseDate.getTime() + transitDays * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  generateCargoType(): string {
+    return getRandomElement(cargoTypes);
+  }
 
-    // Generate realistic costs
-    const baseCost = this.calculateBaseCost(mode, weight, distance);
-    const quotes = this.generateQuotes(baseCost);
+  generateWeight(): number {
+    return Math.floor(100 + Math.random() * 10000);
+  }
+
+  generateVolume(): number {
+    return Math.round((1 + Math.random() * 50) * 10) / 10;
+  }
+
+  generateTransitDays(): number {
+    return Math.floor(1 + Math.random() * 10);
+  }
+
+  generateCost(): number {
+    return Math.round((1 + Math.random() * 10) * 100) / 100;
+  }
+
+  generateDelay(): number {
+    return Math.floor(Math.random() * 5);
+  }
+
+  generateDamage(): boolean {
+    return Math.random() > 0.8;
+  }
+
+  generateLoss(): boolean {
+    return Math.random() > 0.9;
+  }
+
+  generateCanonicalShipment(baseShipment?: Partial<CanonicalShipment>): CanonicalShipment {
+    const forwarders = ['Kuehne Nagel', 'DHL Express', 'Siginon', 'AGL', 'Freight In Time', 'Bwosi', 'Scan Global Logistics', 'DHL Global'];
+    const randomForwarder = forwarders[Math.floor(Math.random() * forwarders.length)];
     
     return {
-      id,
-      date_of_collection: collectionDate,
-      date_of_arrival_destination: arrivalDate,
-      date_of_greenlight_to_pickup: greenlightDate,
-      mode_of_shipment: mode,
-      initial_quote_awarded: quotes.initial,
-      final_quote_awarded_freight_forwarder_carrier: quotes.final,
-      kuehne_nagel: quotes.kuehne_nagel,
-      scan_global_logistics: quotes.scan_global,
-      dhl_express: quotes.dhl_express,
-      dhl_global: quotes.dhl_global,
-      siginon: quotes.siginon,
-      agl: quotes.agl,
-      freight_in_time: quotes.freight_in_time,
-      bwosi: quotes.bwosi,
-      origin,
-      destination,
-      cargo_type: cargoType,
-      weight_kg: weight,
-      volume_cbm: volume,
-      carrier,
-      routing: this.generateRouting(origin, destination, mode),
-      transit_days: transitDays,
-      actual_cost: baseCost * (0.9 + Math.random() * 0.2),
-      fuel_surcharge: baseCost * 0.15 * Math.random(),
-      insurance: baseCost * 0.05 * Math.random(),
-      customs_brokerage: 200 + Math.random() * 800,
-      port_handling: mode === 'Sea' ? 300 + Math.random() * 700 : 0,
-      storage: Math.random() * 500,
-      demurrage: Math.random() < 0.1 ? Math.random() * 2000 : 0,
-      other_charges: Math.random() * 300,
-      total_cost: 0, // Will be calculated
-      delay_days: Math.random() < 0.3 ? Math.floor(Math.random() * 10) : 0,
+      request_reference: `REF-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      date_of_collection: new Date().toISOString().split('T')[0],
+      date_of_arrival_destination: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      date_of_greenlight_to_pickup: new Date().toISOString().split('T')[0],
+      mode_of_shipment: 'Road',
+      cargo_description: baseShipment?.cargo_description || 'General Cargo',
+      item_category: baseShipment?.item_category || 'Commercial Goods',
+      id: Math.floor(Math.random() * 10000),
+      initial_quote_awarded: Math.round((3 + Math.random() * 2) * 100) / 100,
+      final_quote_awarded_freight_forwarder_carrier: Math.round((3.5 + Math.random() * 2) * 100) / 100,
+      kuehne_nagel: Math.round((3.8 + Math.random() * 0.5) * 100) / 100,
+      scan_global_logistics: Math.round((3.5 + Math.random() * 0.8) * 100) / 100,
+      dhl_express: Math.round((5.5 + Math.random() * 1) * 100) / 100,
+      dhl_global: Math.round((4.8 + Math.random() * 0.8) * 100) / 100,
+      siginon: Math.round((3.2 + Math.random() * 0.4) * 100) / 100,
+      agl: Math.round((3.8 + Math.random() * 0.6) * 100) / 100,
+      freight_in_time: Math.round((3.6 + Math.random() * 0.5) * 100) / 100,
+      bwosi: Math.round((3.4 + Math.random() * 0.6) * 100) / 100,
+      origin: baseShipment?.origin || 'Kenya',
+      destination: baseShipment?.destination || 'Zambia',
+      origin_country: 'Kenya',
+      destination_country: 'Zambia',
+      origin_latitude: -1.2921,
+      origin_longitude: 36.8219,
+      destination_latitude: -15.3875,
+      destination_longitude: 28.3228,
+      cargo_type: baseShipment?.cargo_type || 'General',
+      weight_kg: baseShipment?.weight_kg || Math.floor(500 + Math.random() * 2000),
+      volume_cbm: baseShipment?.volume_cbm || Math.round((10 + Math.random() * 50) * 10) / 10,
+      carrier: randomForwarder,
+      routing: 'Road Transport',
+      transit_days: Math.floor(5 + Math.random() * 5),
+      actual_cost: Math.round((3 + Math.random() * 3) * 100) / 100,
+      freight_carrier_cost: Math.round((2.5 + Math.random() * 2) * 100) / 100,
+      fuel_surcharge: Math.round((0.5 + Math.random() * 0.8) * 100) / 100,
+      insurance: Math.round((0.05 + Math.random() * 0.15) * 100) / 100,
+      customs_brokerage: Math.round((0.05 + Math.random() * 0.1) * 100) / 100,
+      port_handling: Math.round((0.1 + Math.random() * 0.3) * 100) / 100,
+      storage: Math.round(Math.random() * 0.5 * 100) / 100,
+      demurrage: Math.round(Math.random() * 0.2 * 100) / 100,
+      other_charges: Math.round(Math.random() * 0.3 * 100) / 100,
+      total_cost: Math.round((4 + Math.random() * 4) * 100) / 100,
+      delay_days: Math.floor(Math.random() * 3),
       damage: Math.random() < 0.05,
       loss: Math.random() < 0.02,
-      customer_complaints: Math.random() < 0.1 ? this.generateComplaint() : '',
-      documentation_errors: Math.random() < 0.15,
-      communication_issues: Math.random() < 0.2,
-      payment_issues: Math.random() < 0.1,
-      shipment_status: this.getRandomElement(['Delivered', 'In Transit', 'Delayed', 'Damaged']),
-      delivery_status: this.getRandomElement(['On Time', 'Delayed', 'Damaged', 'Lost']),
-      temperature_control_failures: cargoType.includes('Medical') ? Math.random() < 0.05 : false,
-      security_breaches: Math.random() < 0.03,
-      risk_assessment_score: Math.random() * 100,
-      sustainability_metrics: Math.random() * 100,
-      customer_satisfaction_score: Math.random() * 100,
-      market_volatility_impact: Math.random() * 50,
-      regulatory_compliance_issues: Math.random() < 0.08,
-      force_majeure_events: config.includeEdgeCases ? Math.random() < 0.1 : false,
-      visibility_and_tracking_accuracy: Math.random() * 100,
-      exception_handling_effectiveness: Math.random() * 100,
-      overall_performance_score: Math.random() * 100
+      customer_complaints: Math.random() < 0.1 ? 'Minor delay complaint' : '',
+      documentation_errors: Math.random() < 0.08,
+      communication_issues: Math.random() < 0.06,
+      payment_issues: Math.random() < 0.04,
+      shipment_status: 'Delivered',
+      delivery_status: 'On Time',
+      temperature_control_failures: Math.random() < 0.03,
+      security_breaches: Math.random() < 0.01,
+      risk_assessment_score: Math.round((60 + Math.random() * 40) * 100) / 100,
+      sustainability_metrics: Math.round((70 + Math.random() * 30) * 100) / 100,
+      customer_satisfaction_score: Math.round((80 + Math.random() * 20) * 100) / 100,
+      market_volatility_impact: Math.round((5 + Math.random() * 15) * 100) / 100,
+      regulatory_compliance_issues: Math.random() < 0.05,
+      force_majeure_events: Math.random() < 0.02,
+      visibility_and_tracking_accuracy: Math.round((85 + Math.random() * 15) * 100) / 100,
+      exception_handling_effectiveness: Math.round((75 + Math.random() * 25) * 100) / 100,
+      overall_performance_score: Math.round((80 + Math.random() * 20) * 100) / 100,
+      ...baseShipment
     };
   }
 
-  private getRandomCity(config: SyntheticDataConfig, exclude?: string): string {
-    let allCities = [...this.africanCities.east, ...this.africanCities.south];
-    
-    if (config.includeWestAfrica) allCities.push(...this.africanCities.west);
-    if (config.includeNorthAfrica) allCities.push(...this.africanCities.north);
-    if (config.includeCentralAfrica) allCities.push(...this.africanCities.central);
-    
-    if (exclude) {
-      allCities = allCities.filter(city => city !== exclude);
-    }
-    
-    return this.getRandomElement(allCities);
-  }
-
-  private getRandomElement<T>(array: T[]): T {
-    return array[Math.floor(Math.random() * array.length)];
-  }
-
-  private getRandomWeight(): number {
-    // Realistic weight distribution for African logistics
-    const rand = Math.random();
-    if (rand < 0.3) return 50 + Math.random() * 200; // Small shipments
-    if (rand < 0.6) return 250 + Math.random() * 750; // Medium shipments
-    if (rand < 0.9) return 1000 + Math.random() * 4000; // Large shipments
-    return 5000 + Math.random() * 15000; // Very large shipments
-  }
-
-  private calculateDistance(origin: string, destination: string): number {
-    // Simplified distance calculation - would use real geolocation in production
-    const africaCityDistances: Record<string, number> = {
-      'Nairobi-Lagos': 3200,
-      'Cairo-Cape Town': 6500,
-      'Dakar-Addis Ababa': 5800,
-      'Johannesburg-Kinshasa': 1800
-    };
-    
-    const key = `${origin}-${destination}`;
-    const reverseKey = `${destination}-${origin}`;
-    
-    return africaCityDistances[key] || africaCityDistances[reverseKey] || 
-           1000 + Math.random() * 4000; // Random realistic distance
-  }
-
-  private calculateTransitDays(mode: string, distance: number): number {
-    const speeds = { Air: 1, Road: 50, Rail: 80, Sea: 500 };
-    const baseSpeed = speeds[mode as keyof typeof speeds] || 100;
-    return Math.ceil(distance / baseSpeed) + Math.floor(Math.random() * 3);
-  }
-
-  private calculateBaseCost(mode: string, weight: number, distance: number): number {
-    const ratePer100Kg = { Air: 5, Road: 1.5, Rail: 1.2, Sea: 0.8 };
-    const baseRate = ratePer100Kg[mode as keyof typeof ratePer100Kg] || 2;
-    return (weight / 100) * baseRate * (distance / 1000) * 100;
-  }
-
-  private generateQuotes(baseCost: number): Record<string, number> {
-    const variation = () => baseCost * (0.8 + Math.random() * 0.4);
-    
-    return {
-      initial: baseCost,
-      final: baseCost * (0.9 + Math.random() * 0.2),
-      kuehne_nagel: variation(),
-      scan_global: variation(),
-      dhl_express: variation() * 1.3, // Premium carrier
-      dhl_global: variation() * 1.1,
-      siginon: variation() * 0.9,
-      agl: variation(),
-      freight_in_time: variation(),
-      bwosi: variation() * 0.95
-    };
-  }
-
-  private generateRouting(origin: string, destination: string, mode: string): string {
-    const hubs = {
-      Air: ['Nairobi', 'Johannesburg', 'Cairo', 'Lagos'],
-      Sea: ['Mombasa', 'Durban', 'Lagos', 'Alexandria'],
-      Road: ['Kampala', 'Lusaka', 'Accra'],
-      Rail: ['Dar es Salaam', 'Maputo']
-    };
-    
-    const relevantHubs = hubs[mode as keyof typeof hubs] || [];
-    const hub = relevantHubs[Math.floor(Math.random() * relevantHubs.length)];
-    
-    return hub ? `${origin} → ${hub} → ${destination}` : `${origin} → ${destination}`;
-  }
-
-  private generateComplaint(): string {
-    const complaints = [
-      'Delayed delivery affecting operations',
-      'Damaged packaging upon arrival',
-      'Poor communication during transit',
-      'Incorrect documentation',
-      'Temperature control issues',
-      'Missing items from shipment',
-      'Customs clearance delays'
-    ];
-    return this.getRandomElement(complaints);
-  }
-
-  // Export to JSONL for fine-tuning
-  exportToJSONL(data: CanonicalShipment[]): string {
-    return data.map(shipment => {
-      const prompt = `Analyze this African logistics shipment: ${shipment.cargo_type} from ${shipment.origin} to ${shipment.destination}, ${shipment.weight_kg}kg via ${shipment.mode_of_shipment}`;
-      const response = `Based on historical data, this ${shipment.cargo_type} shipment from ${shipment.origin} to ${shipment.destination} should take ${shipment.transit_days} days via ${shipment.mode_of_shipment}. The optimal carrier is ${shipment.carrier} with cost estimate $${shipment.actual_cost.toFixed(2)}. Risk factors include ${shipment.delay_days > 0 ? 'potential delays' : 'standard risk profile'}.`;
-      
-      return JSON.stringify({
-        messages: [
-          { role: "user", content: prompt },
-          { role: "assistant", content: response }
-        ]
-      });
-    }).join('\n');
+  generateShipments(count: number = 10, baseShipment?: Partial<CanonicalShipment>): CanonicalShipment[] {
+    return Array.from({ length: count }, () => this.generateCanonicalShipment(baseShipment));
   }
 }
 
-export const syntheticDataGenerator = new SyntheticDataGenerator();
+export const canonicalDataGenerator = new SyntheticDataGenerator();
