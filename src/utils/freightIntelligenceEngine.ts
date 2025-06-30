@@ -287,7 +287,8 @@ export class FreightIntelligenceEngine {
   private calculateSeasonalVariation(shipments: any[]): number {
     // Simplified seasonal variation calculation
     const monthlyData = shipments.reduce((acc, s) => {
-      const month = new Date(s.date_of_collection).getMonth();
+      const collectionDate = new Date(s.date_of_collection);
+      const month = collectionDate.getMonth();
       acc[month] = (acc[month] || 0) + 1;
       return acc;
     }, {} as Record<number, number>);

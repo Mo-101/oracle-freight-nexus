@@ -14,7 +14,7 @@ export const VoiceInterface = ({ onUserMessage, isProcessing }: VoiceInterfacePr
 
   useEffect(() => {
     // Check for Web Speech API support
-    const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognitionConstructor = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
     if (!SpeechRecognitionConstructor) {
       setStatusMessage("Your browser doesn't support speech recognition. Please use Chrome or Edge.");
@@ -38,13 +38,13 @@ export const VoiceInterface = ({ onUserMessage, isProcessing }: VoiceInterfacePr
       }
     };
 
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       onUserMessage(transcript);
       stopListening();
     };
 
-    recognition.onerror = (event) => {
+    recognition.onerror = (event: any) => {
       console.error('Recognition error:', event.error);
       setStatusMessage(`Error: ${event.error}`);
       stopListening();
