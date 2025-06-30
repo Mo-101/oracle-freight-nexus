@@ -133,11 +133,15 @@ const Index = () => {
                 onFormChange={setFormData}
               />
               
-              {/* Add Compact Real-Time Panel below input */}
-              <CompactRealTimePanel />
+              {showOutput && (
+                <div className="mt-4">
+                  <PredictiveTimeline />
+                  <CompactRealTimePanel />
+                </div>
+              )}
             </div>
-            
-            {/* Replace basic OutputPanel with comprehensive FreightIntelligenceDashboard */}
+
+            {/* Right Side - Output Panel */}
             {showOutput && (
               <div className="lg:col-span-2 animate-scroll-appear" id="outputPanel">
                 <FreightIntelligenceDashboard
@@ -150,13 +154,6 @@ const Index = () => {
               </div>
             )}
           </div>
-          
-          {/* Add Predictive Timeline when output is shown */}
-          {showOutput && (
-            <div className="mt-8">
-              <PredictiveTimeline />
-            </div>
-          )}
           
           {showOutput && (
             <div className="mt-6 text-center text-sm text-slate-400">
