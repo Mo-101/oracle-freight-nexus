@@ -66,7 +66,8 @@ export class FreightIntelligenceEngine {
       successRate,
       avgTransitDays,
       predominantMode,
-      riskFactors
+      riskFactors,
+      seasonalVariation
     };
   }
 

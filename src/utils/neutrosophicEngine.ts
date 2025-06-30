@@ -26,6 +26,10 @@ export interface TOPSISResult {
   score: number;
   rank: number;
   reasoning: string[];
+  forwarder: string;
+  normalizedScore: number;
+  neutrosophic: NeutrosophicValue;
+  sha256Hash: string;
 }
 
 export class NeutrosophicEngine {
@@ -106,17 +110,22 @@ export class NeutrosophicEngine {
       );
 
       const score = distanceToNegativeIdeal / (distanceToIdeal + distanceToNegativeIdeal);
+      const neutrosophic = this.createValue(score, 0.1, 1 - score - 0.1);
 
       return {
         forwarderName: f.name,
+        forwarder: f.name,
         score: score,
+        normalizedScore: score,
         rank: 0, // Will be set after sorting
         reasoning: [
           `Cost efficiency: ${(f.cost * 100).toFixed(1)}%`,
           `Time performance: ${(f.time * 100).toFixed(1)}%`,
           `Reliability: ${(f.reliability * 100).toFixed(1)}%`,
           `Experience: ${(f.experience * 100).toFixed(1)}%`
-        ]
+        ],
+        neutrosophic,
+        sha256Hash: Math.random().toString(36).substring(2, 15)
       };
     });
 

@@ -1,7 +1,7 @@
 
 import { NeutrosophicValue } from "@/utils/neutrosophicEngine";
 
-export type TransportMode = 'Air' | 'Sea' | 'Road' | 'Rail' | 'Multimodal';
+export type TransportMode = 'Air' | 'Sea' | 'Road' | 'Rail' | 'Multimodal' | 'Land';
 
 export interface ForwarderPerformance {
     name: string;
@@ -9,6 +9,8 @@ export interface ForwarderPerformance {
     avgTransitDays: number;
     reliabilityScore: number;
     quoteWinRate: number;
+    totalShipments: number;
+    onTimeRate: number;
 }
 
 export interface ForwarderIntelligence {
