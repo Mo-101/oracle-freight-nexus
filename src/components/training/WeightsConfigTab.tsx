@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Sliders } from "lucide-react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
@@ -9,6 +8,7 @@ interface WeightVector {
   time: number;
   reliability: number;
   risk: number;
+  experience: number;
 }
 
 interface WeightsConfigTabProps {

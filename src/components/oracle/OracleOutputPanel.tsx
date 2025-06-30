@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Scroll, Brain, Hash, Download } from 'lucide-react';
@@ -28,11 +27,11 @@ export const OracleOutputPanel = ({
 
   // Sample forwarder data - in real app this would come from API
   const sampleForwarders: ForwarderData[] = [
-    { name: "Kuehne + Nagel", costPerKg: 4.61, transitDays: 5.2, reliability: 92, riskLevel: 8 },
-    { name: "DHL Express", costPerKg: 5.21, transitDays: 6.0, reliability: 88, riskLevel: 15 },
-    { name: "Siginon Logistics", costPerKg: 4.45, transitDays: 6.5, reliability: 85, riskLevel: 22 },
-    { name: "Imperial Logistics", costPerKg: 4.78, transitDays: 5.8, reliability: 90, riskLevel: 12 },
-    { name: "Bollore Africa", costPerKg: 4.93, transitDays: 7.2, reliability: 83, riskLevel: 28 }
+    { name: "Kuehne + Nagel", cost: 4.61, time: 5.2, reliability: 92, experience: 8 },
+    { name: "DHL Express", cost: 5.21, time: 6.0, reliability: 88, experience: 15 },
+    { name: "Siginon Logistics", cost: 4.45, time: 6.5, reliability: 85, experience: 22 },
+    { name: "Imperial Logistics", cost: 4.78, time: 5.8, reliability: 90, experience: 12 },
+    { name: "Bollore Africa", cost: 4.93, time: 7.2, reliability: 83, experience: 28 }
   ];
 
   useEffect(() => {
@@ -47,8 +46,7 @@ export const OracleOutputPanel = ({
     // Simulate calculation time for dramatic effect
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    const engine = new NeutrosophicEngine();
-    const calculatedResults = engine.calculateTOPSIS(sampleForwarders, weights);
+    const calculatedResults = NeutrosophicEngine.calculateTOPSIS(sampleForwarders, weights);
     
     setResults(calculatedResults);
     generateCeremonialSeal(calculatedResults[0]);

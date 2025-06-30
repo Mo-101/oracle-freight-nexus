@@ -3,7 +3,9 @@ export interface NeutrosophicValue {
   truth: number;
   indeterminacy: number;
   falsehood: number;
+  falsity: number; // Added for compatibility
   confidence: number;
+  crispScore: number; // Added for compatibility
 }
 
 export interface ForwarderData {
@@ -41,9 +43,14 @@ export class NeutrosophicEngine {
       falsehood: falsehood / total
     } : { truth: 0.33, indeterminacy: 0.33, falsehood: 0.34 };
 
+    const confidence = Math.max(0, Math.min(1, normalized.truth - normalized.falsehood));
+    const crispScore = normalized.truth - normalized.falsehood;
+
     return {
       ...normalized,
-      confidence: Math.max(0, Math.min(1, normalized.truth - normalized.falsehood))
+      falsity: normalized.falsehood, // Added for compatibility
+      confidence,
+      crispScore
     };
   }
 
