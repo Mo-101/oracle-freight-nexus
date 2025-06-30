@@ -25,7 +25,7 @@ class UnifiedTTSService {
       humorous: 'nova',
       corporate: 'echo'
     };
-    return voiceMap[personality] || 'alloy';
+    return voiceMap[personality] || 'nova';
   }
 
   getEmotionForPersonality(personality: VoicePersonality): string {
