@@ -1,9 +1,11 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { RouteIntelligencePanel } from './RouteIntelligencePanel';
 import { ForwarderIntelligenceMatrix } from './ForwarderIntelligenceMatrix';
 import { SymbolicDecisionEngine } from './SymbolicDecisionEngine';
+import { RealTimeRankingPanel } from './RealTimeRankingPanel';
 import { freightIntelligenceEngine } from '@/utils/freightIntelligenceEngine';
+import { ForwarderIntelligence } from '@/types/freight';
 
 interface FreightIntelligenceDashboardProps {
   origin: string;
@@ -20,6 +22,8 @@ export const FreightIntelligenceDashboard = ({
   weight,
   volume
 }: FreightIntelligenceDashboardProps) => {
+  
+  const [rankedForwarders, setRankedForwarders] = useState<ForwarderIntelligence[]>([]);
   
   const corridorIntelligence = useMemo(() => 
     freightIntelligenceEngine.analyzeCorridorIntelligence(origin, destination),
@@ -40,15 +44,25 @@ export const FreightIntelligenceDashboard = ({
     freightIntelligenceEngine.generateSymbolicDecision(
       corridorIntelligence,
       routeOptions,
-      forwarderIntelligence,
+      rankedForwarders.length > 0 ? rankedForwarders : forwarderIntelligence,
       cargoType
     ),
-    [corridorIntelligence, routeOptions, forwarderIntelligence, cargoType]
+    [corridorIntelligence, routeOptions, rankedForwarders, forwarderIntelligence, cargoType]
   );
+
+  const handleRankingUpdate = (updatedForwarders: ForwarderIntelligence[]) => {
+    setRankedForwarders(updatedForwarders);
+  };
 
   return (
     <div className="space-y-8">
-      {/* Symbolic Decision - Show First */}
+      {/* Real-Time Dynamic Ranking - New Feature */}
+      <RealTimeRankingPanel 
+        forwarders={forwarderIntelligence}
+        onRankingUpdate={handleRankingUpdate}
+      />
+
+      {/* Symbolic Decision - Show After Ranking */}
       <SymbolicDecisionEngine 
         decision={symbolicDecision}
       />
@@ -59,9 +73,9 @@ export const FreightIntelligenceDashboard = ({
         routeOptions={routeOptions}
       />
 
-      {/* Forwarder Matrix */}
+      {/* Forwarder Matrix - Now uses ranked data if available */}
       <ForwarderIntelligenceMatrix 
-        forwarders={forwarderIntelligence}
+        forwarders={rankedForwarders.length > 0 ? rankedForwarders : forwarderIntelligence}
         cargoType={cargoType}
       />
 

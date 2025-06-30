@@ -1,12 +1,28 @@
 
 import { NeutrosophicValue } from "@/utils/neutrosophicEngine";
 
+export type TransportMode = 'Air' | 'Sea' | 'Road' | 'Rail' | 'Multimodal';
+
 export interface ForwarderPerformance {
     name: string;
     avgCostPerKg: number;
     avgTransitDays: number;
     reliabilityScore: number;
     quoteWinRate: number;
+    totalShipments: number;
+    onTimeRate: number;
+}
+
+export interface RealTimeRate {
+    baseRate: number;
+    fuelSurcharge: number;
+    securityFee: number;
+    handlingFee: number;
+    customsFee: number;
+    insuranceRate: number;
+    totalRate: number;
+    validUntil: string;
+    currency: string;
 }
 
 export interface ForwarderIntelligence {
@@ -15,13 +31,23 @@ export interface ForwarderIntelligence {
     avgTransitDays: number;
     reliabilityScore: number;
     totalShipments: number;
-    emergencyGrade: string;
+    emergencyGrade: 'Standard' | 'Priority' | 'Critical';
     quoteCoverage: number;
     specializations: string[];
+    recentPerformance: Array<{
+        month: string;
+        shipmentsHandled: number;
+        successRate: number;
+        avgCost: number;
+    }>;
+    successRate: number;
+    realTimeRate?: RealTimeRate;
+    dynamicScore?: number;
+    rankPosition?: number;
 }
 
 export interface RouteOption {
-    mode: string;
+    mode: TransportMode;
     corridor: string;
     distanceKm: number;
     transitTimeDays: number;
@@ -39,8 +65,9 @@ export interface CorridorIntelligence {
     totalShipments: number;
     successRate: number;
     avgTransitDays: number;
-    predominantMode: string;
+    predominantMode: TransportMode;
     riskFactors: string[];
+    seasonalVariation: number;
 }
 
 export interface SymbolicDecision {
@@ -52,40 +79,62 @@ export interface SymbolicDecision {
   uncertaintyFactors: string[];
 }
 
+export interface WeightVector {
+  cost: number;
+  time: number;
+  reliability: number;
+  risk: number;
+}
+
+export interface DynamicRankingConfig {
+  costWeight: number;
+  timeWeight: number;  
+  reliabilityWeight: number;
+  riskWeight: number;
+  emergencyMode: boolean;
+  maxBudget?: number;
+  maxTransitDays?: number;
+}
+
 export interface CanonicalShipment {
   id: number;
   date_of_collection: string;
   date_of_arrival_destination: string;
   date_of_greenlight_to_pickup: string;
   mode_of_shipment: string;
-  initial_quote_awarded: number;
-  final_quote_awarded_freight_forwarder_carrier: number;
-  kuehne_nagel: number;
-  scan_global_logistics: number;
-  dhl_express: number;
-  dhl_global: number;
-  siginon: number;
-  agl: number;
-  freight_in_time: number;
-  bwosi: number;
+  initial_quote_awarded: number | string;
+  final_quote_awarded_freight_forwarder_carrier: number | string;
+  kuehne_nagel: number | string;
+  scan_global_logistics: number | string;
+  dhl_express: number | string;
+  dhl_global: number | string;
+  siginon: number | string;
+  agl: number | string;
+  freight_in_time: number | string;
+  bwosi: number | string;
   origin: string;
   destination: string;
+  origin_country?: string;
+  destination_country?: string;
   cargo_type: string;
-  weight_kg: number;
-  volume_cbm: number;
+  cargo_description?: string;
+  item_category?: string;
+  weight_kg: number | string;
+  volume_cbm: number | string;
   carrier: string;
   routing: string;
-  transit_days: number;
-  actual_cost: number;
-  fuel_surcharge: number;
-  insurance: number;
-  customs_brokerage: number;
-  port_handling: number;
-  storage: number;
-  demurrage: number;
-  other_charges: number;
-  total_cost: number;
-  delay_days: number;
+  transit_days: number | string;
+  actual_cost: number | string;
+  freight_carrier_cost?: number | string;
+  fuel_surcharge: number | string;
+  insurance: number | string;
+  customs_brokerage: number | string;
+  port_handling: number | string;
+  storage: number | string;
+  demurrage: number | string;
+  other_charges: number | string;
+  total_cost: number | string;
+  delay_days: number | string;
   damage: boolean;
   loss: boolean;
   customer_complaints: string;
@@ -96,14 +145,14 @@ export interface CanonicalShipment {
   delivery_status: string;
   temperature_control_failures: boolean;
   security_breaches: boolean;
-  risk_assessment_score: number;
-  sustainability_metrics: number;
-  customer_satisfaction_score: number;
-  market_volatility_impact: number;
+  risk_assessment_score: number | string;
+  sustainability_metrics: number | string;
+  customer_satisfaction_score: number | string;
+  market_volatility_impact: number | string;
   regulatory_compliance_issues: boolean;
   force_majeure_events: boolean;
-  visibility_and_tracking_accuracy: number;
-  exception_handling_effectiveness: number;
-  overall_performance_score: number;
+  visibility_and_tracking_accuracy: number | string;
+  exception_handling_effectiveness: number | string;
+  overall_performance_score: number | string;
   neutrosophic_interpretation?: NeutrosophicValue;
 }
