@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -11,46 +12,46 @@ import { RiskHeatmap } from '../components/analytics/RiskHeatmap';
 // Set Mapbox access token
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoiYWthbmltbzEiLCJhIjoiY2x4czNxbjU2MWM2eTJqc2gwNGIwaWhkMSJ9.jSwZdyaPa1dOHepNU5P71g';
 
-// Custom hybrid style configuration
-const hybridStyleConfig = {
-  "version": 8,
-  "name": "Hybrid Satellite Style",
-  "pitch": 0,
-  "light": {
-    "intensity": 0.2
+// Custom hybrid style configuration with proper typing
+const hybridStyleConfig: mapboxgl.Style = {
+  version: 8 as const,
+  name: "Hybrid Satellite Style",
+  pitch: 0,
+  light: {
+    intensity: 0.2
   },
-  "sources": {
-    "GoogleSatellite_0": {
-      "type": "raster",
-      "tiles": ["https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"],
-      "tileSize": 256
+  sources: {
+    GoogleSatellite_0: {
+      type: "raster",
+      tiles: ["https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"],
+      tileSize: 256
     },
-    "GoogleHybrid_1": {
-      "type": "raster",
-      "tiles": ["https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"],
-      "tileSize": 256
+    GoogleHybrid_1: {
+      type: "raster",
+      tiles: ["https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"],
+      tileSize: 256
     }
   },
-  "sprite": "",
-  "glyphs": "https://glfonts.lukasmartinelli.ch/fonts/{fontstack}/{range}.pbf",
-  "layers": [
+  sprite: "",
+  glyphs: "https://glfonts.lukasmartinelli.ch/fonts/{fontstack}/{range}.pbf",
+  layers: [
     {
-      "id": "background",
-      "type": "background",
-      "layout": {},
-      "paint": {
+      id: "background",
+      type: "background",
+      layout: {},
+      paint: {
         "background-color": "#ffffff"
       }
     },
     {
-      "id": "lyr_GoogleSatellite_0_0",
-      "type": "raster",
-      "source": "GoogleSatellite_0"
+      id: "lyr_GoogleSatellite_0_0",
+      type: "raster",
+      source: "GoogleSatellite_0"
     },
     {
-      "id": "lyr_GoogleHybrid_1_1",
-      "type": "raster",
-      "source": "GoogleHybrid_1"
+      id: "lyr_GoogleHybrid_1_1",
+      type: "raster",
+      source: "GoogleHybrid_1"
     }
   ]
 };
@@ -199,7 +200,7 @@ const Map = () => {
   useEffect(() => {
     if (!mapContainer.current || viewMode !== '2d') return;
 
-    // Initialize map with custom hybrid style
+    // Initialize map with properly typed hybrid style
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: hybridStyleConfig,
