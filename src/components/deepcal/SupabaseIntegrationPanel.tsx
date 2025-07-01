@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Database, Cloud, Sync, History, Search, TrendingUp } from 'lucide-react';
+import { Database, Cloud, RefreshCw, History, Search, TrendingUp } from 'lucide-react';
 import { baseDataStore } from '@/services/baseDataStore';
 import { supabaseDataService } from '@/services/supabaseDataService';
 import { deepcalCore } from '@/utils/deepcalCore';
@@ -135,7 +134,7 @@ export const SupabaseIntegrationPanel = () => {
               {syncStatus === 'syncing' ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
               ) : (
-                <Sync className="w-4 h-4 mr-1" />
+                <RefreshCw className="w-4 h-4 mr-1" />
               )}
               Sync
             </Button>
