@@ -1,4 +1,5 @@
 import { baseDataStore } from '@/services/baseDataStore';
+import { supabaseDataService } from '@/services/supabaseDataService';
 import { NeutrosophicAHP, TNN } from './neutrosophicAHP';
 import { DeepCALTOPSIS, TOPSISCriteria, TOPSISAlternative, TOPSISResult } from './deepcalTOPSIS';
 
@@ -27,6 +28,7 @@ export interface DeepCALDecision {
   analysis: string;
   timestamp: Date;
   dataVersion: string;
+  analysisId?: string; // New field for Supabase record ID
 }
 
 export interface ShipmentData {
@@ -44,6 +46,7 @@ export interface ShipmentData {
 
 export class DeepCALCore {
   private ahp: NeutrosophicAHP;
+  private useSupabaseCache: boolean = true;
 
   constructor() {
     baseDataStore.enforceDataLock(); // Strict data-first protocol
@@ -53,7 +56,21 @@ export class DeepCALCore {
     });
   }
 
-  analyzeForwarders(): ForwarderAnalysis[] {
+  async analyzeForwarders(): Promise<ForwarderAnalysis[]> {
+    // Try to get cached results from Supabase first
+    if (this.useSupabaseCache && baseDataStore.isSupabaseEnabled()) {
+      try {
+        const cachedPerformance = await supabaseDataService.getForwarderPerformance();
+        if (cachedPerformance.length > 0) {
+          console.log('📊 Using cached forwarder performance from Supabase');
+          return cachedPerformance;
+        }
+      } catch (error) {
+        console.warn('⚠️ Failed to fetch cached performance, falling back to calculation:', error);
+      }
+    }
+
+    // Fallback to original calculation
     const rawData: ShipmentData[] = baseDataStore.getRawData() as ShipmentData[];
     console.log('🔍 Analyzing forwarders from', rawData.length, 'shipments');
 
@@ -159,11 +176,11 @@ export class DeepCALCore {
     };
   }
 
-  makeDecision(forwarders?: string[]): DeepCALDecision {
+  async makeDecision(forwarders?: string[]): Promise<DeepCALDecision> {
     console.log('🧠 DeepCAL Core: Starting decision analysis...');
     
     // Get forwarder analyses
-    const allForwarders = this.analyzeForwarders();
+    const allForwarders = await this.analyzeForwarders();
     const targetForwarders = forwarders ? 
       allForwarders.filter(f => forwarders.includes(f.forwarder)) : 
       allForwarders.slice(0, 8); // Top 8 by shipment count
@@ -217,23 +234,50 @@ export class DeepCALCore {
       dataVersion: baseDataStore.getDataVersion()?.version || 'unknown'
     };
 
+    // Save to Supabase if enabled
+    if (baseDataStore.isSupabaseEnabled()) {
+      try {
+        const analysisId = await supabaseDataService.saveAnalysis(decision);
+        if (analysisId) {
+          decision.analysisId = analysisId;
+          console.log('💾 Analysis saved to Supabase with ID:', analysisId);
+        }
+      } catch (error) {
+        console.warn('⚠️ Failed to save analysis to Supabase:', error);
+      }
+    }
+
     console.log('✅ DeepCAL decision completed');
     console.log('🏆 Top recommendation:', ranking[0]?.alternative.name);
 
     return decision;
   }
 
-  // Continuous learning: update forwarder performance based on new shipment data
-  updatePerformance(shipmentId: string, actualTransitDays: number, actualCost: number, onTime: boolean): void {
+  // Enhanced performance update with Supabase persistence
+  async updatePerformance(shipmentId: string, actualTransitDays: number, actualCost: number, onTime: boolean): Promise<void> {
     console.log('🔄 Updating performance metrics for shipment:', shipmentId);
     
-    // In a full implementation, this would:
-    // 1. Update the forwarder's historical performance
-    // 2. Recalculate reliability scores
-    // 3. Adjust risk assessments
-    // 4. Log performance delta for continuous learning
+    // Update in Supabase if enabled
+    if (baseDataStore.isSupabaseEnabled()) {
+      try {
+        const success = await supabaseDataService.updateShipmentPerformance(
+          shipmentId,
+          actualTransitDays,
+          actualCost,
+          onTime
+        );
+        
+        if (success) {
+          console.log('✅ Performance updated in Supabase');
+          // Refresh local cache
+          await baseDataStore.refreshFromSupabase();
+        }
+      } catch (error) {
+        console.warn('⚠️ Failed to update performance in Supabase:', error);
+      }
+    }
     
-    // For now, we log the performance update
+    // Log performance update for audit trail
     console.log('📊 Performance update:', {
       shipmentId,
       actualTransitDays,
@@ -243,6 +287,30 @@ export class DeepCALCore {
     });
   }
 
+  // New method to get analysis history from Supabase
+  async getAnalysisHistory(limit = 10) {
+    if (!baseDataStore.isSupabaseEnabled()) return [];
+    
+    try {
+      return await supabaseDataService.getAnalysisHistory(limit);
+    } catch (error) {
+      console.error('❌ Failed to fetch analysis history:', error);
+      return [];
+    }
+  }
+
+  // New method for intelligent forwarder recommendations
+  async getIntelligentRecommendations(query: string, limit = 5): Promise<ShipmentData[]> {
+    if (!baseDataStore.isSupabaseEnabled()) return [];
+    
+    try {
+      return await supabaseDataService.findSimilarShipments(query, limit);
+    } catch (error) {
+      console.error('❌ Failed to get intelligent recommendations:', error);
+      return [];
+    }
+  }
+
   // Generate audit trail for decision traceability
   generateAuditTrail(decision: DeepCALDecision): string {
     let trail = "🔍 DEEPCAL DECISION AUDIT TRAIL\n";
@@ -250,7 +318,13 @@ export class DeepCALCore {
     
     trail += `📅 Timestamp: ${decision.timestamp.toISOString()}\n`;
     trail += `📦 Data Version: ${decision.dataVersion}\n`;
-    trail += `🎯 Consistency Ratio: ${decision.consistencyRatio.toFixed(4)} ${decision.isConsistent ? '✅' : '❌'}\n\n`;
+    trail += `🎯 Consistency Ratio: ${decision.consistencyRatio.toFixed(4)} ${decision.isConsistent ? '✅' : '❌'}\n`;
+    
+    if (decision.analysisId) {
+      trail += `💾 Analysis ID: ${decision.analysisId}\n`;
+    }
+    
+    trail += `🔗 Data Source: ${baseDataStore.isSupabaseEnabled() ? 'Supabase Database' : 'In-Memory Store'}\n\n`;
     
     trail += "⚖️ CRITERIA WEIGHTS (Neutrosophic AHP):\n";
     trail += `  Cost: ${(decision.criteriaWeights.cost * 100).toFixed(2)}%\n`;

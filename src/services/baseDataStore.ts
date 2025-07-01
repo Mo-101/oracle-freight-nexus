@@ -1,5 +1,5 @@
-
 import { sha256 } from 'crypto-js';
+import { supabaseDataService } from './supabaseDataService';
 
 export interface DataVersion {
   version: string;
@@ -22,6 +22,7 @@ class BaseDataStore {
   private dataVersion: DataVersion | null = null;
   private rawData: any[] = [];
   private isLocked: boolean = true;
+  private useSupabase: boolean = true; // New flag to enable Supabase integration
 
   private constructor() {}
 
@@ -32,7 +33,42 @@ class BaseDataStore {
     return BaseDataStore.instance;
   }
 
-  async loadAndValidateData(csvData: string, source: string): Promise<boolean> {
+  async initializeFromSupabase(): Promise<boolean> {
+    if (!this.useSupabase) return false;
+    
+    try {
+      console.log('🔄 BaseDataStore: Initializing from Supabase...');
+      
+      const shipments = await supabaseDataService.getAllShipments();
+      if (shipments.length > 0) {
+        this.rawData = shipments;
+        
+        // Create a data version from existing data
+        const dataString = JSON.stringify(shipments);
+        const hash = sha256(dataString).toString();
+        
+        this.dataVersion = {
+          version: `v1.0.0-supabase-${Date.now()}`,
+          hash,
+          source: 'supabase-database',
+          timestamp: new Date(),
+          validated: true
+        };
+        
+        this.isLocked = false;
+        console.log('✅ BaseDataStore: Initialized from Supabase with', shipments.length, 'records');
+        return true;
+      }
+      
+      console.log('ℹ️ BaseDataStore: No data found in Supabase, system remains locked');
+      return false;
+    } catch (error) {
+      console.error('❌ BaseDataStore: Failed to initialize from Supabase:', error);
+      return false;
+    }
+  }
+
+  async loadAndValidateData(csvData: string, source: string, persistToSupabase = true): Promise<boolean> {
     try {
       console.log('🔒 BaseDataStore: Starting data validation protocol...');
       
@@ -69,6 +105,17 @@ class BaseDataStore {
         timestamp: new Date(),
         validated: true
       };
+
+      // Persist to Supabase if enabled
+      if (this.useSupabase && persistToSupabase) {
+        console.log('💾 BaseDataStore: Persisting data to Supabase...');
+        const success = await supabaseDataService.bulkInsertShipments(rows, true);
+        if (success) {
+          console.log('✅ BaseDataStore: Data persisted to Supabase successfully');
+        } else {
+          console.warn('⚠️ BaseDataStore: Failed to persist to Supabase, continuing with in-memory data');
+        }
+      }
 
       this.isLocked = false;
       console.log('✅ BaseDataStore: Data validated and unlocked');
@@ -155,6 +202,23 @@ class BaseDataStore {
       throw new Error("Base algorithmic data not loaded – system locked.");
     }
   }
+
+  // New methods for Supabase integration
+  async refreshFromSupabase(): Promise<boolean> {
+    return await this.initializeFromSupabase();
+  }
+
+  enableSupabaseIntegration(enabled: boolean = true) {
+    this.useSupabase = enabled;
+    console.log(`🔧 BaseDataStore: Supabase integration ${enabled ? 'enabled' : 'disabled'}`);
+  }
+
+  isSupabaseEnabled(): boolean {
+    return this.useSupabase;
+  }
 }
 
 export const baseDataStore = BaseDataStore.getInstance();
+
+// Auto-initialize from Supabase on startup
+baseDataStore.initializeFromSupabase().catch(console.error);
