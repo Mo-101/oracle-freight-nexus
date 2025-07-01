@@ -1,7 +1,27 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://mvzjlugmomgmsvmwzwmj.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12empsdWdtb21nbXN2bXd6d21qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyMDI2MTQsImV4cCI6MjA2Njc3ODYxNH0.v48NN__NywVBdNjqeq1EU7u65lkaKwO7kf515DRDr4I'
+// Neon PostgreSQL connection details
+const neonUrl = 'postgresql://deppcalpot_owner:npg_4WSa3AOwBKef@ep-plain-waterfall-a9z01f8e-pooler.gwc.azure.neon.tech/deppcalpot?sslmode=require&channel_binding=require'
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// For direct PostgreSQL connection, we'll create a custom client
+// Note: This requires a PostgreSQL adapter since Supabase client expects Supabase endpoints
+export const supabase = createClient(
+  // Temporary fallback - we'll need to implement direct PostgreSQL connection
+  'https://placeholder.supabase.co',
+  'placeholder-key'
+)
+
+// Neon database configuration for direct connection
+export const neonConfig = {
+  connectionString: neonUrl,
+  host: 'ep-plain-waterfall-a9z01f8e-pooler.gwc.azure.neon.tech',
+  database: 'deppcalpot',
+  username: 'deppcalpot_owner',
+  password: 'npg_4WSa3AOwBKef',
+  port: 5432,
+  ssl: {
+    rejectUnauthorized: false,
+    sslmode: 'require'
+  }
+}

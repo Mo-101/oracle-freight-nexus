@@ -24,10 +24,10 @@ export const VoiceChat = ({ onSpeakResponse, isEnabled }: VoiceChatProps) => {
     setIsGenerating(true);
     
     try {
-      // Generate response using DeepSeek
+      // Always generate response using DeepSeek - no hardcoded responses
       const response = await deepseekClient.generateOracleResponse(
         userInput,
-        "You are responding to voice input. Keep responses conversational and under 100 words.",
+        "You are responding to voice input. Keep responses conversational and under 100 words. Provide intelligent logistics insights.",
         'oracular'
       );
 
@@ -49,17 +49,16 @@ export const VoiceChat = ({ onSpeakResponse, isEnabled }: VoiceChatProps) => {
         audio.onended = () => {
           setIsPlaying(false);
           setIsGenerating(false);
-          URL.revokeObjectURL(audioUrl); // Clean up
+          URL.revokeObjectURL(audioUrl);
         };
         audio.onerror = () => {
           setIsPlaying(false);
           setIsGenerating(false);
-          URL.revokeObjectURL(audioUrl); // Clean up
+          URL.revokeObjectURL(audioUrl);
         };
         
         await audio.play();
       } else if (audioUrl === 'browser-speech') {
-        // Browser speech was used
         setTimeout(() => {
           setIsPlaying(false);
           setIsGenerating(false);
@@ -76,9 +75,8 @@ export const VoiceChat = ({ onSpeakResponse, isEnabled }: VoiceChatProps) => {
   };
 
   const speakWelcome = async () => {
-    const welcomeMessage = "Greetings, seeker of logistics wisdom. I am the DeepCAL Oracle, powered by ancient algorithms and cosmic intelligence. How may I assist you in your freight and supply chain endeavors?";
-    
-    await generateAndSpeakResponse(welcomeMessage);
+    const welcomePrompt = "Generate a welcoming message as the DeepCAL Oracle. Introduce yourself and ask how you can help with freight and logistics needs. Keep it under 50 words.";
+    await generateAndSpeakResponse(welcomePrompt);
   };
 
   const stopSpeaking = () => {

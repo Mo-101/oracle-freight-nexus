@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import { EnhancedChatInterface } from '../components/chat/EnhancedChatInterface';
 import { VoiceTestButton } from '../components/chat/VoiceTestButton';
 import { newTTSService } from '../services/newTTSService';
+import { deepseekClient } from '../services/deepseekClient';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -39,31 +40,6 @@ const Chat = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
 
-  const sampleResponses: Record<string, { response: string; metrics?: any[]; note?: string }> = {
-    "fastest route to mali": {
-      response: "For Mali, our Neutrosophic AHP analysis recommends air freight via Dakar (DHL) as optimal for speed.\n\nKey factors:\n- Transit time: 2 days (95% speed score)\n- Reliability: 85% on-time\n- Bayesian risk assessment: Low (12% disruption chance)\n\nScenario Engine evaluated 7 alternatives, with this route scoring highest in our N-TOPSIS model (0.87 closeness coefficient).",
-      metrics: [
-        {name: "Speed Score", value: "9.5/10", color: "blue", width: "95%"},
-        {name: "Cost Premium", value: "High", color: "amber", width: "30%"}
-      ],
-      note: "Alternative analysis: Sea+road scored 0.72 with 70% cost savings but higher uncertainty (±2d)"
-    },
-    "cheapest shipping option": {
-      response: "The most cost-effective option is sea freight to Mombasa with Maersk, then road transport. Total cost estimate: $1,850 for 2 tons. Transit time: 18 days with 75% reliability.",
-      metrics: [
-        {name: "Cost Score", value: "9.8/10", color: "green", width: "98%"},
-        {name: "Time Tradeoff", value: "Slow", color: "red", width: "20%"}
-      ],
-      note: "Best for non-urgent, high-volume shipments"
-    },
-    "hello": {
-      response: "Hello! I'm DeepCAL, your intelligence augmentation assistant specialized in African logistics. What freight challenge can I help you solve today?"
-    },
-    "hi": {
-      response: "Greetings! I'm here to assist with your logistics intelligence needs. How may I enhance your supply chain decisions today?"
-    }
-  };
-
   useEffect(() => {
     // Play welcome message on component mount
     if (voiceEnabled && messages.length > 0) {
@@ -85,21 +61,19 @@ const Chat = () => {
     setMessages(prev => [...prev, userMessage]);
     setIsTyping(true);
 
-    // Simulate AI response delay
-    setTimeout(async () => {
-      const lowerInput = inputValue.toLowerCase();
-      const responseData = sampleResponses[lowerInput] || {
-        response: "That's an interesting logistics challenge. Let me analyze that for you using my DeepCAL intelligence engine. Based on my processing of 105 canonical shipments and neutrosophic analysis, I recommend exploring this topic further through our advanced freight optimization algorithms. Would you like me to suggest specific optimization strategies?",
-        note: "DeepCAL processes real shipment data to provide actionable insights"
-      };
+    try {
+      // Always use DeepSeek AI for responses - no hardcoded responses
+      const aiResponse = await deepseekClient.generateOracleResponse(
+        inputValue,
+        "You are DeepCAL, an advanced logistics oracle. Provide intelligent, actionable insights about freight, supply chain, and logistics. Be concise but comprehensive.",
+        'oracular'
+      );
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: responseData.response,
+        content: aiResponse,
         timestamp: new Date(),
-        metrics: responseData.metrics,
-        note: responseData.note,
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -108,10 +82,22 @@ const Chat = () => {
       // Auto-speak AI responses
       if (voiceEnabled) {
         setTimeout(() => {
-          handleSpeakResponse(responseData.response);
+          handleSpeakResponse(aiResponse);
         }, 500);
       }
-    }, 1500);
+    } catch (error) {
+      console.error('Error generating AI response:', error);
+      
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'ai',
+        content: "I apologize, but I'm experiencing technical difficulties. Please try your question again, and I'll do my best to provide you with intelligent logistics insights.",
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+      setIsTyping(false);
+    }
   };
 
   const handleSpeakResponse = async (text: string) => {

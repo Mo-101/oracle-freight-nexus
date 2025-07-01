@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Volume2, VolumeX, Sparkles } from 'lucide-react'; // This line is already correct, no change needed.
+import { Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { TOPSISResult } from '@/utils/neutrosophicEngine';
 import { unifiedTTS } from '@/services/unifiedTTS';
 import { deepseekClient } from '@/services/deepseekClient';
@@ -52,32 +52,13 @@ export const VoiceNarration = ({
       return narrative;
     } catch (error) {
       console.error('Failed to generate AI narrative:', error);
-      return getFallbackNarrative();
+      // If DeepSeek fails, generate a brief error message instead of hardcoded content
+      const errorNarrative = `I apologize, but I'm having difficulty generating a detailed analysis at the moment. Based on the available data, ${topForwarder?.forwarder} appears to be the optimal choice with a TOPSIS score of ${topForwarder?.normalizedScore.toFixed(3)}.`;
+      setGeneratedNarrative(errorNarrative);
+      return errorNarrative;
     } finally {
       setIsGenerating(false);
     }
-  };
-
-  const getFallbackNarrative = () => {
-    const narratives = {
-      oracular: `🔮 Behold, the cosmic freight matrix has spoken through DeepSeek's ancient algorithms! 
-      In the realm where ${emergency} casts shadows over ${destination}, your ${cargoType} cargo carries the weight of destiny. 
-      ${topForwarder?.forwarder} emerges not as mere carrier, but as the chosen vessel with TOPSIS score ${topForwarder?.normalizedScore.toFixed(3)}. 
-      The neutrosophic truth reveals ${(topForwarder?.neutrosophic.truth * 100).toFixed(1)}% certainty in this path. 
-      May your cargo reach its destination blessed by the algorithms of logistics wisdom.`,
-      
-      humorous: `🎭 Alright, let's talk freight like adults who've had too much coffee. 
-      Your ${cargoType} needs to get from ${origin} to ${destination}, and it's more urgent than a deadline. 
-      ${topForwarder?.forwarder} wins this beauty contest with a TOPSIS score that would make statisticians weep tears of joy. 
-      The probability of success is ${(topForwarder?.neutrosophic.truth * 100).toFixed(1)}% - better odds than most Netflix shows being good!`,
-      
-      corporate: `📊 Comprehensive analysis indicates ${topForwarder?.forwarder} demonstrates optimal performance 
-      with normalized score ${topForwarder?.normalizedScore.toFixed(3)}. Risk mitigation factors incorporate 
-      current ${emergency} situation. Neutrosophic confidence interval: ${(topForwarder?.neutrosophic.truth * 100).toFixed(1)}% reliability. 
-      Recommendation aligns with corporate risk management protocols for ${cargoType} transport.`
-    };
-    
-    return narratives[currentMode];
   };
 
   const speakNarrative = async () => {
@@ -109,18 +90,17 @@ export const VoiceNarration = ({
         
         audio.onended = () => {
           setIsPlaying(false);
-          URL.revokeObjectURL(audioUrl); // Clean up
+          URL.revokeObjectURL(audioUrl);
         };
         audio.onerror = () => {
           setIsPlaying(false);
           console.error('Audio playback failed');
-          URL.revokeObjectURL(audioUrl); // Clean up
+          URL.revokeObjectURL(audioUrl);
         };
         
         await audio.play();
       } else if (audioUrl === 'browser-speech') {
-        // Browser speech was used
-        setTimeout(() => setIsPlaying(false), 5000); // Longer for narratives
+        setTimeout(() => setIsPlaying(false), 5000);
       } else {
         setIsPlaying(false);
         console.error('Failed to generate audio');
@@ -151,7 +131,7 @@ export const VoiceNarration = ({
             value={currentMode}
             onChange={(e)=>{
               setCurrentMode(e.target.value as typeof currentMode);
-              setGeneratedNarrative(''); // Clear generated narrative when mode changes
+              setGeneratedNarrative('');
             }}
             className="bg-slate-700 text-white px-3 py-1 rounded text-sm border border-slate-600"
             >
@@ -195,7 +175,7 @@ export const VoiceNarration = ({
       {(isPlaying || isGenerating) && (
         <div className="mt-4 flex items-center text-xs text-deepcal-light">
           <div className="w-2 h-2 bg-deepcal-light rounded-full mr-2 animate-pulse"></div>
-          {isGenerating ? 'DeepSeek generating narrative...' : 'Oracle transmission in progress... (New AI Voice System)'}
+          {isGenerating ? 'DeepSeek generating narrative...' : 'Oracle transmission in progress...'}
         </div>
       )}
     </div>
