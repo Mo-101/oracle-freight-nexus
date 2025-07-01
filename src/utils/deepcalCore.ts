@@ -1,5 +1,5 @@
 import { baseDataStore } from '@/services/baseDataStore';
-import { supabaseDataService } from '@/services/supabaseDataService';
+import { neonDataService } from '@/services/neonDataService';
 import { NeutrosophicAHP, TNN } from './neutrosophicAHP';
 import { DeepCALTOPSIS, TOPSISCriteria, TOPSISAlternative, TOPSISResult } from './deepcalTOPSIS';
 
@@ -46,7 +46,7 @@ export interface ShipmentData {
 
 export class DeepCALCore {
   private ahp: NeutrosophicAHP;
-  private useSupabaseCache: boolean = true;
+  private useNeonCache: boolean = true;
 
   constructor() {
     baseDataStore.enforceDataLock(); // Strict data-first protocol
@@ -57,12 +57,12 @@ export class DeepCALCore {
   }
 
   async analyzeForwarders(): Promise<ForwarderAnalysis[]> {
-    // Try to get cached results from Supabase first
-    if (this.useSupabaseCache && baseDataStore.isSupabaseEnabled()) {
+    // Try to get cached results from Neon first
+    if (this.useNeonCache && baseDataStore.isNeonEnabled()) {
       try {
-        const cachedPerformance = await supabaseDataService.getForwarderPerformance();
+        const cachedPerformance = await neonDataService.getForwarderPerformance();
         if (cachedPerformance.length > 0) {
-          console.log('📊 Using cached forwarder performance from Supabase');
+          console.log('📊 Using cached forwarder performance from Neon');
           return cachedPerformance;
         }
       } catch (error) {
@@ -234,16 +234,16 @@ export class DeepCALCore {
       dataVersion: baseDataStore.getDataVersion()?.version || 'unknown'
     };
 
-    // Save to Supabase if enabled
-    if (baseDataStore.isSupabaseEnabled()) {
+    // Save to Neon if enabled
+    if (baseDataStore.isNeonEnabled()) {
       try {
-        const analysisId = await supabaseDataService.saveAnalysis(decision);
+        const analysisId = await neonDataService.saveAnalysis(decision);
         if (analysisId) {
           decision.analysisId = analysisId;
-          console.log('💾 Analysis saved to Supabase with ID:', analysisId);
+          console.log('💾 Analysis saved to Neon with ID:', analysisId);
         }
       } catch (error) {
-        console.warn('⚠️ Failed to save analysis to Supabase:', error);
+        console.warn('⚠️ Failed to save analysis to Neon:', error);
       }
     }
 
@@ -253,14 +253,14 @@ export class DeepCALCore {
     return decision;
   }
 
-  // Enhanced performance update with Supabase persistence
+  // Enhanced performance update with Neon persistence
   async updatePerformance(shipmentId: string, actualTransitDays: number, actualCost: number, onTime: boolean): Promise<void> {
     console.log('🔄 Updating performance metrics for shipment:', shipmentId);
     
-    // Update in Supabase if enabled
-    if (baseDataStore.isSupabaseEnabled()) {
+    // Update in Neon if enabled
+    if (baseDataStore.isNeonEnabled()) {
       try {
-        const success = await supabaseDataService.updateShipmentPerformance(
+        const success = await neonDataService.updateShipmentPerformance(
           shipmentId,
           actualTransitDays,
           actualCost,
@@ -268,12 +268,12 @@ export class DeepCALCore {
         );
         
         if (success) {
-          console.log('✅ Performance updated in Supabase');
+          console.log('✅ Performance updated in Neon');
           // Refresh local cache
-          await baseDataStore.refreshFromSupabase();
+          await baseDataStore.refreshFromNeon();
         }
       } catch (error) {
-        console.warn('⚠️ Failed to update performance in Supabase:', error);
+        console.warn('⚠️ Failed to update performance in Neon:', error);
       }
     }
     
@@ -287,24 +287,24 @@ export class DeepCALCore {
     });
   }
 
-  // New method to get analysis history from Supabase
+  // Updated method to get analysis history from Neon
   async getAnalysisHistory(limit = 10) {
-    if (!baseDataStore.isSupabaseEnabled()) return [];
+    if (!baseDataStore.isNeonEnabled()) return [];
     
     try {
-      return await supabaseDataService.getAnalysisHistory(limit);
+      return await neonDataService.getAnalysisHistory(limit);
     } catch (error) {
       console.error('❌ Failed to fetch analysis history:', error);
       return [];
     }
   }
 
-  // New method for intelligent forwarder recommendations
+  // Updated method for intelligent forwarder recommendations
   async getIntelligentRecommendations(query: string, limit = 5): Promise<ShipmentData[]> {
-    if (!baseDataStore.isSupabaseEnabled()) return [];
+    if (!baseDataStore.isNeonEnabled()) return [];
     
     try {
-      return await supabaseDataService.findSimilarShipments(query, limit);
+      return await neonDataService.findSimilarShipments(query, limit);
     } catch (error) {
       console.error('❌ Failed to get intelligent recommendations:', error);
       return [];
@@ -324,7 +324,7 @@ export class DeepCALCore {
       trail += `💾 Analysis ID: ${decision.analysisId}\n`;
     }
     
-    trail += `🔗 Data Source: ${baseDataStore.isSupabaseEnabled() ? 'Supabase Database' : 'In-Memory Store'}\n\n`;
+    trail += `🔗 Data Source: ${baseDataStore.isNeonEnabled() ? 'Neon Database' : 'In-Memory Store'}\n\n`;
     
     trail += "⚖️ CRITERIA WEIGHTS (Neutrosophic AHP):\n";
     trail += `  Cost: ${(decision.criteriaWeights.cost * 100).toFixed(2)}%\n`;

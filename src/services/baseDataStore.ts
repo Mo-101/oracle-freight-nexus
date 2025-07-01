@@ -1,5 +1,5 @@
 import { sha256 } from 'crypto-js';
-import { supabaseDataService } from './supabaseDataService';
+import { neonDataService } from './neonDataService';
 
 export interface DataVersion {
   version: string;
@@ -22,7 +22,7 @@ class BaseDataStore {
   private dataVersion: DataVersion | null = null;
   private rawData: any[] = [];
   private isLocked: boolean = true;
-  private useSupabase: boolean = true; // New flag to enable Supabase integration
+  private useNeon: boolean = true; // Updated to use Neon instead of Supabase
 
   private constructor() {}
 
@@ -33,13 +33,13 @@ class BaseDataStore {
     return BaseDataStore.instance;
   }
 
-  async initializeFromSupabase(): Promise<boolean> {
-    if (!this.useSupabase) return false;
+  async initializeFromNeon(): Promise<boolean> {
+    if (!this.useNeon) return false;
     
     try {
-      console.log('🔄 BaseDataStore: Initializing from Supabase...');
+      console.log('🔄 BaseDataStore: Initializing from Neon Database...');
       
-      const shipments = await supabaseDataService.getAllShipments();
+      const shipments = await neonDataService.getAllShipments();
       if (shipments.length > 0) {
         this.rawData = shipments;
         
@@ -48,27 +48,27 @@ class BaseDataStore {
         const hash = sha256(dataString).toString();
         
         this.dataVersion = {
-          version: `v1.0.0-supabase-${Date.now()}`,
+          version: `v1.0.0-neon-${Date.now()}`,
           hash,
-          source: 'supabase-database',
+          source: 'neon-database',
           timestamp: new Date(),
           validated: true
         };
         
         this.isLocked = false;
-        console.log('✅ BaseDataStore: Initialized from Supabase with', shipments.length, 'records');
+        console.log('✅ BaseDataStore: Initialized from Neon with', shipments.length, 'records');
         return true;
       }
       
-      console.log('ℹ️ BaseDataStore: No data found in Supabase, system remains locked');
+      console.log('ℹ️ BaseDataStore: No data found in Neon, system remains locked');
       return false;
     } catch (error) {
-      console.error('❌ BaseDataStore: Failed to initialize from Supabase:', error);
+      console.error('❌ BaseDataStore: Failed to initialize from Neon:', error);
       return false;
     }
   }
 
-  async loadAndValidateData(csvData: string, source: string, persistToSupabase = true): Promise<boolean> {
+  async loadAndValidateData(csvData: string, source: string, persistToNeon = true): Promise<boolean> {
     try {
       console.log('🔒 BaseDataStore: Starting data validation protocol...');
       
@@ -106,14 +106,14 @@ class BaseDataStore {
         validated: true
       };
 
-      // Persist to Supabase if enabled
-      if (this.useSupabase && persistToSupabase) {
-        console.log('💾 BaseDataStore: Persisting data to Supabase...');
-        const success = await supabaseDataService.bulkInsertShipments(rows, true);
+      // Persist to Neon if enabled
+      if (this.useNeon && persistToNeon) {
+        console.log('💾 BaseDataStore: Persisting data to Neon...');
+        const success = await neonDataService.bulkInsertShipments(rows, true);
         if (success) {
-          console.log('✅ BaseDataStore: Data persisted to Supabase successfully');
+          console.log('✅ BaseDataStore: Data persisted to Neon successfully');
         } else {
-          console.warn('⚠️ BaseDataStore: Failed to persist to Supabase, continuing with in-memory data');
+          console.warn('⚠️ BaseDataStore: Failed to persist to Neon, continuing with in-memory data');
         }
       }
 
@@ -203,22 +203,31 @@ class BaseDataStore {
     }
   }
 
-  // New methods for Supabase integration
-  async refreshFromSupabase(): Promise<boolean> {
-    return await this.initializeFromSupabase();
+  // Updated methods for Neon integration
+  async refreshFromNeon(): Promise<boolean> {
+    return await this.initializeFromNeon();
   }
 
-  enableSupabaseIntegration(enabled: boolean = true) {
-    this.useSupabase = enabled;
-    console.log(`🔧 BaseDataStore: Supabase integration ${enabled ? 'enabled' : 'disabled'}`);
+  enableNeonIntegration(enabled: boolean = true) {
+    this.useNeon = enabled;
+    console.log(`🔧 BaseDataStore: Neon integration ${enabled ? 'enabled' : 'disabled'}`);
   }
 
+  isNeonEnabled(): boolean {
+    return this.useNeon;
+  }
+
+  // Keep backward compatibility
   isSupabaseEnabled(): boolean {
-    return this.useSupabase;
+    return this.useNeon; // Map to Neon for compatibility
+  }
+
+  async refreshFromSupabase(): Promise<boolean> {
+    return await this.refreshFromNeon(); // Redirect to Neon
   }
 }
 
 export const baseDataStore = BaseDataStore.getInstance();
 
-// Auto-initialize from Supabase on startup
-baseDataStore.initializeFromSupabase().catch(console.error);
+// Auto-initialize from Neon on startup
+baseDataStore.initializeFromNeon().catch(console.error);
