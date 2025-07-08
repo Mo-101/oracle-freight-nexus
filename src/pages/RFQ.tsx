@@ -10,8 +10,8 @@ const RFQ = () => {
   const [selectedRFQId, setSelectedRFQId] = useState<string>('rfq_001'); // For demo
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 w-full">
+      <div className="max-w-full px-6 py-8">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-deepcal-light mb-2">

@@ -4,9 +4,9 @@ import { Link } from 'react-router-dom';
 
 const Header = () => {
   return (
-    <header className="sticky top-0 z-50">
-      <div className="bg-gradient-to-r from-deepcal-dark to-deepcal-purple py-4 px-6 symbolic-border">
-        <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
+    <header className="sticky top-0 z-50 w-full">
+      <div className="bg-gradient-to-r from-deepcal-dark to-deepcal-purple py-4 px-0 symbolic-border w-full">
+        <div className="max-w-full px-6 flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center space-x-3 animate-fade-in">
             <Link to="/" className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-deepcal-purple rounded-full flex items-center justify-center glowing-border">

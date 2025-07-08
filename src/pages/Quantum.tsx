@@ -46,12 +46,12 @@ const Quantum = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 w-full">
       <Header />
       <QuantumParticles />
       
-      <main className="flex-1 py-8 relative z-10">
-        <div className="container mx-auto px-4">
+      <main className="flex-1 py-8 relative z-10 w-full">
+        <div className="max-w-full px-6">
           {/* Header */}
           <div className="mb-12">
             <div className="flex items-center justify-between flex-wrap gap-4">

@@ -120,10 +120,10 @@ const Chat = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-deepcal-dark">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-deepcal-dark w-full">
       <Header />
-      <main className="flex-1 py-8">
-        <div className="container mx-auto px-4 h-full">
+      <main className="flex-1 py-8 w-full">
+        <div className="max-w-full px-6 h-full">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
             {/* Enhanced Chat Interface */}
             <div className="lg:col-span-2">

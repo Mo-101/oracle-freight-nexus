@@ -119,11 +119,11 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col w-full">
       <Header />
       
-      <main className="flex-1 py-8">
-        <div className="container mx-auto px-4">
+      <main className="flex-1 py-8 w-full">
+        <div className="max-w-full px-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Sidebar - Input Panel + Real-Time Analytics */}
             <div className="space-y-6">
