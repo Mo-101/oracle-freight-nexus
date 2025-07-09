@@ -3,8 +3,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { EnhancedChatInterface } from '../components/chat/EnhancedChatInterface';
 import { VoiceTestButton } from '../components/chat/VoiceTestButton';
-import { newTTSService } from '../services/newTTSService';
-import { deepseekClient } from '../services/deepseekClient';
+import { geminiClient } from '../services/geminiClient';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -62,10 +61,10 @@ const Chat = () => {
     setIsTyping(true);
 
     try {
-      // Always use DeepSeek AI for responses - no hardcoded responses
-      const aiResponse = await deepseekClient.generateOracleResponse(
+      // Use Gemini AI for oracle responses with streaming
+      const aiResponse = await geminiClient.generateOracleResponse(
         inputValue,
-        "You are DeepCAL, an advanced logistics oracle. Provide intelligent, actionable insights about freight, supply chain, and logistics. Be concise but comprehensive.",
+        "Real-time logistics intelligence for East Africa freight corridors, medical supplies, and emergency logistics",
         'oracular'
       );
 
@@ -79,7 +78,7 @@ const Chat = () => {
       setMessages(prev => [...prev, aiMessage]);
       setIsTyping(false);
 
-      // Auto-speak AI responses
+      // Auto-speak AI responses using Gemini TTS
       if (voiceEnabled) {
         setTimeout(() => {
           handleSpeakResponse(aiResponse);
@@ -102,11 +101,7 @@ const Chat = () => {
 
   const handleSpeakResponse = async (text: string) => {
     try {
-      const audioUrl = await newTTSService.generateSpeech(text, {
-        voice: 'alloy',
-        emotion: 'conversational, wise and helpful African logistics expert',
-        useRandomSeed: true
-      });
+      const audioUrl = await geminiClient.generateSpeech(text);
       
       if (audioUrl) {
         const audio = new Audio(audioUrl);
@@ -115,7 +110,7 @@ const Chat = () => {
         }).catch(console.error);
       }
     } catch (error) {
-      console.error('Voice synthesis failed:', error);
+      console.error('Gemini TTS failed:', error);
     }
   };
 

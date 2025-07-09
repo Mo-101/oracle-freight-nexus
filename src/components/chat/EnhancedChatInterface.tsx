@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { VoiceInterface } from './VoiceInterface';
 import { Send } from 'lucide-react';
+import { geminiClient } from '../../services/geminiClient';
 
 interface Message {
   id: string;
@@ -19,6 +20,8 @@ interface EnhancedChatInterfaceProps {
 export const EnhancedChatInterface = ({ onMessageSent, messages, isTyping }: EnhancedChatInterfaceProps) => {
   const [inputValue, setInputValue] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [conversationHistory, setConversationHistory] = useState<Array<{role: string, content: string}>>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -29,15 +32,39 @@ export const EnhancedChatInterface = ({ onMessageSent, messages, isTyping }: Enh
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = () => {
-    if (!inputValue.trim() || isProcessing) return;
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || isProcessing || isStreaming) return;
     
     setIsProcessing(true);
-    onMessageSent(inputValue);
-    setInputValue('');
+    setIsStreaming(true);
     
-    // Reset processing state after a delay
-    setTimeout(() => setIsProcessing(false), 1000);
+    // Call the parent's onMessageSent for UI updates
+    onMessageSent(inputValue);
+    
+    // Add to conversation history
+    setConversationHistory(prev => [...prev, { role: 'User', content: inputValue }]);
+    
+    try {
+      // Generate AI response with streaming
+      const response = await geminiClient.generateOracleResponse(
+        inputValue,
+        "Real-time logistics intelligence for East Africa freight corridors",
+        'conversational'
+      );
+      
+      // Add AI response to history
+      setConversationHistory(prev => [...prev, { role: 'deepTalk', content: response }]);
+      
+      // Auto-speak response
+      await geminiClient.generateSpeech(response);
+      
+    } catch (error) {
+      console.error('Failed to generate response:', error);
+    }
+    
+    setInputValue('');
+    setIsProcessing(false);
+    setIsStreaming(false);
   };
 
   const handleVoiceMessage = (message: string) => {
