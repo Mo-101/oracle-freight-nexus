@@ -1,9 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Scroll, Brain, Hash, Download } from 'lucide-react';
 import { NeutrosophicEngine, ForwarderData, WeightVector, TOPSISResult } from '@/utils/neutrosophicEngine';
 import { VoiceNarration } from './VoiceNarration';
+import './OracleOutputPanel.css';
 
 interface OracleOutputPanelProps {
   isVisible: boolean;
@@ -18,9 +20,9 @@ export const OracleOutputPanel = ({
   isVisible, 
   weights, 
   emergency = "cholera outbreak in Kanyama District",
-  cargoType = "Emergency Medical Supplies",
-  origin = "Johannesburg",
-  destination = "Lusaka"
+  cargoType = "Emergency Health Kits",
+  origin = "Kenya",
+  destination = "Zambia"
 }: OracleOutputPanelProps) => {
   const [results, setResults] = useState<TOPSISResult[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -31,29 +33,32 @@ export const OracleOutputPanel = ({
     { name: "Kuehne + Nagel", costPerKg: 4.61, transitDays: 5.2, reliability: 92, riskLevel: 8 },
     { name: "DHL Express", costPerKg: 5.21, transitDays: 6.0, reliability: 88, riskLevel: 15 },
     { name: "Siginon Logistics", costPerKg: 4.45, transitDays: 6.5, reliability: 85, riskLevel: 22 },
-    { name: "Imperial Logistics", costPerKg: 4.78, transitDays: 5.8, reliability: 90, riskLevel: 12 },
-    { name: "Bollore Africa", costPerKg: 4.93, transitDays: 7.2, reliability: 83, riskLevel: 28 }
+    { name: "DHL Global", costPerKg: 4.78, transitDays: 5.8, reliability: 90, riskLevel: 12 },
+    { name: "AGL", costPerKg: 4.93, transitDays: 7.2, reliability: 80, riskLevel: 28 },
+    { name: "Bwosi", costPerKg: 4.93, transitDays: 7.2, reliability: 80, riskLevel: 28 },
+    { name: "Scan Global", costPerKg: 4.93, transitDays: 7.2, reliability: 80, riskLevel: 28 },
+    { name: "Freight In Time", costPerKg: 4.93, transitDays: 7.2, reliability: 80, riskLevel: 28 }
   ];
 
   useEffect(() => {
-    if (isVisible) {
+    if (isVisible && performOracleCalculation) {
       performOracleCalculation();
     }
-  }, [isVisible, weights]);
+  }, [isVisible, performOracleCalculation, weights]);
 
-  const performOracleCalculation = async () => {
-    setIsCalculating(true);
-    
-    // Simulate calculation time for dramatic effect
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const engine = new NeutrosophicEngine();
-    const calculatedResults = engine.calculateTOPSIS(sampleForwarders, weights);
-    
-    setResults(calculatedResults);
-    generateCeremonialSeal(calculatedResults[0]);
-    setIsCalculating(false);
-  };
+  async function performOracleCalculation() {
+  setIsCalculating(true);
+
+  // Simulate calculation time for dramatic effect
+  await new Promise(resolve => setTimeout(resolve, 2000));
+
+  const engine = new NeutrosophicEngine();
+  const calculatedResults = engine.calculateTOPSIS(sampleForwarders, weights);
+
+  setResults(calculatedResults);
+  generateCeremonialSeal(calculatedResults[0]);
+  setIsCalculating(false);
+}
 
   const generateCeremonialSeal = (topResult: TOPSISResult) => {
     const timestamp = new Date().toISOString();
@@ -147,8 +152,8 @@ export const OracleOutputPanel = ({
               <Brain className="w-6 h-6 text-deepcal-light animate-pulse" />
               <span className="text-lg">Oracle calculating destiny matrix...</span>
             </div>
-            <div className="mt-4 w-full bg-slate-700 rounded-full h-2">
-              <div className="bg-gradient-to-r from-deepcal-purple to-deepcal-light h-2 rounded-full animate-pulse" style={{width: '60%'}}></div>
+            <div className="oracle-progress-bar-bg">
+              <div className="oracle-progress-bar-fill"></div>
             </div>
           </CardContent>
         </Card>

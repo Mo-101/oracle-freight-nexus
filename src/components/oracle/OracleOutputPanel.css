@@ -1,0 +1,20 @@
+.oracle-progress-bar-bg {
+  margin-top: 1rem;
+  width: 100%;
+  background-color: #334155; /* bg-slate-700 */
+  border-radius: 9999px; /* rounded-full */
+  height: 0.5rem; /* h-2 */
+}
+
+.oracle-progress-bar-fill {
+  background: linear-gradient(to right, var(--deepcal-purple), var(--deepcal-light));
+  height: 0.5rem;
+  border-radius: 9999px;
+  animation: oracle-pulse 2s infinite;
+  width: 60%;
+}
+
+@keyframes oracle-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
