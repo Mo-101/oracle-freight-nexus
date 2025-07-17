@@ -315,7 +315,7 @@ class MCPHuggingFaceService {
 
 // Export configured MCP service
 export const mcpHuggingFace = new MCPHuggingFaceService({
-  apiKey: process.env.HUGGINGFACE_API_KEY || 'hf_placeholder_key',
+  apiKey: import.meta.env.VITE_HUGGINGFACE_API_KEY || 'hf_placeholder_key',
   baseURL: 'https://huggingface.co'
 });
 
