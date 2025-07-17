@@ -1,5 +1,6 @@
 import { baseDataStore } from '@/services/baseDataStore';
 import { neonDataService } from '@/services/neonDataService';
+import { canonicalShipmentData } from '@/data/canonicalData';
 import { NeutrosophicAHP, TNN } from './neutrosophicAHP';
 import { DeepCALTOPSIS, TOPSISCriteria, TOPSISAlternative, TOPSISResult } from './deepcalTOPSIS';
 
@@ -15,9 +16,9 @@ export interface ForwarderAnalysis {
   avgCostPerKg: number;
   avgTransitDays: number;
   reliabilityScore: number;
-  riskLevel: number;
-  shipmentCount: number;
-  onTimeRate: number;
+  riskScore: number;
+  totalShipments: number;
+  onTimeDeliveryRate: number;
 }
 
 export interface DeepCALDecision {
@@ -28,7 +29,7 @@ export interface DeepCALDecision {
   analysis: string;
   timestamp: Date;
   dataVersion: string;
-  analysisId?: string; // New field for Supabase record ID
+  analysisId?: string;
 }
 
 export interface ShipmentData {
@@ -46,10 +47,10 @@ export interface ShipmentData {
 
 export class DeepCALCore {
   private ahp: NeutrosophicAHP;
-  private useNeonCache: boolean = true;
+  private useNeon: boolean = true;
 
   constructor() {
-    baseDataStore.enforceDataLock(); // Strict data-first protocol
+    console.log('🚀 DeepCAL: Initializing with canonical data foundation');
     this.ahp = new NeutrosophicAHP({
       consistencyThreshold: 0.1,
       maxIterations: 100
@@ -57,77 +58,78 @@ export class DeepCALCore {
   }
 
   async analyzeForwarders(): Promise<ForwarderAnalysis[]> {
-    // Try to get cached results from Neon first
-    if (this.useNeonCache && baseDataStore.isNeonEnabled()) {
-      try {
-        const cachedPerformance = await neonDataService.getForwarderPerformance();
-        if (cachedPerformance.length > 0) {
-          console.log('📊 Using cached forwarder performance from Neon');
-          return cachedPerformance;
-        }
-      } catch (error) {
-        console.warn('⚠️ Failed to fetch cached performance, falling back to calculation:', error);
-      }
-    }
-
-    // Fallback to original calculation
-    const rawData: ShipmentData[] = baseDataStore.getRawData() as ShipmentData[];
-    console.log('🔍 Analyzing forwarders from', rawData.length, 'shipments');
-
-    // Group by forwarder
-    const forwarderGroups = rawData.reduce((groups: Record<string, ShipmentData[]>, shipment) => {
-      const forwarder = shipment.forwarder || 'Unknown';
-      if (!groups[forwarder]) groups[forwarder] = [];
-      groups[forwarder].push(shipment);
-      return groups;
-    }, {});
-
-    const analyses: ForwarderAnalysis[] = [];
-
-    Object.entries(forwarderGroups).forEach(([forwarder, shipments]: [string, ShipmentData[]]) => {
-      if (shipments.length === 0) return;
-
-      // Calculate metrics
-      const costs = shipments.map(s => parseFloat(s.cost as string) || 0).filter(c => c > 0);
-      const weights = shipments.map(s => parseFloat(s.weight_kg as string) || 1).filter(w => w > 0);
-      const transitTimes = shipments.map(s => parseFloat(s.transit_days as string) || 0).filter(t => t > 0);
-      const delays = shipments.map(s => parseFloat(s.delay_days as string) || 0);
+    console.log('🔍 DeepCAL: Analyzing forwarders from canonical data...');
+    
+    const forwarderGroups = new Map<string, any[]>();
+    
+    // Helper to calculate transit days
+    const calculateTransitDays = (collectionDate: string, arrivalDate: string): number => {
+      if (!collectionDate || !arrivalDate) return 0;
+      const collection = new Date(collectionDate);
+      const arrival = new Date(arrivalDate);
+      const diffTime = Math.abs(arrival.getTime() - collection.getTime());
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    };
+    
+    // Extract actual shipment data per forwarder from canonical data
+    canonicalShipmentData.forEach(shipment => {
+      const forwarders = [
+        { name: 'Kuehne Nagel', cost: Number(shipment.kuehne_nagel) || 0 },
+        { name: 'Scan Global Logistics', cost: Number(shipment.scan_global_logistics) || 0 },
+        { name: 'DHL Express', cost: Number(shipment.dhl_express) || 0 },
+        { name: 'DHL Global', cost: Number(shipment.dhl_global) || 0 },
+        { name: 'BWOSI', cost: Number(shipment.bwosi) || 0 },
+        { name: 'AGL', cost: Number(shipment.agl) || 0 },
+        { name: 'Siginon', cost: Number(shipment.siginon) || 0 },
+        { name: 'Freight in Time', cost: Number(shipment.freight_in_time) || 0 }
+      ];
       
-      // Cost per kg
-      const totalCost = costs.reduce((a, b) => a + b, 0);
-      const totalWeight = weights.reduce((a, b) => a + b, 0);
-      const avgCostPerKg = totalWeight > 0 ? totalCost / totalWeight : 0;
-
-      // Average transit time
-      const avgTransitDays = transitTimes.length > 0 ? 
-        transitTimes.reduce((a, b) => a + b, 0) / transitTimes.length : 0;
-
-      // On-time performance
-      const onTimeShipments = delays.filter(d => d <= 0).length;
-      const onTimeRate = delays.length > 0 ? onTimeShipments / delays.length : 0;
-
-      // Reliability score (based on on-time rate and consistency)
-      const transitStdDev = this.calculateStandardDeviation(transitTimes);
-      const consistencyFactor = transitTimes.length > 1 ? Math.max(0, 1 - (transitStdDev / avgTransitDays)) : 1;
-      const reliabilityScore = (onTimeRate * 0.7 + consistencyFactor * 0.3) * 100;
-
-      // Risk level (inverted reliability with delay factor)
-      const avgDelay = delays.length > 0 ? delays.reduce((a, b) => a + b, 0) / delays.length : 0;
-      const riskLevel = Math.max(0, Math.min(100, (1 - onTimeRate) * 100 + avgDelay * 5));
-
-      analyses.push({
-        forwarder,
-        avgCostPerKg: Math.round(avgCostPerKg * 100) / 100,
-        avgTransitDays: Math.round(avgTransitDays * 10) / 10,
-        reliabilityScore: Math.round(reliabilityScore * 10) / 10,
-        riskLevel: Math.round(riskLevel * 10) / 10,
-        shipmentCount: shipments.length,
-        onTimeRate: Math.round(onTimeRate * 1000) / 10
+      forwarders.forEach(({ name, cost }) => {
+        if (cost > 0) {
+          if (!forwarderGroups.has(name)) {
+            forwarderGroups.set(name, []);
+          }
+          
+          const transitDays = calculateTransitDays(shipment.date_of_collection, shipment.date_of_arrival_destination);
+          
+          forwarderGroups.get(name)!.push({
+            ...shipment,
+            actualCost: cost,
+            transitDays,
+            onTime: transitDays <= 7,
+            delivered: shipment.delivery_status === 'Delivered'
+          });
+        }
       });
     });
-
-    console.log('📈 Forwarder analysis complete:', analyses.length, 'forwarders analyzed');
-    return analyses.sort((a, b) => b.shipmentCount - a.shipmentCount);
+    
+    // Calculate real metrics from actual canonical data
+    const analyses: ForwarderAnalysis[] = [];
+    
+    forwarderGroups.forEach((shipmentList, forwarderName) => {
+      const totalShipments = shipmentList.length;
+      if (totalShipments === 0) return;
+      
+      const avgCost = shipmentList.reduce((sum, s) => sum + (s.actualCost / (Number(s.weight_kg) || 1)), 0) / totalShipments;
+      const avgTransit = shipmentList.reduce((sum, s) => sum + s.transitDays, 0) / totalShipments;
+      const deliveredCount = shipmentList.filter(s => s.delivered).length;
+      const onTimeCount = shipmentList.filter(s => s.onTime).length;
+      
+      analyses.push({
+        forwarder: forwarderName,
+        avgCostPerKg: Number(avgCost.toFixed(2)),
+        avgTransitDays: Number(avgTransit.toFixed(1)),
+        reliabilityScore: Number(((deliveredCount / totalShipments) * 100).toFixed(1)),
+        totalShipments,
+        onTimeDeliveryRate: Number(((onTimeCount / totalShipments) * 100).toFixed(1)),
+        riskScore: Number((100 - (deliveredCount / totalShipments) * 100).toFixed(1))
+      });
+    });
+    
+    console.log(`✅ DeepCAL: Analyzed ${analyses.length} forwarders from canonical data`);
+    analyses.forEach(a => console.log(`📊 ${a.forwarder}: ${a.totalShipments} shipments, $${a.avgCostPerKg}/kg, ${a.avgTransitDays} days`));
+    
+    return analyses;
   }
 
   private calculateStandardDeviation(values: number[]): number {
@@ -144,14 +146,13 @@ export class DeepCALCore {
   } {
     const criteria = ['cost', 'time', 'reliability', 'risk'];
     
-    // Default neutrosophic judgments if not provided
     const defaultJudgments = userJudgments || {
-      'cost-time': new TNN(0.7, 0.2, 0.1),        // Cost moderately more important than time
-      'cost-reliability': new TNN(0.4, 0.3, 0.3), // Cost slightly less important than reliability
-      'cost-risk': new TNN(0.6, 0.2, 0.2),        // Cost moderately more important than risk
-      'time-reliability': new TNN(0.3, 0.3, 0.4), // Time slightly less important than reliability
-      'time-risk': new TNN(0.5, 0.3, 0.2),        // Time equally important as risk
-      'reliability-risk': new TNN(0.8, 0.1, 0.1)  // Reliability much more important than risk
+      'cost-time': new TNN(0.7, 0.2, 0.1),
+      'cost-reliability': new TNN(0.4, 0.3, 0.3),
+      'cost-risk': new TNN(0.6, 0.2, 0.2),
+      'time-reliability': new TNN(0.3, 0.3, 0.4),
+      'time-risk': new TNN(0.5, 0.3, 0.2),
+      'reliability-risk': new TNN(0.8, 0.1, 0.1)
     };
 
     console.log('⚖️ Calculating criteria weights using Neutrosophic AHP');
@@ -179,34 +180,29 @@ export class DeepCALCore {
   async makeDecision(forwarders?: string[]): Promise<DeepCALDecision> {
     console.log('🧠 DeepCAL Core: Starting decision analysis...');
     
-    // Get forwarder analyses
     const allForwarders = await this.analyzeForwarders();
     const targetForwarders = forwarders ? 
       allForwarders.filter(f => forwarders.includes(f.forwarder)) : 
-      allForwarders.slice(0, 8); // Top 8 by shipment count
+      allForwarders.slice(0, 8);
 
     if (targetForwarders.length === 0) {
       throw new Error('No forwarders found for analysis');
     }
 
-    // Calculate criteria weights
     const { weights, consistencyRatio, isConsistent } = this.calculateCriteriaWeights();
 
-    // Set up TOPSIS
     const topsis = new DeepCALTOPSIS([
-      { name: 'cost', weight: weights.cost, beneficial: false },      // Minimize cost
-      { name: 'time', weight: weights.time, beneficial: false },      // Minimize time
-      { name: 'reliability', weight: weights.reliability, beneficial: true }, // Maximize reliability
-      { name: 'risk', weight: weights.risk, beneficial: false }       // Minimize risk
+      { name: 'cost', weight: weights.cost, beneficial: false },
+      { name: 'time', weight: weights.time, beneficial: false },
+      { name: 'reliability', weight: weights.reliability, beneficial: true },
+      { name: 'risk', weight: weights.risk, beneficial: false }
     ]);
 
-    // Add alternatives
     targetForwarders.forEach(forwarder => {
-      // Normalize values for TOPSIS (0-100 scale)
-      const normalizedCost = Math.min(100, forwarder.avgCostPerKg * 10); // Scale cost
-      const normalizedTime = Math.min(100, forwarder.avgTransitDays * 5); // Scale time
-      const normalizedReliability = forwarder.reliabilityScore; // Already 0-100
-      const normalizedRisk = forwarder.riskLevel; // Already 0-100
+      const normalizedCost = Math.min(100, forwarder.avgCostPerKg * 10);
+      const normalizedTime = Math.min(100, forwarder.avgTransitDays * 5);
+      const normalizedReliability = forwarder.reliabilityScore;
+      const normalizedRisk = forwarder.riskScore;
 
       topsis.addAlternative({
         id: forwarder.forwarder,
@@ -220,7 +216,6 @@ export class DeepCALCore {
       });
     });
 
-    // Calculate TOPSIS ranking
     const ranking = topsis.calculate();
     const analysis = topsis.generateReport(ranking);
 
@@ -231,21 +226,8 @@ export class DeepCALCore {
       isConsistent,
       analysis,
       timestamp: new Date(),
-      dataVersion: baseDataStore.getDataVersion()?.version || 'unknown'
+      dataVersion: 'canonical-v1.0'
     };
-
-    // Save to Neon if enabled
-    if (baseDataStore.isNeonEnabled()) {
-      try {
-        const analysisId = await neonDataService.saveAnalysis(decision);
-        if (analysisId) {
-          decision.analysisId = analysisId;
-          console.log('💾 Analysis saved to Neon with ID:', analysisId);
-        }
-      } catch (error) {
-        console.warn('⚠️ Failed to save analysis to Neon:', error);
-      }
-    }
 
     console.log('✅ DeepCAL decision completed');
     console.log('🏆 Top recommendation:', ranking[0]?.alternative.name);
@@ -253,12 +235,10 @@ export class DeepCALCore {
     return decision;
   }
 
-  // Enhanced performance update with Neon persistence
   async updatePerformance(shipmentId: string, actualTransitDays: number, actualCost: number, onTime: boolean): Promise<void> {
     console.log('🔄 Updating performance metrics for shipment:', shipmentId);
     
-    // Update in Neon if enabled
-    if (baseDataStore.isNeonEnabled()) {
+    if (this.useNeon) {
       try {
         const success = await neonDataService.updateShipmentPerformance(
           shipmentId,
@@ -269,27 +249,15 @@ export class DeepCALCore {
         
         if (success) {
           console.log('✅ Performance updated in Neon');
-          // Refresh local cache
-          await baseDataStore.refreshFromNeon();
         }
       } catch (error) {
         console.warn('⚠️ Failed to update performance in Neon:', error);
       }
     }
-    
-    // Log performance update for audit trail
-    console.log('📊 Performance update:', {
-      shipmentId,
-      actualTransitDays,
-      actualCost,
-      onTime,
-      timestamp: new Date()
-    });
   }
 
-  // Updated method to get analysis history from Neon
   async getAnalysisHistory(limit = 10) {
-    if (!baseDataStore.isNeonEnabled()) return [];
+    if (!this.useNeon) return [];
     
     try {
       return await neonDataService.getAnalysisHistory(limit);
@@ -299,9 +267,8 @@ export class DeepCALCore {
     }
   }
 
-  // Updated method for intelligent forwarder recommendations
   async getIntelligentRecommendations(query: string, limit = 5): Promise<ShipmentData[]> {
-    if (!baseDataStore.isNeonEnabled()) return [];
+    if (!this.useNeon) return [];
     
     try {
       return await neonDataService.findSimilarShipments(query, limit);
@@ -311,20 +278,13 @@ export class DeepCALCore {
     }
   }
 
-  // Generate audit trail for decision traceability
   generateAuditTrail(decision: DeepCALDecision): string {
     let trail = "🔍 DEEPCAL DECISION AUDIT TRAIL\n";
     trail += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
     
     trail += `📅 Timestamp: ${decision.timestamp.toISOString()}\n`;
     trail += `📦 Data Version: ${decision.dataVersion}\n`;
-    trail += `🎯 Consistency Ratio: ${decision.consistencyRatio.toFixed(4)} ${decision.isConsistent ? '✅' : '❌'}\n`;
-    
-    if (decision.analysisId) {
-      trail += `💾 Analysis ID: ${decision.analysisId}\n`;
-    }
-    
-    trail += `🔗 Data Source: ${baseDataStore.isNeonEnabled() ? 'Neon Database' : 'In-Memory Store'}\n\n`;
+    trail += `🎯 Consistency Ratio: ${decision.consistencyRatio.toFixed(4)} ${decision.isConsistent ? '✅' : '❌'}\n\n`;
     
     trail += "⚖️ CRITERIA WEIGHTS (Neutrosophic AHP):\n";
     trail += `  Cost: ${(decision.criteriaWeights.cost * 100).toFixed(2)}%\n`;
