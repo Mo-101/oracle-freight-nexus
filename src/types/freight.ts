@@ -25,7 +25,9 @@ export interface RealTimeRate {
     currency: string;
     volumeDiscount?: number;
     seasonalAdjustment?: number;
-    confidence?: 'High' | 'Good' | 'Medium' | 'Low';
+    confidence?: 'High' | 'Good' | 'Medium' | 'Low' | number;
+    source?: string;
+    lastUpdated?: Date;
 }
 
 export interface ForwarderIntelligence {

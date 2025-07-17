@@ -176,7 +176,7 @@ export const MCPAnalyticsDashboard = ({ shipmentData }: MCPAnalyticsDashboardPro
 
       {/* Real-Time Rate Integration */}
       <RealTimeRatePanel 
-        route={`${shipmentData.origin} → ${shipmentData.destination}`}
+        route={{ origin: shipmentData.origin, destination: shipmentData.destination }}
         onRateUpdate={(rates) => {
           // Update selected forwarder based on best rate
           if (rates.length > 0) {

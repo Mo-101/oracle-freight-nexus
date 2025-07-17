@@ -1,25 +1,13 @@
 
 import { ForwarderIntelligence, DynamicRankingConfig, RealTimeRate } from '@/types/freight';
 import { safeParseNumber } from './dataTypeUtils';
+import { realRateService } from '@/services/realRateService';
 
 export class DynamicRankingEngine {
   
-  // Generate mock real-time rates (in a real system, this would call forwarder APIs)
-  private generateRealTimeRate(forwarderName: string, baseCost: number): RealTimeRate {
-    const variation = (Math.random() - 0.5) * 0.2; // ±10% variation
-    const baseRate = baseCost * (1 + variation);
-    
-    return {
-      baseRate: Math.round(baseRate * 100) / 100,
-      fuelSurcharge: Math.round(baseRate * 0.15 * 100) / 100,
-      securityFee: Math.round(baseRate * 0.05 * 100) / 100,
-      handlingFee: Math.round(baseRate * 0.08 * 100) / 100,
-      customsFee: Math.round(baseRate * 0.12 * 100) / 100,
-      insuranceRate: Math.round(baseRate * 0.03 * 100) / 100,
-      totalRate: Math.round(baseRate * 1.43 * 100) / 100,
-      validUntil: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      currency: 'USD'
-    };
+  // Generate real-time rates based on canonical data and market adjustments
+  private generateRealTimeRate(forwarderName: string, origin: string = 'Kenya', destination: string = 'Zimbabwe', weight: number = 1000): RealTimeRate {
+    return realRateService.generateRealTimeRate(forwarderName, origin, destination, weight);
   }
 
   // Calculate dynamic score based on multiple criteria
@@ -57,13 +45,19 @@ export class DynamicRankingEngine {
   // Main ranking function
   public rankForwarders(
     forwarders: ForwarderIntelligence[], 
-    config: DynamicRankingConfig
+    config: DynamicRankingConfig,
+    route?: { origin: string; destination: string; weight?: number }
   ): ForwarderIntelligence[] {
     
     // Generate real-time rates for all forwarders
     const forwardersWithRates = forwarders.map(forwarder => ({
       ...forwarder,
-      realTimeRate: this.generateRealTimeRate(forwarder.name, forwarder.avgCostPerKg)
+      realTimeRate: this.generateRealTimeRate(
+        forwarder.name, 
+        route?.origin || 'Kenya', 
+        route?.destination || 'Zimbabwe', 
+        route?.weight || 1000
+      )
     }));
     
     // Calculate dynamic scores
