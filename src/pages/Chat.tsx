@@ -32,7 +32,7 @@ const Chat = () => {
     {
       id: '1',
       type: 'ai',
-      content: 'This is DeepCAL. How may I support your intelligence today? I am your advanced logistics oracle powered by Neutrosophic AI and Storytelling Analytics. With my enhanced Scenario Engine, Bayesian-Neural Fusion, and Explainable AI, I can provide deep insights into your freight and supply chain endeavors.',
+      content: 'Welcome to deepTalk 🧠 — your Pan-African logistics oracle powered by DeepCAL++. I am your symbolic intelligence companion with live routing data across all African corridors. From Dakar to Djibouti, Lagos to Cape Town, I can analyze routes, assess carriers, calculate risks, and provide real-time freight intelligence using Google Maps integration and Neutrosophic reasoning. How may I assist your continental logistics mission today?',
       timestamp: new Date(),
     }
   ]);
@@ -61,11 +61,12 @@ const Chat = () => {
     setIsTyping(true);
 
     try {
-      // Use Gemini AI for oracle responses with streaming
-      const aiResponse = await geminiClient.generateOracleResponse(
+      // Use Pan-African logistics intelligence with live routing
+      const aiResponse = await geminiClient.generatePanAfricanResponse(
         inputValue,
-        "Real-time logistics intelligence for East Africa freight corridors, medical supplies, and emergency logistics",
-        'oracular'
+        undefined, // Auto-extract origin from query
+        undefined, // Auto-extract destination from query
+        [] // TODO: Add conversation history if needed
       );
 
       const aiMessage: Message = {

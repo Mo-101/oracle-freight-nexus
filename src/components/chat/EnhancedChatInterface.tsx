@@ -45,21 +45,38 @@ export const EnhancedChatInterface = ({ onMessageSent, messages, isTyping }: Enh
     setConversationHistory(prev => [...prev, { role: 'User', content: inputValue }]);
     
     try {
-      // Generate AI response with streaming
-      const response = await geminiClient.generateOracleResponse(
+      // Generate Pan-African response with live routing intelligence
+      const response = await geminiClient.generatePanAfricanResponse(
         inputValue,
-        "Real-time logistics intelligence for East Africa freight corridors",
-        'conversational'
+        undefined, // Auto-extract origin
+        undefined, // Auto-extract destination
+        conversationHistory
       );
       
       // Add AI response to history
       setConversationHistory(prev => [...prev, { role: 'deepTalk', content: response }]);
       
-      // Auto-speak response
+      // Auto-speak response with enhanced voice
       await geminiClient.generateSpeech(response);
       
     } catch (error) {
-      console.error('Failed to generate response:', error);
+      console.error('Failed to generate Pan-African response:', error);
+      // Fallback to standard oracle response
+      try {
+        const fallbackResponse = await geminiClient.generateOracleResponse(
+          inputValue,
+          "Pan-African logistics intelligence with symbolic reasoning",
+          'conversational'
+        );
+        setConversationHistory(prev => [...prev, { role: 'deepTalk', content: fallbackResponse }]);
+        await geminiClient.generateSpeech(fallbackResponse);
+      } catch (fallbackError) {
+        console.error('Fallback response failed:', fallbackError);
+        setConversationHistory(prev => [...prev, { 
+          role: 'deepTalk', 
+          content: '⚠️ Connection to DeepCAL headquarters temporarily disrupted. Please try again.' 
+        }]);
+      }
     }
     
     setInputValue('');
@@ -133,7 +150,7 @@ export const EnhancedChatInterface = ({ onMessageSent, messages, isTyping }: Enh
         <div className="flex items-center bg-slate-800 rounded-full px-4 py-3 mb-4">
           <input
             type="text"
-            placeholder="Type your message or use voice..."
+            placeholder="Ask about routes across Africa: Lagos to Nairobi, carriers, costs, risks..."
             className="flex-grow bg-transparent outline-none px-3 text-slate-200 placeholder-slate-500"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
