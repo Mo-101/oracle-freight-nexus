@@ -129,18 +129,18 @@ class NeonDataService {
           avgCostPerKg: 2.4,
           avgTransitDays: 5.2,
           reliabilityScore: 92.5,
-          riskLevel: 7.5,
-          shipmentCount: 150,
-          onTimeRate: 92.5
+          riskScore: 7.5,
+          totalShipments: 150,
+          onTimeDeliveryRate: 92.5
         },
         {
           forwarder: 'FedEx International',
           avgCostPerKg: 2.7,
           avgTransitDays: 4.8,
           reliabilityScore: 89.3,
-          riskLevel: 10.7,
-          shipmentCount: 120,
-          onTimeRate: 89.3
+          riskScore: 10.7,
+          totalShipments: 120,
+          onTimeDeliveryRate: 89.3
         }
       ];
       

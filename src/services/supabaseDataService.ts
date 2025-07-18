@@ -162,9 +162,9 @@ class SupabaseDataService {
         avgCostPerKg: perf.avg_cost_per_kg,
         avgTransitDays: perf.avg_transit_days,
         reliabilityScore: perf.reliability_score,
-        riskLevel: perf.risk_level,
-        shipmentCount: perf.shipment_count,
-        onTimeRate: perf.on_time_rate
+        riskScore: perf.risk_score,
+        totalShipments: perf.total_shipments,
+        onTimeDeliveryRate: perf.on_time_delivery_rate
       }));
     } catch (error) {
       console.error('❌ Error fetching forwarder performance:', error);
