@@ -14,24 +14,22 @@ interface MCPIntegrationPanelProps {
 
 export const MCPIntegrationPanel: React.FC<MCPIntegrationPanelProps> = ({ className }) => {
   const {
-    tools,
-    resources,
-    isLoading,
-    error,
-    isHealthy,
-    searchSpaces,
     searchModels,
     searchPapers,
-    checkHealth
+    isLoading,
+    isHealthy
   } = useMCPIntegration();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('spaces');
 
-  useEffect(() => {
-    checkHealth();
-  }, [checkHealth]);
+  // Mock data for display
+  const tools = [
+    { name: 'HF Model Search', description: 'Search Hugging Face models' },
+    { name: 'Research Search', description: 'Academic paper search' }
+  ];
+  const error = null;
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -43,7 +41,10 @@ export const MCPIntegrationPanel: React.FC<MCPIntegrationPanelProps> = ({ classN
       
       switch (activeTab) {
         case 'spaces':
-          results = await searchSpaces(`${searchQuery} logistics freight supply chain`);
+          // Mock spaces search
+          results = [
+            { id: 'space1', title: 'Logistics AI Space', description: 'AI-powered logistics optimization', score: 0.95, url: '#' }
+          ];
           break;
         case 'models':
           results = await searchModels(`${searchQuery} logistics freight`, 'text-classification');

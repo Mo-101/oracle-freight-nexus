@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { EnhancedChatInterface } from '../components/chat/EnhancedChatInterface';
-import { VoiceTestButton } from '../components/chat/VoiceTestButton';
+import { EnhancedChatInterface } from '../components/deepcal/chat/EnhancedChatInterface';
+import { VoiceTestButton } from '../components/deepcal/chat/VoiceTestButton';
 import { geminiClient } from '../services/geminiClient';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';

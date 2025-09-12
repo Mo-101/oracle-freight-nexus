@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { VoiceInterface } from './VoiceInterface';
 import { Send } from 'lucide-react';
-import { geminiClient } from '../../services/geminiClient';
+import { geminiClient } from '../../../services/geminiClient';
 
 interface Message {
   id: string;

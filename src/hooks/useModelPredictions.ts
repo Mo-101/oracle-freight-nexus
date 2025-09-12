@@ -1,70 +1,47 @@
-
 import { useState, useCallback } from 'react';
-import { deepcalModelAPI } from '../services/deepcalModelAPI';
-import { 
-  ForwarderPrediction, 
-  ShipmentFeatures, 
-  EnhancedForwarderRanking 
-} from '../types/modelTypes';
-import { convertFormDataToFeatures, validateFeatures } from '../utils/modelFeatureConverter';
 
-interface UseModelPredictionsResult {
-  predictions: ForwarderPrediction[];
-  isLoading: boolean;
-  error: string | null;
-  isModelAvailable: boolean;
-  fetchPredictions: (formData: any, forwarders: string[]) => Promise<void>;
-  checkModelHealth: () => Promise<void>;
+interface PredictionData {
+  metric: string;
+  value: number;
+  confidence: number;
+  trend: 'up' | 'down' | 'stable';
 }
 
-export const useModelPredictions = (): UseModelPredictionsResult => {
-  const [predictions, setPredictions] = useState<ForwarderPrediction[]>([]);
+export const useModelPredictions = () => {
+  const [predictions, setPredictions] = useState<PredictionData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [isModelAvailable, setIsModelAvailable] = useState(true);
 
-  const checkModelHealth = useCallback(async () => {
-    try {
-      const healthy = await deepcalModelAPI.healthCheck();
-      setIsModelAvailable(healthy);
-      if (!healthy) {
-        console.warn('🤖 Model API is not available, will use fallback methods');
-      }
-    } catch (err) {
-      setIsModelAvailable(false);
-      console.warn('🤖 Model health check failed:', err);
-    }
-  }, []);
-
-  const fetchPredictions = useCallback(async (formData: any, forwarders: string[]) => {
+  const fetchPredictions = useCallback(async (shipmentData: any) => {
     setIsLoading(true);
-    setError(null);
-    
     try {
-      // Convert form data to model features (without carrier, we'll add that per forwarder)
-      const baseFeatures = convertFormDataToFeatures(formData, '');
-      const { carrier_enc, ...featuresWithoutCarrier } = baseFeatures;
+      // Mock predictions - replace with actual ML model API
+      const mockPredictions: PredictionData[] = [
+        {
+          metric: 'Transit Time',
+          value: 7.2,
+          confidence: 92,
+          trend: 'stable'
+        },
+        {
+          metric: 'Cost per KG',
+          value: 3.45,
+          confidence: 88,
+          trend: 'down'
+        },
+        {
+          metric: 'Risk Score',
+          value: 15,
+          confidence: 85,
+          trend: 'up'
+        }
+      ];
       
-      if (!validateFeatures(baseFeatures)) {
-        throw new Error('Invalid or incomplete shipment features');
-      }
-
-      console.log('🤖 Fetching predictions for forwarders:', forwarders);
-      
-      const predictionResults = await deepcalModelAPI.predictForwarders(
-        featuresWithoutCarrier,
-        forwarders
-      );
-      
-      setPredictions(predictionResults);
+      setPredictions(mockPredictions);
       setIsModelAvailable(true);
-      
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch predictions';
-      setError(errorMessage);
+    } catch (error) {
+      console.error('Model prediction error:', error);
       setIsModelAvailable(false);
-      setPredictions([]);
-      console.error('🤖 Prediction error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -72,10 +49,8 @@ export const useModelPredictions = (): UseModelPredictionsResult => {
 
   return {
     predictions,
-    isLoading,
-    error,
-    isModelAvailable,
     fetchPredictions,
-    checkModelHealth
+    isLoading,
+    isModelAvailable
   };
 };

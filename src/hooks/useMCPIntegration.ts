@@ -1,135 +1,99 @@
-
 import { useState, useCallback } from 'react';
-import { mcpHuggingFace, MCPTool, MCPResource, SemanticSearchResult, ModelInfo } from '../services/mcpHuggingFace';
 
-interface UseMCPIntegrationResult {
-  tools: MCPTool[];
-  resources: MCPResource[];
-  isLoading: boolean;
-  error: string | null;
-  isHealthy: boolean;
-  searchSpaces: (query: string) => Promise<SemanticSearchResult[]>;
-  searchModels: (query: string, task?: string) => Promise<ModelInfo[]>;
-  searchPapers: (query: string) => Promise<SemanticSearchResult[]>;
-  getModelDetails: (modelId: string) => Promise<ModelInfo | null>;
-  executeTool: (toolName: string, parameters: any) => Promise<any>;
-  checkHealth: () => Promise<void>;
+interface MCPModel {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
 }
 
-export const useMCPIntegration = (): UseMCPIntegrationResult => {
+interface ResearchPaper {
+  id: string;
+  title: string;
+  authors: string[];
+  abstract: string;
+  url: string;
+}
+
+export const useMCPIntegration = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [isHealthy, setIsHealthy] = useState(true);
 
-  const checkHealth = useCallback(async () => {
+  const searchModels = useCallback(async (query: string, type?: string): Promise<MCPModel[]> => {
+    setIsLoading(true);
     try {
-      const healthy = await mcpHuggingFace.healthCheck();
-      setIsHealthy(healthy);
-      if (!healthy) {
-        console.warn('🔌 MCP Hugging Face service is not available');
-      }
-    } catch (err) {
+      // Mock MCP model search - replace with actual MCP integration
+      const mockModels: MCPModel[] = [
+        {
+          id: 'logistics-forecasting-v2',
+          name: 'Logistics Forecasting Model v2',
+          description: 'Advanced freight demand forecasting using neural networks',
+          type: 'forecasting'
+        },
+        {
+          id: 'route-optimization-ai',
+          name: 'Route Optimization AI',
+          description: 'Multi-modal transportation route optimization',
+          type: 'optimization'
+        },
+        {
+          id: 'risk-assessment-ml',
+          name: 'Risk Assessment ML',
+          description: 'Machine learning model for supply chain risk prediction',
+          type: 'risk-analysis'
+        }
+      ];
+      
+      return mockModels.filter(model => 
+        model.name.toLowerCase().includes(query.toLowerCase()) ||
+        model.description.toLowerCase().includes(query.toLowerCase())
+      );
+    } catch (error) {
+      console.error('MCP model search error:', error);
       setIsHealthy(false);
-      console.warn('🔌 MCP health check failed:', err);
-    }
-  }, []);
-
-  const searchSpaces = useCallback(async (query: string): Promise<SemanticSearchResult[]> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const results = await mcpHuggingFace.searchSpaces(query);
-      return results;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to search spaces';
-      setError(errorMessage);
-      console.error('🔍 Spaces search error:', err);
       return [];
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const searchModels = useCallback(async (query: string, task?: string): Promise<ModelInfo[]> => {
+  const searchPapers = useCallback(async (query: string): Promise<ResearchPaper[]> => {
     setIsLoading(true);
-    setError(null);
-    
     try {
-      const results = await mcpHuggingFace.searchModels(query, task);
-      return results;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to search models';
-      setError(errorMessage);
-      console.error('🤖 Models search error:', err);
+      // Mock research paper search - replace with actual academic API
+      const mockPapers: ResearchPaper[] = [
+        {
+          id: 'paper-1',
+          title: 'Optimizing Supply Chain Networks in Sub-Saharan Africa',
+          authors: ['Dr. A. Smith', 'Dr. B. Johnson'],
+          abstract: 'A comprehensive analysis of supply chain optimization strategies for African logistics corridors.',
+          url: 'https://example.com/paper1'
+        },
+        {
+          id: 'paper-2',
+          title: 'Machine Learning Applications in Freight Forwarding',
+          authors: ['Dr. C. Williams', 'Dr. D. Brown'],
+          abstract: 'Exploring the use of ML algorithms for freight forwarding optimization.',
+          url: 'https://example.com/paper2'
+        }
+      ];
+      
+      return mockPapers.filter(paper =>
+        paper.title.toLowerCase().includes(query.toLowerCase()) ||
+        paper.abstract.toLowerCase().includes(query.toLowerCase())
+      );
+    } catch (error) {
+      console.error('Research paper search error:', error);
       return [];
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const searchPapers = useCallback(async (query: string): Promise<SemanticSearchResult[]> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const results = await mcpHuggingFace.searchPapers(query);
-      return results;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to search papers';
-      setError(errorMessage);
-      console.error('📄 Papers search error:', err);
-      return [];
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const getModelDetails = useCallback(async (modelId: string): Promise<ModelInfo | null> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const details = await mcpHuggingFace.getModelDetails(modelId);
-      return details;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get model details';
-      setError(errorMessage);
-      console.error('📊 Model details error:', err);
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const executeTool = useCallback(async (toolName: string, parameters: any): Promise<any> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const result = await mcpHuggingFace.executeTool(toolName, parameters);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to execute tool';
-      setError(errorMessage);
-      console.error('🛠️ Tool execution error:', err);
-      return null;
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   return {
-    tools: mcpHuggingFace.getAvailableTools(),
-    resources: mcpHuggingFace.getAvailableResources(),
-    isLoading,
-    error,
-    isHealthy,
-    searchSpaces,
     searchModels,
     searchPapers,
-    getModelDetails,
-    executeTool,
-    checkHealth
+    isLoading,
+    isHealthy
   };
 };

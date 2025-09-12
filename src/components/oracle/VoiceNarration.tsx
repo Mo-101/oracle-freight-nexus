@@ -47,7 +47,9 @@ export const VoiceNarration = ({
       Include insights about the TOPSIS score and neutrosophic analysis.
       Keep it engaging and informative, around 200-300 words.`;
 
-      const narrative = await deepseekClient.generateOracleResponse(prompt, context, currentMode);
+      // Map currentMode to valid deepseekClient modes
+      const validMode = currentMode === 'humorous' || currentMode === 'corporate' ? 'conversational' : currentMode;
+      const narrative = await deepseekClient.generateOracleResponse(prompt, context, validMode);
       setGeneratedNarrative(narrative);
       return narrative;
     } catch (error) {
