@@ -11,6 +11,7 @@ interface InputPanelProps {
     cargoType: string;
     selectedForwarders: string[];
     forwarderRates: { [key: string]: number };
+    forwarderTransitDays: { [key: string]: number };
   };
   onFormChange: (data: any) => void;
 }
@@ -47,6 +48,16 @@ const InputPanel: React.FC<InputPanelProps> = ({ onOracleAwaken, formData, onFor
       forwarderRates: {
         ...formData.forwarderRates,
         [forwarderName]: rate
+      }
+    });
+  };
+
+  const handleTransitDaysChange = (forwarderName: string, days: number) => {
+    onFormChange({
+      ...formData,
+      forwarderTransitDays: {
+        ...formData.forwarderTransitDays,
+        [forwarderName]: days
       }
     });
   };
@@ -215,17 +226,30 @@ const InputPanel: React.FC<InputPanelProps> = ({ onOracleAwaken, formData, onFor
                     <span className="ml-3 font-medium">{forwarder.name}</span>
                   </div>
                   {formData.selectedForwarders.includes(forwarder.name) && (
-                    <div className="ml-6 mt-2">
-                      <label className="block text-sm text-slate-400 mb-1">Rate (USD/kg)</label>
-                      <input 
-                        type="number" 
-                        step="0.01"
-                        min="0"
-                        placeholder="Enter rate"
-                        value={formData.forwarderRates?.[forwarder.name] || ''}
-                        onChange={(e) => handleRateChange(forwarder.name, parseFloat(e.target.value) || 0)}
-                        className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-deepcal-light"
-                      />
+                    <div className="ml-6 mt-2 grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm text-slate-400 mb-1">Rate (USD/kg)</label>
+                        <input 
+                          type="number" 
+                          step="0.01"
+                          min="0"
+                          placeholder="Enter rate"
+                          value={formData.forwarderRates?.[forwarder.name] || ''}
+                          onChange={(e) => handleRateChange(forwarder.name, parseFloat(e.target.value) || 0)}
+                          className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-deepcal-light"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-slate-400 mb-1">Transit Days</label>
+                        <input 
+                          type="number" 
+                          min="1"
+                          placeholder="Days"
+                          value={formData.forwarderTransitDays?.[forwarder.name] || ''}
+                          onChange={(e) => handleTransitDaysChange(forwarder.name, parseInt(e.target.value) || 0)}
+                          className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-deepcal-light"
+                        />
+                      </div>
                     </div>
                   )}
                 </div>

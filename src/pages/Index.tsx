@@ -17,6 +17,7 @@ interface FormData {
   cargoType: string;
   selectedForwarders: string[];
   forwarderRates: { [key: string]: number };
+  forwarderTransitDays: { [key: string]: number };
 }
 
 interface ForwarderRanking {
@@ -44,6 +45,13 @@ const Index = () => {
       'Siginon Logistics': 3.80,
       'Scan Global Logistics': 4.10,
       'Agility Logistics': 4.75
+    },
+    forwarderTransitDays: {
+      'Kuehne + Nagel': 5,
+      'DHL Global Forwarding': 3,
+      'Siginon Logistics': 7,
+      'Scan Global Logistics': 6,
+      'Agility Logistics': 4
     }
   });
 
