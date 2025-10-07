@@ -16,6 +16,7 @@ interface FormData {
   volume: number;
   cargoType: string;
   selectedForwarders: string[];
+  forwarderRates: { [key: string]: number };
 }
 
 interface ForwarderRanking {
@@ -36,7 +37,14 @@ const Index = () => {
     weight: 7850,
     volume: 24.5,
     cargoType: 'Emergency Health Kits',
-    selectedForwarders: ['Kuehne Nagel', 'DHL Express', 'Siginon Logistics', 'Freight In Time']
+    selectedForwarders: ['Kuehne Nagel', 'DHL Express', 'Siginon Logistics', 'Freight In Time'],
+    forwarderRates: {
+      'Kuehne + Nagel': 4.50,
+      'DHL Global Forwarding': 5.20,
+      'Siginon Logistics': 3.80,
+      'Scan Global Logistics': 4.10,
+      'Agility Logistics': 4.75
+    }
   });
 
   // Normalize values between 0-1

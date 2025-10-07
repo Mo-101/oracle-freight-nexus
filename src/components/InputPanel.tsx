@@ -10,6 +10,7 @@ interface InputPanelProps {
     volume: number;
     cargoType: string;
     selectedForwarders: string[];
+    forwarderRates: { [key: string]: number };
   };
   onFormChange: (data: any) => void;
 }
@@ -37,6 +38,16 @@ const InputPanel: React.FC<InputPanelProps> = ({ onOracleAwaken, formData, onFor
     onFormChange({
       ...formData,
       selectedForwarders: updatedForwarders
+    });
+  };
+
+  const handleRateChange = (forwarderName: string, rate: number) => {
+    onFormChange({
+      ...formData,
+      forwarderRates: {
+        ...formData.forwarderRates,
+        [forwarderName]: rate
+      }
     });
   };
 
@@ -189,18 +200,34 @@ const InputPanel: React.FC<InputPanelProps> = ({ onOracleAwaken, formData, onFor
           <div>
             <h3 className="font-medium mb-2 flex items-center">
               <i className="fas fa-truck-loading mr-2 text-amber-400"></i>
-              Freight Forwarders
+              Freight Forwarders & Rates
             </h3>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {forwarders.map((forwarder) => (
-                <div key={forwarder.name} className="flex items-center bg-slate-800 p-3 rounded-lg border border-slate-700">
-                  <input 
-                    type="checkbox" 
-                    className="form-checkbox text-deepcal-light"
-                    checked={formData.selectedForwarders.includes(forwarder.name)}
-                    onChange={(e) => handleForwarderChange(forwarder.name, e.target.checked)}
-                  />
-                  <span className="ml-3">{forwarder.name}</span>
+                <div key={forwarder.name} className="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                  <div className="flex items-center mb-2">
+                    <input 
+                      type="checkbox" 
+                      className="form-checkbox text-deepcal-light"
+                      checked={formData.selectedForwarders.includes(forwarder.name)}
+                      onChange={(e) => handleForwarderChange(forwarder.name, e.target.checked)}
+                    />
+                    <span className="ml-3 font-medium">{forwarder.name}</span>
+                  </div>
+                  {formData.selectedForwarders.includes(forwarder.name) && (
+                    <div className="ml-6 mt-2">
+                      <label className="block text-sm text-slate-400 mb-1">Rate (USD/kg)</label>
+                      <input 
+                        type="number" 
+                        step="0.01"
+                        min="0"
+                        placeholder="Enter rate"
+                        value={formData.forwarderRates?.[forwarder.name] || ''}
+                        onChange={(e) => handleRateChange(forwarder.name, parseFloat(e.target.value) || 0)}
+                        className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-deepcal-light"
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
