@@ -37,17 +37,7 @@ const Chat = () => {
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);
-  const [voiceEnabled, setVoiceEnabled] = useState(true);
-
-  useEffect(() => {
-    // Play welcome message on component mount
-    if (voiceEnabled && messages.length > 0) {
-      const welcomeMessage = messages[0].content;
-      setTimeout(() => {
-        handleSpeakResponse(welcomeMessage);
-      }, 1000);
-    }
-  }, []);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
 
   const handleSendMessage = async (inputValue: string) => {
     const userMessage: Message = {
@@ -78,13 +68,6 @@ const Chat = () => {
 
       setMessages(prev => [...prev, aiMessage]);
       setIsTyping(false);
-
-      // Auto-speak AI responses using Gemini TTS
-      if (voiceEnabled) {
-        setTimeout(() => {
-          handleSpeakResponse(aiResponse);
-        }, 500);
-      }
     } catch (error) {
       console.error('Error generating AI response:', error);
       
